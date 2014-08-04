@@ -276,6 +276,8 @@ class wizard_report(osv.osv_memory):
                     raise osv.except_osv(_('Error !'), _(
                         'La interseccion entre el periodo y fecha es vacio'))
 
+        if data['form']['columns'] == 'currency':
+            name = 'afr.multicurrency'
         if data['form']['columns'] == 'one':
             name = 'afr.1cols'
         if data['form']['columns'] == 'two':
