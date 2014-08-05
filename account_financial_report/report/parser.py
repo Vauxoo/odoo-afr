@@ -110,7 +110,8 @@ class account_balance(report_sxw.rml_parse):
             name = _('Balance Sheet')
         elif form['inf_type'] == 'IS':
             name = _('Income Statement')
-
+        if form['columns'] == 'currency':
+            name = _('End Balance Multicurrency')
         return name
 
     def get_month(self, form):
