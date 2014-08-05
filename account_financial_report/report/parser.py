@@ -1043,6 +1043,11 @@ report_sxw.report_sxw('report.afr.analytic.ledger',
                       'account_financial_report/report/balance_full_4_cols_analytic_ledger.rml',
                       parser=account_balance,
                       header=False)
+report_sxw.report_sxw('report.afr.multicurrency',
+                      'wizard.report',
+                      'account_financial_report/report/balance_multicurrency.rml',
+                      parser=account_balance,
+                      header=False)
 
 report_sxw.report_sxw('report.afr.partner.balance',
                       'wizard.report',
