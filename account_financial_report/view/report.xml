@@ -100,7 +100,15 @@
             string="Balance 13 Columnas"
             header="False"
         />
-        
+         <report 
+            id="balance_multicurrency"
+            model="wizard.report"
+            name="balance_multicurrency"
+            rml="account_financial_report/report/balance_multicurrency.rml"
+            string="Balance MultiCurrency"
+            auto="False"
+            header="False"
+            menu="True"/>
 
     </data>
 </openerp>
