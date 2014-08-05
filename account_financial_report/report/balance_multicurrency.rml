@@ -185,7 +185,7 @@
         
         
     <section>
-        <para>[[ repeatIn([x for x in lines_by_currency(data['form']) if x['type'] != 'view'], 'a') ]]</para>
+        <para>[[ repeatIn([x for x in lines(data['form']) if x['type'] != 'view'], 'a') ]]</para>
         <blockTable colWidths="2.5cm,16cm,2.5cm,2.5cm,2.5cm" style="BODY" repeatRows="0">
             <tr>
                 <td>
