@@ -342,7 +342,8 @@ class account_balance(report_sxw.rml_parse):
                     'balance': balance,
                     'currency': det['currency'] or company_currency,
                     'amount_currency': det['amount_currency'],
-                    'amount_company_currency': det['debit'] - det['credit'],
+                    'amount_company_currency': det['debit'] - det['credit'] if
+                    det['currency'] == None else 0.0,
                 })
 
         res2 = dict()
