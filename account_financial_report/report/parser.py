@@ -351,7 +351,8 @@ class account_balance(report_sxw.rml_parse):
                 'entry', 'ref', 'debit', 'credit', 'analytic', 'period',
                 'balance', 'currency'])
             res3.update(
-                partner='TOTAL', debit=0.0, credit=0.0, balance=0.0,
+                partner='TOTAL IN {0}'.format(currency_group[0]['currency']),
+                debit=0.0, credit=0.0, balance=0.0,
                 currency=currency_group[0]['currency'])
             for line in currency_group:
                 res3['debit'] += line['debit']
