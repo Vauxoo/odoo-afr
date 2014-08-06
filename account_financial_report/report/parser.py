@@ -289,7 +289,8 @@ class account_balance(report_sxw.rml_parse):
             unknown and res.append(unknown)
         return res
 
-    def _get_analytic_ledger(self, account, ctx={}):
+    def _get_analytic_ledger(self, account, ctx=None):
+        ctx = ctx or {}
         res = []
 
         if account['type'] in ('other', 'liquidity', 'receivable', 'payable'):
@@ -321,6 +322,8 @@ class account_balance(report_sxw.rml_parse):
             self.cr.execute(sql_detalle)
             resultat = self.cr.dictfetchall()
             balance = account['balanceinit']
+            company_currency = self.pool.get('res.currency').browse(
+                self.cr, self.uid, self.get_company_currency(ctx['company_id'])).name
             for det in resultat:
                 balance += det['debit'] - det['credit']
                 res.append({
@@ -336,7 +339,7 @@ class account_balance(report_sxw.rml_parse):
                     'analytic': det['analitica'],
                     'period': det['periodo'],
                     'balance': balance,
-                    'currency': det['currency'],
+                    'currency': det['currency'] or company_currency,
                 })
 
         res2 = dict()
@@ -951,6 +954,7 @@ class account_balance(report_sxw.rml_parse):
 
                 #~ ANALYTIC LEDGER
                 if to_include and form['analytic_ledger'] and form['columns'] == 'four' and form['inf_type'] == 'BS' and res['type'] in ('other', 'liquidity', 'receivable', 'payable') or form['columns'] == 'currency':
+                    ctx_end.update(company_id=form['company_id'] and type(form['company_id']) in (list, tuple) and form['company_id'][0] or form['company_id'])
                     res['mayor'] = self._get_analytic_ledger(res, ctx=ctx_end)
                 elif to_include and form['journal_ledger'] and form['columns'] == 'four' and form['inf_type'] == 'BS' and res['type'] in ('other', 'liquidity', 'receivable', 'payable'):
                     res['journal'] = self._get_journal_ledger(res, ctx=ctx_end)
