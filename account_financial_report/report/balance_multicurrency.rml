@@ -222,7 +222,9 @@
         </blockTable>
 
         <section>
-            <para>[[ repeatIn(a['mayor'], 'm') ]]</para>
+            <para>[[ repeatIn(a['mayor'], 'group_currency') ]]</para>
+            <section>
+            <para>[[ repeatIn(group_currency, 'm') ]]</para>
                 <blockTable colWidths="2.25cm,2.0cm,7.75cm,2.5cm,4.0cm,2.5cm,2.5cm,2.5cm" style="BODY_LINE" repeatRows="1">
 <!--
                 [[ (a['type'] &lt;&gt; 'view') or removeParentNode('blockTable') ]]
@@ -278,6 +280,8 @@
                         </td>
                     </tr>
                 </blockTable>
+        </section>
+        <spacer length="2.5mm"/>
         </section>
         <spacer length="2.5mm"/>
     </section>
