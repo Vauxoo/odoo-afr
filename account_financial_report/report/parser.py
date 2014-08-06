@@ -345,6 +345,19 @@ class account_balance(report_sxw.rml_parse):
                 res2[item['currency']] += [item]
             else:
                 res2[item['currency']] = [item]
+
+        for currency_group in res2.values():
+            res3 = {}.fromkeys(['id', 'date', 'journal', 'partner', 'name',
+                'entry', 'ref', 'debit', 'credit', 'analytic', 'period',
+                'balance', 'currency'])
+            res3.update(
+                partner='TOTAL', debit=0.0, credit=0.0, balance=0.0,
+                currency=currency_group[0]['currency'])
+            for line in currency_group:
+                res3['debit'] += line['debit']
+                res3['credit'] += line['credit']
+                res3['balance'] += line['balance']
+            currency_group += [res3]
         return res2.values()
 
     def _get_journal_ledger(self, account, ctx={}):
