@@ -347,33 +347,38 @@ class account_balance(report_sxw.rml_parse):
                     'differential': 0.0,
                 })
 
-        res2 = dict()
-        for item in res:
-            if res2.get(item['currency'], False):
-                res2[item['currency']] += [item]
-            else:
-                res2[item['currency']] = [item]
+        if ctx['report'] == 'four':
+            return res
+        elif ctx['report'] == 'currency':
+            res2 = dict()
+            for item in res:
+                if res2.get(item['currency'], False):
+                    res2[item['currency']] += [item]
+                else:
+                    res2[item['currency']] = [item]
 
-        for currency_group in res2.values():
-            res3 = {}.fromkeys(['id', 'date', 'journal', 'partner', 'name',
-                'entry', 'ref', 'debit', 'credit', 'analytic', 'period',
-                'balance', 'currency', 'amount_currency',
-                'amount_company_currency', 'differential'])
-            res3.update(
-                partner='TOTAL IN {0}'.format(currency_group[0]['currency']),
-                debit=0.0, credit=0.0, balance=0.0,
-                amount_currency=0.0, amount_company_currency=0.0,
-                differential=0.0,
-                currency=currency_group[0]['currency'])
-            for line in currency_group:
-                res3['debit'] += line['debit']
-                res3['credit'] += line['credit']
-                res3['balance'] += line['balance']
-                res3['amount_currency'] += line['amount_currency']
-                res3['amount_company_currency'] += line['amount_company_currency']
-                res3['differential'] += line['differential']
-            currency_group += [res3]
-        return res2.values()
+            for currency_group in res2.values():
+                res3 = {}.fromkeys(['id', 'date', 'journal', 'partner', 'name',
+                    'entry', 'ref', 'debit', 'credit', 'analytic', 'period',
+                    'balance', 'currency', 'amount_currency',
+                    'amount_company_currency', 'differential'])
+                res3.update(
+                    partner='TOTAL IN {0}'.format(currency_group[0]['currency']),
+                    debit=0.0, credit=0.0, balance=0.0,
+                    amount_currency=0.0, amount_company_currency=0.0,
+                    differential=0.0,
+                    currency=currency_group[0]['currency'])
+                for line in currency_group:
+                    res3['debit'] += line['debit']
+                    res3['credit'] += line['credit']
+                    res3['balance'] += line['balance']
+                    res3['amount_currency'] += line['amount_currency']
+                    res3['amount_company_currency'] += line['amount_company_currency']
+                    res3['differential'] += line['differential']
+                currency_group += [res3]
+            return res2.values()
+        else:
+            return []
 
     def _get_journal_ledger(self, account, ctx={}):
         res = []
@@ -965,7 +970,7 @@ class account_balance(report_sxw.rml_parse):
 
                 #~ ANALYTIC LEDGER
                 if to_include and form['analytic_ledger'] and form['columns'] == 'four' and form['inf_type'] == 'BS' and res['type'] in ('other', 'liquidity', 'receivable', 'payable') or form['columns'] == 'currency':
-                    ctx_end.update(company_id=form['company_id'] and type(form['company_id']) in (list, tuple) and form['company_id'][0] or form['company_id'])
+                    ctx_end.update(company_id=form['company_id'] and type(form['company_id']) in (list, tuple) and form['company_id'][0] or form['company_id'], report=form['columns'])
                     res['mayor'] = self._get_analytic_ledger(res, ctx=ctx_end)
                 elif to_include and form['journal_ledger'] and form['columns'] == 'four' and form['inf_type'] == 'BS' and res['type'] in ('other', 'liquidity', 'receivable', 'payable'):
                     res['journal'] = self._get_journal_ledger(res, ctx=ctx_end)
