@@ -338,7 +338,14 @@ class account_balance(report_sxw.rml_parse):
                     'balance': balance,
                     'currency': det['currency'],
                 })
-        return res
+
+        res2 = dict()
+        for item in res:
+            if res2.get(item['currency'], False):
+                res2[item['currency']] += [item]
+            else:
+                res2[item['currency']] = [item]
+        return res2.values()
 
     def _get_journal_ledger(self, account, ctx={}):
         res = []
