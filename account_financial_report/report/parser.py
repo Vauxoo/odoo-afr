@@ -344,6 +344,7 @@ class account_balance(report_sxw.rml_parse):
                     'amount_currency': det['amount_currency'],
                     'amount_company_currency': det['debit'] - det['credit'] if
                     det['currency'] == None else 0.0,
+                    'differential': 0.0,
                 })
 
         res2 = dict()
@@ -356,11 +357,13 @@ class account_balance(report_sxw.rml_parse):
         for currency_group in res2.values():
             res3 = {}.fromkeys(['id', 'date', 'journal', 'partner', 'name',
                 'entry', 'ref', 'debit', 'credit', 'analytic', 'period',
-                'balance', 'currency', 'amount_currency', 'amount_company_currency'])
+                'balance', 'currency', 'amount_currency',
+                'amount_company_currency', 'differential'])
             res3.update(
                 partner='TOTAL IN {0}'.format(currency_group[0]['currency']),
                 debit=0.0, credit=0.0, balance=0.0,
                 amount_currency=0.0, amount_company_currency=0.0,
+                differential=0.0,
                 currency=currency_group[0]['currency'])
             for line in currency_group:
                 res3['debit'] += line['debit']
@@ -368,6 +371,7 @@ class account_balance(report_sxw.rml_parse):
                 res3['balance'] += line['balance']
                 res3['amount_currency'] += line['amount_currency']
                 res3['amount_company_currency'] += line['amount_company_currency']
+                res3['differential'] += line['differential']
             currency_group += [res3]
         return res2.values()
 
