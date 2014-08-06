@@ -304,7 +304,7 @@ class account_balance(report_sxw.rml_parse):
             sql_detalle = """select aml.id as id, aj.name as diario, aa.name as descripcion,
                 (select name from res_partner where aml.partner_id = id) as partner,
                 aa.code as cuenta, aml.name as name,
-                aml.ref as ref,
+                aml.ref as ref, aml.currency_id as currency,
                 case when aml.debit is null then 0.00 else aml.debit end as debit,
                 case when aml.credit is null then 0.00 else aml.credit end as credit,
                 (select code from account_analytic_account where  aml.analytic_account_id = id) as analitica,
@@ -335,6 +335,7 @@ class account_balance(report_sxw.rml_parse):
                     'analytic': det['analitica'],
                     'period': det['periodo'],
                     'balance': balance,
+                    'currency': det['currency'],
                 })
         return res
 
@@ -927,7 +928,7 @@ class account_balance(report_sxw.rml_parse):
                         to_include = True
 
                 #~ ANALYTIC LEDGER
-                if to_include and form['analytic_ledger'] and form['columns'] == 'four' and form['inf_type'] == 'BS' and res['type'] in ('other', 'liquidity', 'receivable', 'payable'):
+                if to_include and form['analytic_ledger'] and form['columns'] == 'four' and form['inf_type'] == 'BS' and res['type'] in ('other', 'liquidity', 'receivable', 'payable') or form['columns'] == 'currency':
                     res['mayor'] = self._get_analytic_ledger(res, ctx=ctx_end)
                 elif to_include and form['journal_ledger'] and form['columns'] == 'four' and form['inf_type'] == 'BS' and res['type'] in ('other', 'liquidity', 'receivable', 'payable'):
                     res['journal'] = self._get_journal_ledger(res, ctx=ctx_end)
