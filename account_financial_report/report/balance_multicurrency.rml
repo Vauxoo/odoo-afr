@@ -203,19 +203,19 @@
                 <td>
                     <para style="TITLE_LEFT_ALIGN">
                         <font>[[ a['type']&lt;&gt;'view' and setTag('para','para',{'fontName':"Courier-Bold"}) or removeParentNode('font') ]]</font>
-                        <font>[[ (a['total']==True) and formatLang(a['balance'] and a['balance'] * a.get('change_sign',1.0) or 0.0, digits=2, grouping=True) or '']]</font>
+                        <font>[[ (a['total']==True) and '']]</font>
                     </para>
                 </td>
                 <td>
                     <para style="TITLE_LEFT_ALIGN">
                         <font>[[ a['type']&lt;&gt;'view' and setTag('para','para',{'fontName':"Courier-Bold"}) or removeParentNode('font') ]]</font>
-                        <font>[[ (a['total']==True) and formatLang(a['balance'] and a['balance'] * a.get('change_sign',1.0) or 0.0, digits=2, grouping=True) or '']]</font>
+                        <font>[[ (a['total']==True) and '']]</font>
                     </para>
                 </td>
                 <td>
                     <para style="TITLE_LEFT_ALIGN">
                         <font>[[ a['type']&lt;&gt;'view' and setTag('para','para',{'fontName':"Courier-Bold"}) or removeParentNode('font') ]]</font>
-                        <font>[[ (a['total']==True) and formatLang(a['balance'] and a['balance'] * a.get('change_sign',1.0) or 0.0, digits=2, grouping=True) or '']]</font>
+                        <font>[[ (a['total']==True) and '']]</font>
                     </para>
                 </td>
             </tr>
@@ -263,13 +263,13 @@
                         <td>
                     <para style="TITLE_LEFT_ALIGN">
                         <font>[[ a['type']&lt;&gt;'view' and setTag('para','para',{'fontName':"Courier"}) or removeParentNode('font') ]]</font>
-                        <font>[[ (a['total']==True) and formatLang(m['debit'], digits=2, grouping=True) or '']]</font>
+                        <font>[[ (a['total']==True) and formatLang(m['amount_company_currency'], digits=2, grouping=True) or '']]</font>
                     </para>
                         </td>
                         <td>
                     <para style="TITLE_LEFT_ALIGN">
                         <font>[[ a['type']&lt;&gt;'view' and setTag('para','para',{'fontName':"Courier"}) or removeParentNode('font') ]]</font>
-                        <font>[[ (a['total']==True) and formatLang(m['credit'], digits=2, grouping=True) or '']]</font>
+                        <font>[[ (a['total']==True) and formatLang(m['amount_currency'], digits=2, grouping=True) or '']]</font>
                     </para>
                         </td>
                         <td>
