@@ -232,7 +232,7 @@
                     <tr>
                         <td>
                             <para style="TITLES_NEW">
-                                <font> [[ formatLang( m['date'], date=True) ]]</font>
+                                <font> [[ m['date'] and formatLang( m['date'], date=True) or '' ]]</font>
                             </para>
                         </td>
                         <td>
