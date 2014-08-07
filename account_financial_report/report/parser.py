@@ -355,7 +355,8 @@ class account_balance(report_sxw.rml_parse):
             for item in res:
                 key = (item['currency'], item['partner'])
                 res2[key] = res2.get(key, False) and res2[key] + [item] or [item]
-            return self.get_group_total(res2.values())
+            partner_total_list = self.get_group_total(res2.values())
+            return self.get_group_total(partner_total_list, remove_group_lines=False)
         else:
             return []
 
