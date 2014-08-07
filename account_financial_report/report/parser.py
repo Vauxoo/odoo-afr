@@ -355,34 +355,43 @@ class account_balance(report_sxw.rml_parse):
             for item in res:
                 key = (item['currency'], item['partner'])
                 res2[key] = res2.get(key, False) and res2[key] + [item] or [item]
-
-            total_group = dict()
-            for aml_group in res2.values():
-                res3 = {}.fromkeys(['id', 'date', 'journal', 'partner', 'name',
-                    'entry', 'ref', 'debit', 'credit', 'analytic', 'period',
-                    'balance', 'currency', 'amount_currency',
-                    'amount_company_currency', 'differential'])
-                res3.update(
-                    partner='{partner} TOTAL IN {currency}'.format(
-                        partner=aml_group[0]['partner'],
-                        currency=aml_group[0]['currency']),
-                    debit=0.0, credit=0.0, balance=0.0,
-                    amount_currency=0.0, amount_company_currency=0.0,
-                    differential=0.0,
-                    currency=aml_group[0]['currency'])
-                for line in aml_group:
-                    res3['debit'] += line['debit']
-                    res3['credit'] += line['credit']
-                    res3['balance'] += line['balance']
-                    res3['amount_currency'] += line['amount_currency']
-                    res3['amount_company_currency'] += line['amount_company_currency']
-                    res3['differential'] += line['differential']
-
-                key = aml_group[0]['currency']
-                total_group[key] = total_group.get(key, False) and total_group[key] + [res3] or [res3]
-            return total_group.values()
+            return self.get_group_total(res2.values())
         else:
             return []
+
+    def get_group_total(self, group_list):
+        """
+        @return a list of lines to prin in the balance multicurrency report.
+        Return one totalization line by a given lists of groups.
+
+        Note: A list of groups is a list o dictionaries where every dictionary
+        represent a report line.
+        """
+        total_group = dict()
+        for aml_group in group_list:
+            res3 = {}.fromkeys(['id', 'date', 'journal', 'partner', 'name',
+                'entry', 'ref', 'debit', 'credit', 'analytic', 'period',
+                'balance', 'currency', 'amount_currency',
+                'amount_company_currency', 'differential'])
+            res3.update(
+                partner='{partner} TOTAL IN {currency}'.format(
+                    partner=aml_group[0]['partner'],
+                    currency=aml_group[0]['currency']),
+                debit=0.0, credit=0.0, balance=0.0,
+                amount_currency=0.0, amount_company_currency=0.0,
+                differential=0.0,
+                currency=aml_group[0]['currency'])
+            for line in aml_group:
+                res3['debit'] += line['debit']
+                res3['credit'] += line['credit']
+                res3['balance'] += line['balance']
+                res3['amount_currency'] += line['amount_currency']
+                res3['amount_company_currency'] += line['amount_company_currency']
+                res3['differential'] += line['differential']
+
+            key = aml_group[0]['currency']
+            total_group[key] = total_group.get(key, False) and total_group[key] + [res3] or [res3]
+        return total_group.values()
 
     def _get_journal_ledger(self, account, ctx={}):
         res = []
