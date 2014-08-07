@@ -361,6 +361,12 @@ class account_balance(report_sxw.rml_parse):
 
     def get_group_total(self, group_list, remove_group_lines=True):
         """
+        @param group_list: list of dictionaries every list represent a group of
+        aml lines, and every dictionary represent a aml line.
+        @param remove_group_lines: Flag that indicate what to return. If not
+        set (default True) will return only the line with the total of the
+        group of lines. if set (call with remove_group_lines=False) will return
+        all the group lines and plus the new line for the total of the groups.
         @return a list of lines to prin in the balance multicurrency report.
         Return one totalization line by a given lists of groups.
 
