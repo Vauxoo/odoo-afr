@@ -999,8 +999,15 @@ class account_balance(report_sxw.rml_parse):
                         to_include = True
 
                 #~ ANALYTIC LEDGER
-                if to_include and form['analytic_ledger'] and form['columns'] == 'four' and form['inf_type'] == 'BS' and res['type'] in ('other', 'liquidity', 'receivable', 'payable') or form['columns'] == 'currency':
-                    ctx_end.update(company_id=form['company_id'] and type(form['company_id']) in (list, tuple) and form['company_id'][0] or form['company_id'], report=form['columns'])
+                if (to_include and form['analytic_ledger'] and form['columns']
+                    == 'four' and form['inf_type'] == 'BS' and res['type']
+                    in ('other', 'liquidity', 'receivable', 'payable') or
+                    form['columns'] == 'currency'):
+                    ctx_end.update(
+                        company_id=(form['company_id'] and
+                            type(form['company_id']) in (list, tuple) and
+                            form['company_id'][0] or form['company_id']),
+                        report=form['columns'])
                     res['mayor'] = self._get_analytic_ledger(res, ctx=ctx_end)
                 elif to_include and form['journal_ledger'] and form['columns'] == 'four' and form['inf_type'] == 'BS' and res['type'] in ('other', 'liquidity', 'receivable', 'payable'):
                     res['journal'] = self._get_journal_ledger(res, ctx=ctx_end)
