@@ -355,12 +355,12 @@ class account_balance(report_sxw.rml_parse):
             for item in res:
                 key = (item['currency'], item['partner'])
                 res2[key] = res2.get(key, False) and res2[key] + [item] or [item]
-            partner_total_list = self.get_group_total(res2.values())
-            return self.get_group_total(partner_total_list, remove_group_lines=False)
+            partner_total_list = self.get_group_total(res2.values(), total_str='{partner}')
+            return self.get_group_total(partner_total_list, total_str='TOTAL IN {currency}', remove_group_lines=False)
         else:
             return []
 
-    def get_group_total(self, group_list, remove_group_lines=True):
+    def get_group_total(self, group_list, total_str, remove_group_lines=True):
         """
         @param group_list: list of dictionaries every list represent a group of
         aml lines, and every dictionary represent a aml line.
@@ -381,9 +381,7 @@ class account_balance(report_sxw.rml_parse):
                 'balance', 'currency', 'amount_currency',
                 'amount_company_currency', 'differential'])
             res3.update(
-                partner='{partner} TOTAL IN {currency}'.format(
-                    partner=aml_group[0]['partner'],
-                    currency=aml_group[0]['currency']),
+                partner=total_str.format(**aml_group[0]),
                 debit=0.0, credit=0.0, balance=0.0,
                 amount_currency=0.0, amount_company_currency=0.0,
                 differential=0.0,
