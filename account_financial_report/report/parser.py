@@ -351,8 +351,8 @@ class account_balance(report_sxw.rml_parse):
             return res
         elif ctx['report'] == 'currency':
             res2 = self.aml_group_by_keys(res, ['currency', 'partner'])
-            partner_total_list = self.get_group_total(res2.values(), total_str='{partner}')
-            return self.get_group_total(partner_total_list, total_str='TOTAL IN {currency}', remove_group_lines=False)
+            partner_total_list = self.get_group_total(res2.values(), total_str='{partner}', remove_lines=True)
+            return self.get_group_total(partner_total_list, total_str='TOTAL IN {currency}')
         else:
             return []
 
@@ -371,14 +371,14 @@ class account_balance(report_sxw.rml_parse):
             res[key] = res.get(key, False) and res[key] + [item] or [item]
         return res
 
-    def get_group_total(self, group_list, total_str, remove_group_lines=True):
+    def get_group_total(self, group_list, total_str, remove_lines=False):
         """
         @param group_list: list of dictionaries every list represent a group of
         aml lines, and every dictionary represent a aml line.
-        @param remove_group_lines: Flag that indicate what to return. If not
-        set (default True) will return only the line with the total of the
-        group of lines. if set (call with remove_group_lines=False) will return
-        all the group lines and plus the new line for the total of the groups.
+        @param remove_lines: Flag that indicate what to return. If not set
+        (default False) will return all the group lines and plus the new line
+        for the total of the group. If set (call with remove_lines=True) will
+        only the line with the total of the group of lines. 
         @return a list of lines to prin in the balance multicurrency report.
         Return one totalization line by a given lists of groups.
 
@@ -408,7 +408,7 @@ class account_balance(report_sxw.rml_parse):
             key = aml_group[0]['currency']
             total_group[key] = total_group.get(key, False) and total_group[key] + [res3] or [res3]
             aml_group += [res3]
-        return total_group.values() if remove_group_lines else group_list
+        return total_group.values() if remove_lines else group_list
 
     def _get_journal_ledger(self, account, ctx={}):
         res = []
