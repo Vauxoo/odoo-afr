@@ -353,7 +353,7 @@ class account_balance(report_sxw.rml_parse):
         @return the lines of the balance multicurrency report.
         """
         ctx = ctx or {}
-        res = self._get_analytic_ledger(account, ctx=ctx):
+        res = self._get_analytic_ledger(account, ctx=ctx)
         if res:
             res2 = self.aml_group_by_keys(res, ['currency', 'partner'])
             partner_total_list = self.get_group_total(res2.values(), total_str='{partner}', remove_lines=True)
