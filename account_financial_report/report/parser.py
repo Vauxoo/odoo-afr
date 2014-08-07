@@ -346,10 +346,15 @@ class account_balance(report_sxw.rml_parse):
                     det['currency'] == None else 0.0,
                     'differential': det['debit'] - det['credit'] if det['currency'] != None and not det['amount_currency'] else 0.0,
                 })
+        return res
 
-        if ctx['report'] == 'four':
-            return res
-        elif ctx['report'] == 'currency':
+    def _get_balance_multicurrency(self, account, ctx=None):
+        """
+        @return the lines of the balance multicurrency report.
+        """
+        ctx = ctx or {}
+        res = self._get_analytic_ledger(account, ctx=ctx):
+        if res:
             res2 = self.aml_group_by_keys(res, ['currency', 'partner'])
             partner_total_list = self.get_group_total(res2.values(), total_str='{partner}', remove_lines=True)
             return self.get_group_total(partner_total_list, total_str='TOTAL IN {currency}')
@@ -1001,14 +1006,15 @@ class account_balance(report_sxw.rml_parse):
                 #~ ANALYTIC LEDGER
                 if (to_include and form['analytic_ledger'] and form['columns']
                     == 'four' and form['inf_type'] == 'BS' and res['type']
-                    in ('other', 'liquidity', 'receivable', 'payable') or
-                    form['columns'] == 'currency'):
+                    in ('other', 'liquidity', 'receivable', 'payable')):
                     ctx_end.update(
                         company_id=(form['company_id'] and
                             type(form['company_id']) in (list, tuple) and
                             form['company_id'][0] or form['company_id']),
                         report=form['columns'])
                     res['mayor'] = self._get_analytic_ledger(res, ctx=ctx_end)
+                elif form['columns'] == 'currency':
+                    res['mayor'] = self._get_balance_multicurrency(res, ctx=ctx_end)
                 elif to_include and form['journal_ledger'] and form['columns'] == 'four' and form['inf_type'] == 'BS' and res['type'] in ('other', 'liquidity', 'receivable', 'payable'):
                     res['journal'] = self._get_journal_ledger(res, ctx=ctx_end)
                 elif to_include and form['partner_balance'] and form['columns'] == 'four' and form['inf_type'] == 'BS' and res['type'] in ('other', 'liquidity', 'receivable', 'payable'):
