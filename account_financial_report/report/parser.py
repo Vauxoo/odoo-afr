@@ -350,32 +350,33 @@ class account_balance(report_sxw.rml_parse):
         if ctx['report'] == 'four':
             return res
         elif ctx['report'] == 'currency':
+            # group by currency + partner
             res2 = dict()
             for item in res:
-                if res2.get(item['currency'], False):
-                    res2[item['currency']] += [item]
-                else:
-                    res2[item['currency']] = [item]
+                key = (item['currency'], item['partner'])
+                res2[key] = res2.get(key, False) and res2[key] + [item] or [item]
 
-            for currency_group in res2.values():
+            for aml_group in res2.values():
                 res3 = {}.fromkeys(['id', 'date', 'journal', 'partner', 'name',
                     'entry', 'ref', 'debit', 'credit', 'analytic', 'period',
                     'balance', 'currency', 'amount_currency',
                     'amount_company_currency', 'differential'])
                 res3.update(
-                    partner='TOTAL IN {0}'.format(currency_group[0]['currency']),
+                    partner='{partner} TOTAL IN {currency}'.format(
+                        partner=aml_group[0]['partner'],
+                        currency=aml_group[0]['currency']),
                     debit=0.0, credit=0.0, balance=0.0,
                     amount_currency=0.0, amount_company_currency=0.0,
                     differential=0.0,
-                    currency=currency_group[0]['currency'])
-                for line in currency_group:
+                    currency=aml_group[0]['currency'])
+                for line in aml_group:
                     res3['debit'] += line['debit']
                     res3['credit'] += line['credit']
                     res3['balance'] += line['balance']
                     res3['amount_currency'] += line['amount_currency']
                     res3['amount_company_currency'] += line['amount_company_currency']
                     res3['differential'] += line['differential']
-                currency_group += [res3]
+                aml_group += [res3]
             return res2.values()
         else:
             return []
