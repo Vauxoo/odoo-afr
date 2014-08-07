@@ -359,7 +359,7 @@ class account_balance(report_sxw.rml_parse):
         else:
             return []
 
-    def get_group_total(self, group_list):
+    def get_group_total(self, group_list, remove_group_lines=True):
         """
         @return a list of lines to prin in the balance multicurrency report.
         Return one totalization line by a given lists of groups.
@@ -391,7 +391,8 @@ class account_balance(report_sxw.rml_parse):
 
             key = aml_group[0]['currency']
             total_group[key] = total_group.get(key, False) and total_group[key] + [res3] or [res3]
-        return total_group.values()
+            aml_group += [res3]
+        return total_group.values() if remove_group_lines else group_list
 
     def _get_journal_ledger(self, account, ctx={}):
         res = []
