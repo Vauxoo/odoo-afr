@@ -350,15 +350,26 @@ class account_balance(report_sxw.rml_parse):
         if ctx['report'] == 'four':
             return res
         elif ctx['report'] == 'currency':
-            # group by currency + partner
-            res2 = dict()
-            for item in res:
-                key = (item['currency'], item['partner'])
-                res2[key] = res2.get(key, False) and res2[key] + [item] or [item]
+            res2 = self.aml_group_by_keys(res, ['currency', 'partner'])
             partner_total_list = self.get_group_total(res2.values(), total_str='{partner}')
             return self.get_group_total(partner_total_list, total_str='TOTAL IN {currency}', remove_group_lines=False)
         else:
             return []
+
+    def aml_group_by_keys(self, aml_list, group_by_keys):
+        """
+        given a list of amls return a dictionary of groups given for
+        group_by_keys
+        @param aml_list: and aml list is a list of dictionaries where every
+        dictionary represent a report line.
+        @param group_by_keys: a list of the aml keys that you want to group
+        @return: a dictiory { (group_by_x, group_by_y, ..): [ amls.. ] } 
+        """
+        res = dict()
+        for item in aml_list:
+            key = tuple([item[col] for col in group_by_keys])
+            res[key] = res.get(key, False) and res[key] + [item] or [item]
+        return res
 
     def get_group_total(self, group_list, total_str, remove_group_lines=True):
         """
