@@ -344,7 +344,7 @@ class account_balance(report_sxw.rml_parse):
                     'amount_currency': det['amount_currency'],
                     'amount_company_currency': det['debit'] - det['credit'] if
                     det['currency'] == None else 0.0,
-                    'differential': 0.0,
+                    'differential': det['debit'] - det['credit'] if det['currency'] != None and not det['amount_currency'] else 0.0,
                 })
 
         if ctx['report'] == 'four':
