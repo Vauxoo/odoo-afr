@@ -356,6 +356,7 @@ class account_balance(report_sxw.rml_parse):
                 key = (item['currency'], item['partner'])
                 res2[key] = res2.get(key, False) and res2[key] + [item] or [item]
 
+            total_group = dict()
             for aml_group in res2.values():
                 res3 = {}.fromkeys(['id', 'date', 'journal', 'partner', 'name',
                     'entry', 'ref', 'debit', 'credit', 'analytic', 'period',
@@ -376,8 +377,10 @@ class account_balance(report_sxw.rml_parse):
                     res3['amount_currency'] += line['amount_currency']
                     res3['amount_company_currency'] += line['amount_company_currency']
                     res3['differential'] += line['differential']
-                aml_group += [res3]
-            return res2.values()
+
+                key = aml_group[0]['currency']
+                total_group[key] = total_group.get(key, False) and total_group[key] + [res3] or [res3]
+            return total_group.values()
         else:
             return []
 
