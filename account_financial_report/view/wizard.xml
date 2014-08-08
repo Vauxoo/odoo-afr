@@ -37,6 +37,7 @@
                             />
                         <field name="columns" on_change='onchange_columns(columns,fiscalyear,periods)'/>
                         <field name="group_by" attrs="{'invisible':[('columns', '!=', 'currency')], 'required': [('columns','=','currency')]}"/>
+                        <field name="lines_detail" attrs="{'invisible':[('columns', '!=', 'currency')], 'required': [('columns','=','currency')]}"/>
                         <field name="analytic_ledger"  
                         attrs="{'readonly':['|',('columns','!=','four'),('inf_type','!=','BS')],}" 
                         on_change='onchange_analytic_ledger(company_id,analytic_ledger)'
