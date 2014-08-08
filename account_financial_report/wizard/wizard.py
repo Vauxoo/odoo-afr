@@ -93,6 +93,7 @@ class wizard_report(osv.osv_memory):
         'columns': lambda *a: 'five',
         'target_move': 'posted',
         'group_by': 'currency',
+        'lines_detail': 'total',
     }
 
     def onchange_inf_type(self, cr, uid, ids, inf_type, context=None):
