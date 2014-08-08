@@ -240,9 +240,9 @@
                     </tr>
                 </blockTable>
         </section>
-        <spacer length="10mm"/>
+        <spacer length="3mm"/>
         </section>
-        <spacer length="2.5mm"/>
+        <spacer length="3mm"/>
     </section>
 
     </story>
