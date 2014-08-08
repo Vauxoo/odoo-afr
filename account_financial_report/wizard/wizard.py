@@ -72,6 +72,9 @@ class wizard_report(osv.osv_memory):
         'filter': fields.selection([('bydate', 'By Date'), ('byperiod', 'By Period'), ('all', 'By Date and Period'), ('none', 'No Filter')], 'Date/Period Filter'),
         'date_to': fields.date('End date'),
         'date_from': fields.date('Start date'),
+        'group_by': fields.selection([('currency', 'Currency'), ('partner',
+            'Partner')], 'Group by', help='Only applies in the way of the end'
+            ' balance multicurrency report is show.'),
     }
 
     _defaults = {
