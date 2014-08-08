@@ -356,8 +356,8 @@ class account_balance(report_sxw.rml_parse):
         res = self._get_analytic_ledger(account, ctx=ctx)
         if res:
             res2 = self.aml_group_by_keys(res, ['currency', 'partner'])
-            partner_total_list = self.get_group_total(res2.values(), total_str='{partner}', remove_lines=True)
-            return self.get_group_total(partner_total_list, total_str='TOTAL IN {currency}')
+            partner_total_list = self.get_group_total(res2.values(), total_str='{partner}', main_group='currency', remove_lines=True)
+            return self.get_group_total(partner_total_list, main_group='currency', total_str='TOTAL IN {currency}')
         else:
             return []
 
@@ -376,7 +376,7 @@ class account_balance(report_sxw.rml_parse):
             res[key] = res.get(key, False) and res[key] + [item] or [item]
         return res
 
-    def get_group_total(self, group_list, total_str, remove_lines=False):
+    def get_group_total(self, group_list, total_str, main_group, remove_lines=False):
         """
         @param group_list: list of dictionaries every list represent a group of
         aml lines, and every dictionary represent a aml line.
@@ -410,7 +410,7 @@ class account_balance(report_sxw.rml_parse):
                 res3['amount_company_currency'] += line['amount_company_currency']
                 res3['differential'] += line['differential']
 
-            key = aml_group[0]['currency']
+            key = aml_group[0][main_group]
             total_group[key] = total_group.get(key, False) and total_group[key] + [res3] or [res3]
             aml_group += [res3]
         return total_group.values() if remove_lines else group_list
