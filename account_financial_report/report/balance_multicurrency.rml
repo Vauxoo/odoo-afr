@@ -144,21 +144,11 @@
             </tr>
         </blockTable>
 
-                <blockTable colWidths="2.25cm,2.0cm,7.75cm,6.5cm,2.5cm,2.5cm,2.5cm" style="BODY_LINE" repeatRows="1">
+                <blockTable colWidths="7.75cm,10.75cm,2.5cm,2.5cm,2.5cm" style="BODY_LINE" repeatRows="1">
 <!--
                 [[ (a['type'] &lt;&gt; 'view') or removeParentNode('blockTable') ]]
 -->
                     <tr noRowsplits="1">
-                        <td>
-                            <para style="TITLES_NEW">
-                                <font>DATE</font>
-                            </para>
-                        </td>
-                        <td>
-                            <para style="TITLES_NEW">
-                                <font>PERIOD</font>
-                            </para>
-                        </td>
                         <td>
                             <para style="TITLES_NEW">REFERENCE</para>
                         </td>
@@ -222,21 +212,11 @@
             <para>[[ repeatIn(a['mayor'], 'group_currency') ]]</para>
             <section>
             <para>[[ repeatIn(group_currency, 'm') ]]</para>
-                <blockTable colWidths="2.25cm,2.0cm,7.75cm,6.5cm,2.5cm,2.5cm,2.5cm" style="BODY_LINE" repeatRows="1">
+                <blockTable colWidths="7.75cm,10.75cm,2.5cm,2.5cm,2.5cm" style="BODY_LINE" repeatRows="1">
 <!--
                 [[ (a['type'] &lt;&gt; 'view') or removeParentNode('blockTable') ]]
 -->
                     <tr>
-                        <td>
-                            <para style="TITLES_NEW">
-                                <font> [[ m['date'] and formatLang( m['date'], date=True) or '' ]]</font>
-                            </para>
-                        </td>
-                        <td>
-                            <para style="TITLES_NEW">
-                                <font>[[ m['period'] ]]</font>
-                            </para>
-                        </td>
                         <td>
                             <para style="TITLES_NEW">
                                 <font>[[ m['name'] ]] [[ m['ref'] and (' - Ref %s'%m['ref']) or '' ]] </font>
