@@ -361,9 +361,7 @@ class account_balance(report_sxw.rml_parse):
                 return self.get_group_total(partner_total_list, main_group='currency', total_str='TOTAL IN {currency}')
             else:
                 res2 = self.aml_group_by_keys(res, ['partner', 'currency'])
-                res3 = self.get_group_total(res2.values(), total_str='{partner} Total in {currency}', main_group='partner', remove_lines=True if ctx['lines_detail'] == 'total' else False)
-                res3 = self.aml_group_by_keys(res3, ['partner'])
-                return res3
+                return self.get_group_total(res2.values(), total_str='{partner} Total in {currency}', main_group='partner', remove_lines=True if ctx['lines_detail'] == 'total' else False)
         else:
             return []
 
@@ -378,12 +376,8 @@ class account_balance(report_sxw.rml_parse):
         """
         res = dict()
         for item in aml_list:
-            if isinstance(item, (dict,)):
-                key = tuple([item[col] for col in group_by_keys])
-                res[key] = res.get(key, False) and res[key] + [item] or [item]
-            elif isinstance(item, (list,)):
-                key = tuple([item[0][col] for col in group_by_keys])
-                res[key] = res.get(key, False) and res[key] + item or item
+            key = tuple([item[col] for col in group_by_keys])
+            res[key] = res.get(key, False) and res[key] + [item] or [item]
         return res
 
     def get_group_total(self, group_list, total_str, main_group, remove_lines=False):
