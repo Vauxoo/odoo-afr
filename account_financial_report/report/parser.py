@@ -355,9 +355,13 @@ class account_balance(report_sxw.rml_parse):
         ctx = ctx or {}
         res = self._get_analytic_ledger(account, ctx=ctx)
         if res:
-            res2 = self.aml_group_by_keys(res, ['currency', 'partner'])
-            partner_total_list = self.get_group_total(res2.values(), total_str='{partner}', main_group='currency', remove_lines=True)
-            return self.get_group_total(partner_total_list, main_group='currency', total_str='TOTAL IN {currency}')
+            if ctx['group_by'] == 'currency':
+                res2 = self.aml_group_by_keys(res, ['currency', 'partner'])
+                partner_total_list = self.get_group_total(res2.values(), total_str='{partner}', main_group='currency', remove_lines=True)
+                return self.get_group_total(partner_total_list, main_group='currency', total_str='TOTAL IN {currency}')
+            else:
+                res2 = self.aml_group_by_keys(res, ['partner', 'currency'])
+                return self.get_group_total(res2.values(), total_str='{partner} Total in {currency}', main_group='partner', remove_lines=True)
         else:
             return []
 
