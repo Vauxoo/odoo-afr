@@ -144,14 +144,11 @@
             </tr>
         </blockTable>
 
-                <blockTable colWidths="7.75cm,10.75cm,2.5cm,2.5cm,2.5cm" style="BODY_LINE" repeatRows="1">
+                <blockTable colWidths="10.75cm,2.5cm,2.5cm,2.5cm" style="BODY_LINE" repeatRows="1">
 <!--
                 [[ (a['type'] &lt;&gt; 'view') or removeParentNode('blockTable') ]]
 -->
                     <tr noRowsplits="1">
-                        <td>
-                            <para style="TITLES_NEW">REFERENCE</para>
-                        </td>
                         <td>
                             <para style="TITLES_NEW">PARTNER</para>
                         </td>
@@ -212,16 +209,11 @@
             <para>[[ repeatIn(a['mayor'], 'group_currency') ]]</para>
             <section>
             <para>[[ repeatIn(group_currency, 'm') ]]</para>
-                <blockTable colWidths="7.75cm,10.75cm,2.5cm,2.5cm,2.5cm" style="BODY_LINE" repeatRows="1">
+                <blockTable colWidths="10.75cm,2.5cm,2.5cm,2.5cm" style="BODY_LINE" repeatRows="1">
 <!--
                 [[ (a['type'] &lt;&gt; 'view') or removeParentNode('blockTable') ]]
 -->
                     <tr>
-                        <td>
-                            <para style="TITLES_NEW">
-                                <font>[[ m['name'] ]] [[ m['ref'] and (' - Ref %s'%m['ref']) or '' ]] </font>
-                            </para>
-                        </td>
                         <td>
                             <para style="TITLES_NEW">
                                 <font>[[ m['partner'] ]]</font>
