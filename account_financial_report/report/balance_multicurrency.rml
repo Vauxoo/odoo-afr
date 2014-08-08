@@ -144,7 +144,7 @@
             </tr>
         </blockTable>
 
-                <blockTable colWidths="2.25cm,2.0cm,7.75cm,2.5cm,4.0cm,2.5cm,2.5cm,2.5cm" style="BODY_LINE" repeatRows="1">
+                <blockTable colWidths="2.25cm,2.0cm,7.75cm,6.5cm,2.5cm,2.5cm,2.5cm" style="BODY_LINE" repeatRows="1">
 <!--
                 [[ (a['type'] &lt;&gt; 'view') or removeParentNode('blockTable') ]]
 -->
@@ -161,9 +161,6 @@
                         </td>
                         <td>
                             <para style="TITLES_NEW">REFERENCE</para>
-                        </td>
-                        <td>
-                            <para style="TITLES_NEW">JOURNAL ENTRY</para>
                         </td>
                         <td>
                             <para style="TITLES_NEW">PARTNER</para>
@@ -225,7 +222,7 @@
             <para>[[ repeatIn(a['mayor'], 'group_currency') ]]</para>
             <section>
             <para>[[ repeatIn(group_currency, 'm') ]]</para>
-                <blockTable colWidths="2.25cm,2.0cm,7.75cm,2.5cm,4.0cm,2.5cm,2.5cm,2.5cm" style="BODY_LINE" repeatRows="1">
+                <blockTable colWidths="2.25cm,2.0cm,7.75cm,6.5cm,2.5cm,2.5cm,2.5cm" style="BODY_LINE" repeatRows="1">
 <!--
                 [[ (a['type'] &lt;&gt; 'view') or removeParentNode('blockTable') ]]
 -->
@@ -244,16 +241,6 @@
                             <para style="TITLES_NEW">
                                 <font>[[ m['name'] ]] [[ m['ref'] and (' - Ref %s'%m['ref']) or '' ]] </font>
                             </para>
-                        </td>
-                        <td>
-                            <para style="TITLES_NEW">
-                                <font>[[ m['entry'] ]]</font>
-                            </para>
-<!--
-                            <para style="TITLES_NEW">
-                                <font>[[ m['journal'] ]]</font>
-                            </para>
--->
                         </td>
                         <td>
                             <para style="TITLES_NEW">
