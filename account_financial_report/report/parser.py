@@ -308,6 +308,7 @@ class account_balance(report_sxw.rml_parse):
                 aa.code as cuenta, aa.id as aa_id, aml.name as name,
                 aml.ref as ref, 
                 (select name from res_currency where aml.currency_id = id) as currency,
+                aml.currency_id as currency_id,
                 aml.amount_currency as amount_currency,
                 case when aml.debit is null then 0.00 else aml.debit end as debit,
                 case when aml.credit is null then 0.00 else aml.credit end as credit,
