@@ -355,6 +355,7 @@ class account_balance(report_sxw.rml_parse):
         ctx = ctx or {}
         res = self._get_analytic_ledger(account, ctx=ctx)
         if res:
+            self.result_master(res)
             remove_value = True if ctx['lines_detail'] == 'total' else False
             if ctx['group_by'] == 'currency':
                 res2 = self.aml_group_by_keys(res, ['currency', 'partner'])
@@ -386,6 +387,67 @@ class account_balance(report_sxw.rml_parse):
         for item in aml_list:
             key = tuple([item[col] for col in group_by_keys])
             res[key] = res.get(key, False) and res[key] + [item] or [item]
+        return res
+
+
+    def result_master(self, aml_list):
+        """
+        @param aml_list: and aml list is a list of dictionaries where every
+        dictionary represent a report line.
+        @param group_by_keys: a list of the aml keys that you want to group
+        @return: a dictiory { (group_by_x, group_by_y, ..): [ amls.. ] } 
+        """
+        res = dict(currency={}, partner={}, currency_partner={})
+        for line in aml_list:
+            pkey, ckey = line['partner'], line['currency']
+            res = self.init_report_line_group(line, res, 'currency', ckey)
+            res = self.init_report_line_group(line, res, 'partner', pkey)
+        
+            res = self.update_report_line(line, res, 'currency', ckey)
+            res = self.update_report_line(line, res, 'partner', pkey)
+        import pdb
+        pdb.set_trace()
+        raise osv.except_osv(
+            _('Invalid Procedure'),
+            _('This funcionality is still in development.'))
+        return res
+
+    def init_report_line_group(self, line, res, key1, key2):
+        """
+        init dictionary use to define groups
+        """
+        group_dict = dict(init_balance={}, total={}, lines=[])
+        if not res[key1].get(key2, False):
+            res[key1][key2] = group_dict.copy()
+            res[key1][key2]['total'] = self.create_report_line()
+            res[key1][key2]['init_balance'] = self.create_report_line()
+        return res
+
+    def create_report_line(self):
+        """
+        return an empty dictionary to be use as a init balance line or a total
+        line in the report.
+        """
+        res = {}.fromkeys(['id', 'date', 'journal', 'partner', 'name',
+            'entry', 'ref', 'debit', 'credit', 'analytic', 'period',
+            'balance', 'currency', 'amount_currency',
+            'amount_company_currency', 'differential'])
+        res.update(
+            debit=0.0, credit=0.0, balance=0.0, amount_currency=0.0,
+            amount_company_currency=0.0, differential=0.0)
+        return res
+
+    def update_report_line(self, line, res, key1, key2):
+        """
+        update master reult dictionary
+        """
+        res[key1][key2]['lines'] += [line]
+        res[key1][key2]['total']['debit'] += line['debit']
+        res[key1][key2]['total']['credit'] += line['credit']
+        res[key1][key2]['total']['balance'] += line['balance']
+        res[key1][key2]['total']['amount_currency'] += line['amount_currency']
+        res[key1][key2]['total']['amount_company_currency'] += line['amount_company_currency']
+        res[key1][key2]['total']['differential'] += line['differential']
         return res
 
     def get_group_total(self, group_list, total_str, main_group, remove_lines=False):
