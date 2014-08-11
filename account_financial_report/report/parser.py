@@ -304,7 +304,7 @@ class account_balance(report_sxw.rml_parse):
                 where += "AND am.state = 'posted'"
             sql_detalle = """select aml.id as id, aj.name as diario, aa.name as descripcion,
                 (select name from res_partner where aml.partner_id = id) as partner,
-                aa.code as cuenta, aml.name as name,
+                aa.code as cuenta, aa.id as aa_id, aml.name as name,
                 aml.ref as ref, 
                 (select name from res_currency where aml.currency_id = id) as currency,
                 aml.amount_currency as amount_currency,
@@ -328,6 +328,8 @@ class account_balance(report_sxw.rml_parse):
             for det in resultat:
                 balance += det['debit'] - det['credit']
                 res.append({
+                    'aa_id': det['aa_id'],
+                    'cuenta': det['cuenta'],
                     'id': det['id'],
                     'date': det['date'],
                     'journal': det['diario'],
