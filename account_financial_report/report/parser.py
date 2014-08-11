@@ -410,7 +410,7 @@ class account_balance(report_sxw.rml_parse):
             res = self.update_report_line(line, res, 'currency', ckey)
             res = self.update_report_line(line, res, 'partner', pkey)
 
-            res = self.get_initial_balance(account, ckey, pkey, ctx)
+            res = self.get_initial_balance(res, account, ckey, pkey, ctx)
         raise osv.except_osv(
             _('Invalid Procedure'),
             _('This funcionality is still in development.'))
@@ -427,19 +427,20 @@ class account_balance(report_sxw.rml_parse):
             res[key1][key2]['init_balance'] = self.create_report_line()
         return res
 
-    def get_initial_balance(self, account, currency, partner, ctx):
+    def get_initial_balance(self, res, account, currency, partner, ctx):
         """
         Dummy method that get the intial balance of an account.
         """
         ctx = ctx or {}
         if ctx['periods']:
             ctx['periods'] = self.get_previous_periods(ctx['periods'], ctx)
-        res = self._get_analytic_ledger(account, ctx=ctx)
-        init_balance_line = self.get_group_total(
-            group_list=res, total_str='Init Balance', main_group='currency',
-            remove_lines=True)
-        res['currency'][currency]['init_balance'] = init_balance_line
-        res['partner'][partner]['init_balance'] = init_balance_line
+        res0 = self._get_analytic_ledger(account, ctx=ctx)
+        if res0:
+            init_balance_line = self.get_group_total(
+                group_list=res0, total_str='Init Balance', main_group='currency',
+                remove_lines=True)
+            res['currency'][currency]['init_balance'] = init_balance_line
+            res['partner'][partner]['init_balance'] = init_balance_line
         return res 
 
     def get_previous_periods(self, period_ids, ctx=None):
