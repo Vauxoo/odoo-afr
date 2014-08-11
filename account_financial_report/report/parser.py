@@ -431,17 +431,9 @@ class account_balance(report_sxw.rml_parse):
         """
         Dummy method that get the intial balance of an account.
         """
-        uid, cr = self.uid, self.cr
         ctx = ctx or {}
-        ap_obj = self.pool.get('account.period')
         if ctx['periods']:
-            ap_id = ap_obj.search(
-                cr, uid, [('id', 'in', ctx['periods'])],
-                context=ctx, order='date_start asc', limit=1)[0]
-            date_init = ap_obj.browse(cr, uid, ap_id, context=ctx).date_start
-            ap_ids = ap_obj.search(
-                cr, uid, [('date_stop', '<=', date_init)], context=ctx)
-            ctx['periods'] = ap_ids
+            ctx['periods'] = self.get_previous_periods(ctx['periods'], ctx)
         res = self._get_analytic_ledger(account, ctx=ctx)
         init_balance_line = self.get_group_total(
             group_list=res, total_str='Init Balance', main_group='currency',
@@ -449,6 +441,24 @@ class account_balance(report_sxw.rml_parse):
         res['currency'][currency]['init_balance'] = init_balance_line
         res['partner'][partner]['init_balance'] = init_balance_line
         return res 
+
+    def get_previous_periods(self, period_ids, ctx=None):
+        """
+        @param period_ids: recieve a list of periods, period ids list.
+        @return the previous period ids. 
+        """
+        cr, uid = self.cr, self.uid
+        ctx = ctx or {}
+        ap_obj = self.pool.get('account.period')
+        period_ids = isinstance(period_ids, (int, long)) and [period_ids] or period_ids
+        early_dt_start_ap_id = ap_obj.search(
+            cr, uid, [('id', 'in', period_ids)],
+            context=ctx, order='date_start asc', limit=1)[0]
+        date_init = ap_obj.browse(
+            cr, uid, early_dt_start_ap_id, context=ctx).date_start
+        ap_ids = ap_obj.search(
+            cr, uid, [('date_stop', '<=', date_init)], context=ctx)
+        return ap_ids
 
     def create_report_line(self):
         """
