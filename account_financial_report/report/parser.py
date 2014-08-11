@@ -301,6 +301,8 @@ class account_balance(report_sxw.rml_parse):
             #~ periods = str(tuple(ctx['periods']))
             where = """where aml.period_id in (%s) and aa.id = %s and aml.state <> 'draft'""" % (
                 periods, account['id'])
+            if ctx.get('currency_id'):
+                where = where + """ and aml.currency_id = {currency_id}""".format(currency_id=ctx['currency_id'])
             if ctx.get('state', 'posted') == 'posted':
                 where += "AND am.state = 'posted'"
             sql_detalle = """select aml.id as id, aj.name as diario, aa.name as descripcion,
@@ -345,6 +347,7 @@ class account_balance(report_sxw.rml_parse):
                     'period': det['periodo'],
                     'balance': balance,
                     'currency': det['currency'] or company_currency,
+                    'currency_id': det['currency_id'],
                     'amount_currency': det['amount_currency'],
                     'amount_company_currency': det['debit'] - det['credit'] if
                     det['currency'] == None else 0.0,
@@ -435,6 +438,8 @@ class account_balance(report_sxw.rml_parse):
         ctx = ctx or {}
         if ctx['periods']:
             ctx['periods'] = self.get_previous_periods(ctx['periods'], ctx)
+            if res['currency'][currency]['lines']:
+                ctx['currency_id'] = res['currency'][currency]['lines'][0]['currency_id']
         res0 = self._get_analytic_ledger(account, ctx=ctx)
         if res0:
             init_balance_line = self.get_group_total(
