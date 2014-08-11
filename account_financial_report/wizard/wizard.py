@@ -75,8 +75,10 @@ class wizard_report(osv.osv_memory):
         'group_by': fields.selection([('currency', 'Currency'), ('partner',
             'Partner')], 'Group by', help='Only applies in the way of the end'
             ' balance multicurrency report is show.'),
-        'lines_detail': fields.selection([('detail', 'All move details'),
-            ('total', 'Only Totals')], 'Line Details',
+        'lines_detail': fields.selection([
+            ('detail', 'All moves'), ('both', 'All moves with total lines'),
+            ('total', 'Only Totals')],
+            'Line Details',
             help='Only applies in the way of the end balance multicurrency'
             ' report is show.'),
     }
