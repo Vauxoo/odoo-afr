@@ -36,6 +36,7 @@ from tools import config
 from tools.translate import _
 from osv import osv
 from openerp.tools.safe_eval import safe_eval as eval
+import pdb, pprint
 
 
 class account_balance(report_sxw.rml_parse):
@@ -407,8 +408,6 @@ class account_balance(report_sxw.rml_parse):
         
             res = self.update_report_line(line, res, 'currency', ckey)
             res = self.update_report_line(line, res, 'partner', pkey)
-        import pdb
-        pdb.set_trace()
         raise osv.except_osv(
             _('Invalid Procedure'),
             _('This funcionality is still in development.'))
