@@ -422,7 +422,15 @@ class account_balance(report_sxw.rml_parse):
             res[key1][key2] = group_dict.copy()
             res[key1][key2]['total'] = self.create_report_line()
             res[key1][key2]['init_balance'] = self.create_report_line()
+            res[key1][key2]['init_balance']['balance'] = self.get_init_balance(
+                line['aa_id'], line['period'], line['currency'])
         return res
+
+    def get_init_balance(self, account, period, currency):
+        """
+        Dummy method that get the intial balance of an account.
+        """
+        return -1.0
 
     def create_report_line(self):
         """
