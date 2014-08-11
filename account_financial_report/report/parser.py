@@ -358,7 +358,7 @@ class account_balance(report_sxw.rml_parse):
         ctx = ctx or {}
         res = self._get_analytic_ledger(account, ctx=ctx)
         if res:
-            self.result_master(res)
+            self.result_master(res, account, ctx)
             remove_value = True if ctx['lines_detail'] == 'total' else False
             if ctx['group_by'] == 'currency':
                 res2 = self.aml_group_by_keys(res, ['currency', 'partner'])
@@ -393,13 +393,14 @@ class account_balance(report_sxw.rml_parse):
         return res
 
 
-    def result_master(self, aml_list):
+    def result_master(self, aml_list, account, ctx=None):
         """
         @param aml_list: and aml list is a list of dictionaries where every
         dictionary represent a report line.
         @param group_by_keys: a list of the aml keys that you want to group
         @return: a dictiory { (group_by_x, group_by_y, ..): [ amls.. ] } 
         """
+        ctx = ctx or {}
         res = dict(currency={}, partner={}, currency_partner={})
         for line in aml_list:
             pkey, ckey = line['partner'], line['currency']
@@ -408,6 +409,8 @@ class account_balance(report_sxw.rml_parse):
         
             res = self.update_report_line(line, res, 'currency', ckey)
             res = self.update_report_line(line, res, 'partner', pkey)
+
+            res = self.get_initial_balance(account, ckey, pkey, ctx)
         raise osv.except_osv(
             _('Invalid Procedure'),
             _('This funcionality is still in development.'))
@@ -422,15 +425,30 @@ class account_balance(report_sxw.rml_parse):
             res[key1][key2] = group_dict.copy()
             res[key1][key2]['total'] = self.create_report_line()
             res[key1][key2]['init_balance'] = self.create_report_line()
-            res[key1][key2]['init_balance']['balance'] = self.get_init_balance(
-                line['aa_id'], line['period'], line['currency'])
         return res
 
-    def get_init_balance(self, account, period, currency):
+    def get_initial_balance(self, account, currency, partner, ctx):
         """
         Dummy method that get the intial balance of an account.
         """
-        return -1.0
+        uid, cr = self.uid, self.cr
+        ctx = ctx or {}
+        ap_obj = self.pool.get('account.period')
+        if ctx['periods']:
+            ap_id = ap_obj.search(
+                cr, uid, [('id', 'in', ctx['periods'])],
+                context=ctx, order='date_start asc', limit=1)[0]
+            date_init = ap_obj.browse(cr, uid, ap_id, context=ctx).date_start
+            ap_ids = ap_obj.search(
+                cr, uid, [('date_stop', '<=', date_init)], context=ctx)
+            ctx['periods'] = ap_ids
+        res = self._get_analytic_ledger(account, ctx=ctx)
+        init_balance_line = self.get_group_total(
+            group_list=res, total_str='Init Balance', main_group='currency',
+            remove_lines=True)
+        res['currency'][currency]['init_balance'] = init_balance_line
+        res['partner'][partner]['init_balance'] = init_balance_line
+        return res 
 
     def create_report_line(self):
         """
