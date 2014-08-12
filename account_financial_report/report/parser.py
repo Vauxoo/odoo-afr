@@ -414,27 +414,28 @@ class account_balance(report_sxw.rml_parse):
         self.get_real_totals(res, main_keys)
         return res
 
-    def init_report_line_group(self, res, line, keyt, keyv):
+    def init_report_line_group(self, res, line, key):
         """
         Update the dictionary given in the paramenter res with the
         initialization values of the group a init dictionary used to defined
         the group.
-        @param keyt: key type (the name of the column in the report).
-        @param keyv: key value. 
+        @param key: the name of the column in the report.
         @return True 
         """
-        group_dict = dict(init_balance={}, total={}, lines=[], real_total={},
-            xchange_lines=[], xchange_total={})
-        if not res[keyt].get(keyv, False):
-            res[keyt][keyv] = group_dict.copy()
-            res[keyt][keyv]['total'] = self.create_report_line(
-                'Accumulated in {0}'.format(keyv))
-            res[keyt][keyv]['real_total'] = self.create_report_line(
-                'Total in {0}'.format(keyv))
-            res[keyt][keyv]['init_balance'] = self.create_report_line(
-                'Initial Balance in {0}'.format(keyv))
-            res[keyt][keyv]['xchange_total'] = self.create_report_line(
-                'Exchange Differencial in {0}'.format(keyv))
+        group_dict = dict(
+            init_balance={}, total={}, lines=[], real_total={},
+            xchange_lines=[], xchange_total={}
+        )
+        if not res[key].get(line[key], False):
+            res[key][line[key]] = group_dict.copy()
+            res[key][line[key]]['total'] = self.create_report_line(
+                'Accumulated in {0}'.format(line[key]))
+            res[key][line[key]]['real_total'] = self.create_report_line(
+                'Total in {0}'.format(line[key]))
+            res[key][line[key]]['init_balance'] = self.create_report_line(
+                'Initial Balance in {0}'.format(line[key]))
+            res[key][line[key]]['xchange_total'] = self.create_report_line(
+                'Exchange Differencial in {0}'.format(line[key]))
         return True 
 
     def get_initial_balance(self, res, account, main_keys, ctx):
@@ -503,7 +504,7 @@ class account_balance(report_sxw.rml_parse):
         @param key: the name of the column in the report.
         @return True
         """
-        self.init_report_line_group(res, line, key, line[key])
+        self.init_report_line_group(res, line, key)
         update_fields_list = [
             'debit', 'credit', 'balance', 'amount_currency',
             'amount_company_currency', 'differential']
