@@ -418,7 +418,7 @@ class account_balance(report_sxw.rml_parse):
         if not res[keyt].get(keyv, False):
             res[keyt][keyv] = group_dict.copy()
             res[keyt][keyv]['total'] = self.create_report_line(
-                'Select Periods Accumulated in {0}'.format(keyv))
+                'Accumulated in {0}'.format(keyv))
             res[keyt][keyv]['real_total'] = self.create_report_line(
                 'Total in {0}'.format(keyv))
             res[keyt][keyv]['init_balance'] = self.create_report_line(
@@ -444,7 +444,7 @@ class account_balance(report_sxw.rml_parse):
             res['currency'][currency_id]['init_balance'].update(
                  res['currency'][currency_id]['total'])
             res['currency'][currency_id]['total'] = self.create_report_line(
-                'Select Periods Accumulated in {0}'.format(currency_id))
+                'Accumulated in {0}'.format(currency_id))
             res['currency'][currency_id]['lines'] = []
 
         for partner_id in partner_ids:
@@ -452,7 +452,7 @@ class account_balance(report_sxw.rml_parse):
             res['partner'][partner_id]['init_balance'].update(
                  res['partner'][partner_id]['total'])
             res['partner'][partner_id]['total'] = self.create_report_line(
-                'Select Periods Accumulated in in {0}'.format(partner_id))
+                'Accumulated in in {0}'.format(partner_id))
             res['partner'][partner_id]['lines'] = []
         return True
 
