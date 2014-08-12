@@ -401,7 +401,7 @@ class account_balance(report_sxw.rml_parse):
         """
         ctx = ctx or {}
         res = dict(currency={}, partner={}, currency_partner={})
-        main_keys = ['currency', 'partner']
+        main_keys = ['currency', 'partner', ('currency','partner')]
         self.get_initial_balance(res, account, main_keys, ctx=ctx.copy())
         for line in aml_list:
             for key in main_keys:
@@ -443,7 +443,8 @@ class account_balance(report_sxw.rml_parse):
                 self.update_report_line(res, line, key)
 
         for key in main_keys:
-            key_ids = res[key].keys()
+            key_ids = (isinstance(key, (tuple,)) and
+                res['_'.join(key)].keys() or res[key].keys())
             for key_id in key_ids:
                 res[key][key_id]['total'].pop('partner', None)
                 res[key][key_id]['init_balance'].update(
