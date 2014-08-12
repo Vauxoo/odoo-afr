@@ -362,9 +362,15 @@ class account_balance(report_sxw.rml_parse):
         ctx = ctx or {}
         res = self._get_analytic_ledger(account, ctx=ctx)
         if res:
-            self.result_master(res, account, ctx)
             remove_value = True if ctx['lines_detail'] == 'total' else False
             if ctx['group_by'] == 'currency':
+                #res2 = []
+                #new_res = self.result_master(res, account, ctx)
+                #for (key, value) in new_res['currency'].iteritems():
+                #    res2 += [value['init_balance']] + value['lines'] + [value['total']]
+                #pdb.set_trace()
+                #return res2
+
                 res2 = self.aml_group_by_keys(res, ['currency', 'partner'])
                 partner_total_list = self.get_group_total(
                     res2.values(),
@@ -415,9 +421,6 @@ class account_balance(report_sxw.rml_parse):
             res = self.update_report_line(line, res, 'partner', pkey)
 
             res = self.get_initial_balance(res, account, ckey, pkey, ctx)
-        raise osv.except_osv(
-            _('Invalid Procedure'),
-            _('This funcionality is still in development.'))
         return res
 
     def init_report_line_group(self, line, res, key1, key2):
@@ -441,6 +444,9 @@ class account_balance(report_sxw.rml_parse):
             if res['currency'][currency]['lines']:
                 ctx['currency_id'] = res['currency'][currency]['lines'][0]['currency_id']
         res0 = self._get_analytic_ledger(account, ctx=ctx)
+        #print ' ----- cxt period', ctx['periods']
+        #print ' ----- cxt currency_id', ctx['currency_id']
+        #print ' ----- res0', res0 
         if res0:
             init_balance_line = self.get_group_total(
                 group_list=res0, total_str='Init Balance', main_group='currency',
