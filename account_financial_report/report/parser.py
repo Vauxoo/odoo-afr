@@ -402,9 +402,8 @@ class account_balance(report_sxw.rml_parse):
         res = dict(currency={}, partner={}, currency_partner={})
         self.get_initial_balance(res, account, ctx=ctx.copy())
         for line in aml_list:
-            pkey, ckey = line['partner'], line['currency']
-            self.update_report_line(res, line, 'currency', ckey)
-            self.update_report_line(res, line, 'partner', pkey)
+            self.update_report_line(res, line, 'currency')
+            self.update_report_line(res, line, 'partner')
         return res
 
     def init_report_line_group(self, res, line, keyt, keyv):
@@ -435,8 +434,8 @@ class account_balance(report_sxw.rml_parse):
         ctx['periods'] = self.get_previous_periods(ctx['periods'], ctx)
         previous_aml = self._get_analytic_ledger(account, ctx=ctx)
         for line in previous_aml:
-            self.update_report_line(res, line, 'currency', line['currency'])
-            self.update_report_line(res, line, 'partner', line['partner'])
+            self.update_report_line(res, line, 'currency')
+            self.update_report_line(res, line, 'partner')
         currency_ids = res['currency'].keys()
         for currency_id in currency_ids:
             init_balance_line = self.get_group_total(
@@ -481,22 +480,21 @@ class account_balance(report_sxw.rml_parse):
             partner=title)
         return res
 
-    def update_report_line(self, res, line, keyt, keyv):
+    def update_report_line(self, res, line, key):
         """
         Update the dictionary given in res to add the lines associaed to the
         given group and to also update the total column while the move lines
         have benn grouping.
-        @param keyt: key type (the name of the column in the report).
-        @param keyv: key value. 
+        @param key: the name of the column in the report.
         @return True
         """
-        self.init_report_line_group(res, line, keyt, keyv)
-        res[keyt][keyv]['lines'] += [line]
+        self.init_report_line_group(res, line, key, line[key])
+        res[key][line[key]]['lines'] += [line]
         update_fields_list = [
             'debit', 'credit', 'balance', 'amount_currency',
             'amount_company_currency', 'differential']
         for field in update_fields_list:
-            res[keyt][keyv]['total'][field] += line[field]
+            res[key][line[key]]['total'][field] += line[field]
         return True
 
     def get_group_total(self, group_list, total_str, main_group, remove_lines=False):
