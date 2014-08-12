@@ -411,17 +411,20 @@ class account_balance(report_sxw.rml_parse):
             res = self.get_initial_balance(res, account, ckey, pkey, ctx)
         return res
 
-    def init_report_line_group(self, line, res, key1, key2):
+    def init_report_line_group(self, line, res, keyt, keyv):
         """
         init dictionary use to define groups
+        @param keyt: key type (the name of the column in the report).
+        @param keyv: key value. 
+        @return a dictionary with the initialization values of the group.
         """
         group_dict = dict(init_balance={}, total={}, lines=[])
-        if not res[key1].get(key2, False):
-            res[key1][key2] = group_dict.copy()
-            res[key1][key2]['total'] = self.create_report_line(
-                'Total in {0}'.format(key2))
-            res[key1][key2]['init_balance'] = self.create_report_line(
-                'Initial Balance in {0}'.format(key2))
+        if not res[keyt].get(keyv, False):
+            res[keyt][keyv] = group_dict.copy()
+            res[keyt][keyv]['total'] = self.create_report_line(
+                'Total in {0}'.format(keyv))
+            res[keyt][keyv]['init_balance'] = self.create_report_line(
+                'Initial Balance in {0}'.format(keyv))
         return res
 
     def get_initial_balance(self, res, account, currency, partner, ctx):
