@@ -482,7 +482,7 @@ class account_balance(report_sxw.rml_parse):
         res = {}.fromkeys(['id', 'date', 'journal', 'partner', 'name',
             'entry', 'ref', 'debit', 'credit', 'analytic', 'period',
             'balance', 'currency', 'amount_currency',
-            'amount_company_currency', 'differential'])
+            'amount_company_currency', 'differential'], str())
         res.update(
             debit=0.0, credit=0.0, balance=0.0, amount_currency=0.0,
             amount_company_currency=0.0, differential=0.0,
