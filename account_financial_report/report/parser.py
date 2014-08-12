@@ -363,6 +363,13 @@ class account_balance(report_sxw.rml_parse):
         raw_aml_list = self._get_analytic_ledger(account, ctx=ctx)
         #remove_value = True if ctx['lines_detail'] == 'total' else False
         all_res = self.result_master(raw_aml_list, account, ctx)
+
+        #pprint.pprint(
+        #    [(currency, partner, len(values2['lines']), values2['total'])
+        #     for (currency, values) in all_res['currency'].iteritems()
+        #     for (partner, values2) in values['partner'].iteritems()])
+        #raise osv.except_osv('only', 'testing')
+
         res = []
         if ctx['group_by'] == 'currency':
             for (key, value) in all_res['currency'].iteritems():
@@ -424,9 +431,10 @@ class account_balance(report_sxw.rml_parse):
         """
         group_dict = dict(
             init_balance={}, total={}, lines=[], real_total={},
-            xchange_lines=[], xchange_total={}, filter_lines=[], 
+            xchange_lines=[], xchange_total={}, filter_lines=[],
+            partner={},
         )
-        group_dict['partner'] = dict(total={}, lines=[])
+        partner_dict = dict(total={}, lines=[])
         rows = dict(
             total='Accumulated in {0}',
             real_total='Total in {0}',
@@ -438,6 +446,12 @@ class account_balance(report_sxw.rml_parse):
             for (row, title_str) in rows.iteritems(): 
                 res[key][line[key]][row] = self.create_report_line(
                     title_str.format(line[key]))
+
+        if not res[key][line[key]]['partner'].get(line['partner'], False):
+            res[key][line[key]]['partner'].update(
+                {line['partner']:  partner_dict.copy()})
+            res[key][line[key]]['partner'][line['partner']]['total'] = self.create_report_line(
+                '{0}'.format(line['partner']))
         return True 
 
     def get_initial_balance(self, res, account, main_keys, ctx):
@@ -513,8 +527,11 @@ class account_balance(report_sxw.rml_parse):
 
         if not line['differential']:
             res[key][line[key]]['lines'] += [line]
+            res[key][line[key]]['partner'][line['partner']]['lines'] += [line]
             for field in update_fields_list:
                 res[key][line[key]]['total'][field] += line[field]
+                res[key][line[key]]['partner'][line['partner']]['total'][field] += line[field]
+
         else:
             res[key][line[key]]['xchange_lines'] += [line]
             for field in update_fields_list:
