@@ -408,7 +408,7 @@ class account_balance(report_sxw.rml_parse):
             res = self.update_report_line(line, res, 'currency', ckey)
             res = self.update_report_line(line, res, 'partner', pkey)
 
-            res = self.get_initial_balance(res, account, ckey, pkey, ctx)
+            res = self.get_initial_balance(res, account, ckey, pkey, ctx=ctx.copy())
         return res
 
     def init_report_line_group(self, line, res, keyt, keyv):
@@ -438,12 +438,6 @@ class account_balance(report_sxw.rml_parse):
             if res['currency'][currency]['lines']:
                 ctx['currency_id'] = res['currency'][currency]['lines'][0]['currency_id']
         res0 = self._get_analytic_ledger(account, ctx=ctx)
-        # re init the context with the original values
-        ctx['periods'] =  afr_periods
-        ctx.pop('currency_id', None)
-        #print ' ----- cxt period', ctx['periods']
-        #print ' ----- cxt currency_id', ctx['currency_id']
-        #print ' ----- res0', res0 
         if res0:
             init_balance_line = self.get_group_total(
                 group_list=[res0],
