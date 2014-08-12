@@ -402,8 +402,7 @@ class account_balance(report_sxw.rml_parse):
         for line in aml_list:
             self.update_report_line(res, line, 'currency')
             self.update_report_line(res, line, 'partner')
-            self.get_real_total_report_line(res, line, 'currency')
-            self.get_real_total_report_line(res, line, 'partner')
+        self.get_real_totals(res)
         return res
 
     def init_report_line_group(self, res, line, keyt, keyv):
@@ -508,19 +507,19 @@ class account_balance(report_sxw.rml_parse):
             res[key][line[key]]['total'][field] += line[field]
         return True
 
-    def get_real_total_report_line(self, res, line, key):
+
+    def get_real_totals(self, res):
         """
-        Update the dictionary given in res to the real total of the
-        account.
-        @param key: the name of the column in the report.
+        Update the dictionary given in res to the real total of every group
         @return True
         """
         update_fields_list = [
             'debit', 'credit', 'balance', 'amount_currency',
             'amount_company_currency', 'differential']
-        for field in update_fields_list:
-            res[key][line[key]]['real_total'][field] += \
-            res[key][line[key]]['init_balance'][field] + res[key][line[key]]['total'][field] 
+        currency_ids = res['currency'].keys()
+        for currency_id in currency_ids:
+            for field in update_fields_list:
+                res['currency'][currency_id]['real_total'][field] = res['currency'][currency_id]['init_balance'][field] + res['currency'][currency_id]['total'][field]
         return True
 
     def get_group_total(self, group_list, total_str, main_group, remove_lines=False):
