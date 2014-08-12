@@ -366,7 +366,8 @@ class account_balance(report_sxw.rml_parse):
         res = []
         if ctx['group_by'] == 'currency':
             for (key, value) in all_res['currency'].iteritems():
-                res.append([value['init_balance']] + value['lines'] + [value['total']])
+                res.append([value['init_balance']] + value['lines'] +
+                        [value['total']] + [value['accum']])
             return res 
         else:
             res = self.aml_group_by_keys(raw_aml_list, ['partner', 'currency'])
@@ -401,6 +402,8 @@ class account_balance(report_sxw.rml_parse):
         for line in aml_list:
             self.update_report_line(res, line, 'currency')
             self.update_report_line(res, line, 'partner')
+            self.get_accum_report_line(res, line, 'currency')
+            self.get_accum_report_line(res, line, 'partner')
         return res
 
     def init_report_line_group(self, res, line, keyt, keyv):
@@ -503,6 +506,21 @@ class account_balance(report_sxw.rml_parse):
             'amount_company_currency', 'differential']
         for field in update_fields_list:
             res[key][line[key]]['total'][field] += line[field]
+        return True
+
+    def get_accum_report_line(self, res, line, key):
+        """
+        Update the dictionary given in res to the total accumulated of the
+        account.
+        @param key: the name of the column in the report.
+        @return True
+        """
+        update_fields_list = [
+            'debit', 'credit', 'balance', 'amount_currency',
+            'amount_company_currency', 'differential']
+        for field in update_fields_list:
+            res[key][line[key]]['accum'][field] += \
+            res[key][line[key]]['init_balance'][field] + res[key][line[key]]['total'][field] 
         return True
 
     def get_group_total(self, group_list, total_str, main_group, remove_lines=False):
