@@ -401,12 +401,12 @@ class account_balance(report_sxw.rml_parse):
         """
         ctx = ctx or {}
         res = dict(currency={}, partner={}, currency_partner={})
-        self.get_initial_balance(res, account, ctx=ctx.copy())
         main_keys = ['currency', 'partner']
+        self.get_initial_balance(res, account, main_keys, ctx=ctx.copy())
         for line in aml_list:
             for key in main_keys:
                 self.update_report_line(res, line, key)
-        self.get_real_totals(res)
+        self.get_real_totals(res, main_keys)
         return res
 
     def init_report_line_group(self, res, line, keyt, keyv):
@@ -429,7 +429,7 @@ class account_balance(report_sxw.rml_parse):
                 'Initial Balance in {0}'.format(keyv))
         return True 
 
-    def get_initial_balance(self, res, account, ctx):
+    def get_initial_balance(self, res, account, main_keys, ctx):
         """
         This method update the res dictionary given with the inital balance of
         the accounts.
@@ -438,7 +438,6 @@ class account_balance(report_sxw.rml_parse):
         ctx = ctx or {}
         ctx['periods'] = self.get_previous_periods(ctx['periods'], ctx)
         previous_aml = self._get_analytic_ledger(account, ctx=ctx)
-        main_keys = ['currency', 'partner']
         for line in previous_aml:
             for key in main_keys:
                 self.update_report_line(res, line, key)
@@ -506,7 +505,7 @@ class account_balance(report_sxw.rml_parse):
         return True
 
 
-    def get_real_totals(self, res):
+    def get_real_totals(self, res, main_keys):
         """
         Update the dictionary given in res to the real total of every group
         @return True
@@ -514,10 +513,13 @@ class account_balance(report_sxw.rml_parse):
         update_fields_list = [
             'debit', 'credit', 'balance', 'amount_currency',
             'amount_company_currency', 'differential']
-        currency_ids = res['currency'].keys()
-        for currency_id in currency_ids:
-            for field in update_fields_list:
-                res['currency'][currency_id]['real_total'][field] = res['currency'][currency_id]['init_balance'][field] + res['currency'][currency_id]['total'][field]
+        for key in main_keys:
+            key_ids = res[key].keys()
+            for key_id in key_ids:
+                for field in update_fields_list:
+                    res[key][key_id]['real_total'][field] = \
+                        res[key][key_id]['init_balance'][field] + \
+                        res[key][key_id]['total'][field]
         return True
 
     def get_group_total(self, group_list, total_str, main_group, remove_lines=False):
