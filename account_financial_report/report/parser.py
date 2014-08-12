@@ -404,8 +404,8 @@ class account_balance(report_sxw.rml_parse):
             pkey, ckey = line['partner'], line['currency']
             self.init_report_line_group(res, line, 'currency', ckey)
             self.init_report_line_group(res, line, 'partner', pkey)
-            self.update_report_line(line, res, 'currency', ckey)
-            self.update_report_line(line, res, 'partner', pkey)
+            self.update_report_line(res, line, 'currency', ckey)
+            self.update_report_line(res, line, 'partner', pkey)
             self.get_initial_balance(res, account, ckey, pkey, ctx=ctx.copy())
         return res
 
@@ -483,7 +483,7 @@ class account_balance(report_sxw.rml_parse):
             partner=title)
         return res
 
-    def update_report_line(self, line, res, key1, key2):
+    def update_report_line(self, res, line, key1, key2):
         """
         Update the dictionary given in res to add the lines associaed to the
         given group and to also update the total column while the move lines
