@@ -442,8 +442,8 @@ class account_balance(report_sxw.rml_parse):
         #print ' ----- res0', res0 
         if res0:
             init_balance_line = self.get_group_total(
-                group_list=res0, total_str='Init Balance', main_group='currency',
-                remove_lines=True)
+                group_list=[res0], total_str='Init Balance',
+                main_group='currency', remove_lines=True)[0][0]
             res['currency'][currency]['init_balance'] = init_balance_line
             res['partner'][partner]['init_balance'] = init_balance_line
         return res 
