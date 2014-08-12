@@ -360,17 +360,17 @@ class account_balance(report_sxw.rml_parse):
         @return the lines of the balance multicurrency report.
         """
         ctx = ctx or {}
-        res = self._get_analytic_ledger(account, ctx=ctx)
+        raw_aml_list = self._get_analytic_ledger(account, ctx=ctx)
         #remove_value = True if ctx['lines_detail'] == 'total' else False
         if ctx['group_by'] == 'currency':
-            res2 = []
-            new_res = self.result_master(res, account, ctx)
+            res = []
+            new_res = self.result_master(raw_aml_list, account, ctx)
             for (key, value) in new_res['currency'].iteritems():
-                res2.append([value['init_balance']] + value['lines'] + [value['total']])
-            return res2 
+                res.append([value['init_balance']] + value['lines'] + [value['total']])
+            return res 
         else:
-            res2 = self.aml_group_by_keys(res, ['partner', 'currency'])
-            return self.get_group_total(res2.values(), total_str='{partner} Total in {currency}', main_group='partner', remove_lines=False)
+            res = self.aml_group_by_keys(raw_aml_list, ['partner', 'currency'])
+            return self.get_group_total(res.values(), total_str='{partner} Total in {currency}', main_group='partner', remove_lines=False)
 
     def aml_group_by_keys(self, aml_list, group_by_keys):
         """
