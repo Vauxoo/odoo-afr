@@ -402,13 +402,11 @@ class account_balance(report_sxw.rml_parse):
         res = dict(currency={}, partner={}, currency_partner={})
         for line in aml_list:
             pkey, ckey = line['partner'], line['currency']
-            res = self.init_report_line_group(line, res, 'currency', ckey)
-            res = self.init_report_line_group(line, res, 'partner', pkey)
-        
-            res = self.update_report_line(line, res, 'currency', ckey)
-            res = self.update_report_line(line, res, 'partner', pkey)
-
-            res = self.get_initial_balance(res, account, ckey, pkey, ctx=ctx.copy())
+            self.init_report_line_group(line, res, 'currency', ckey)
+            self.init_report_line_group(line, res, 'partner', pkey)
+            self.update_report_line(line, res, 'currency', ckey)
+            self.update_report_line(line, res, 'partner', pkey)
+            self.get_initial_balance(res, account, ckey, pkey, ctx=ctx.copy())
         return res
 
     def init_report_line_group(self, line, res, keyt, keyv):
