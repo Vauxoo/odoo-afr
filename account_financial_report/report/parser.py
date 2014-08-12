@@ -366,9 +366,13 @@ class account_balance(report_sxw.rml_parse):
         res = []
         if ctx['group_by'] == 'currency':
             for (key, value) in all_res['currency'].iteritems():
-                res.append([value['init_balance']] + value['lines'] +
-                        [value['total']] + [value['real_total']] +
-                        [value['xchange_total']])
+                aux_res = list()
+                aux_res.append(value['init_balance'])
+                aux_res = value['lines']
+                aux_res.append(value['total'])
+                aux_res.append(value['xchange_total'])
+                aux_res.append(value['real_total'])
+                res.append(aux_res)
             return res 
         else:
             #for (key, value) in all_res['partner'].iteritems():
