@@ -367,7 +367,8 @@ class account_balance(report_sxw.rml_parse):
         if ctx['group_by'] == 'currency':
             for (key, value) in all_res['currency'].iteritems():
                 res.append([value['init_balance']] + value['lines'] +
-                        [value['total']] + [value['real_total']])
+                        [value['total']] + [value['real_total']] +
+                        [value['xchange_total']])
             return res 
         else:
             #for (key, value) in all_res['partner'].iteritems():
@@ -418,7 +419,8 @@ class account_balance(report_sxw.rml_parse):
         @param keyv: key value. 
         @return True 
         """
-        group_dict = dict(init_balance={}, total={}, lines=[], real_total={})
+        group_dict = dict(init_balance={}, total={}, lines=[], real_total={},
+            xchange_lines=[], xchange_total={})
         if not res[keyt].get(keyv, False):
             res[keyt][keyv] = group_dict.copy()
             res[keyt][keyv]['total'] = self.create_report_line(
@@ -427,6 +429,8 @@ class account_balance(report_sxw.rml_parse):
                 'Total in {0}'.format(keyv))
             res[keyt][keyv]['init_balance'] = self.create_report_line(
                 'Initial Balance in {0}'.format(keyv))
+            res[keyt][keyv]['xchange_total'] = self.create_report_line(
+                'Exchange Differencial in {0}'.format(keyv))
         return True 
 
     def get_initial_balance(self, res, account, main_keys, ctx):
@@ -496,12 +500,19 @@ class account_balance(report_sxw.rml_parse):
         @return True
         """
         self.init_report_line_group(res, line, key, line[key])
-        res[key][line[key]]['lines'] += [line]
         update_fields_list = [
             'debit', 'credit', 'balance', 'amount_currency',
             'amount_company_currency', 'differential']
-        for field in update_fields_list:
-            res[key][line[key]]['total'][field] += line[field]
+
+        if not line['differential']:
+            res[key][line[key]]['lines'] += [line]
+            for field in update_fields_list:
+                res[key][line[key]]['total'][field] += line[field]
+        else:
+            res[key][line[key]]['xchange_lines'] += [line]
+            for field in update_fields_list:
+                res[key][line[key]]['xchange_total'][field] += line[field]
+
         return True
 
 
