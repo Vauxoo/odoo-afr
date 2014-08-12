@@ -426,16 +426,17 @@ class account_balance(report_sxw.rml_parse):
             init_balance={}, total={}, lines=[], real_total={},
             xchange_lines=[], xchange_total={}
         )
+        rows = dict(
+            total='Accumulated in {0}',
+            real_total='Total in {0}',
+            init_balance='Initial Balance in {0}',
+            xchange_total='Exchange Differencial in {0}',
+        )
         if not res[key].get(line[key], False):
             res[key][line[key]] = group_dict.copy()
-            res[key][line[key]]['total'] = self.create_report_line(
-                'Accumulated in {0}'.format(line[key]))
-            res[key][line[key]]['real_total'] = self.create_report_line(
-                'Total in {0}'.format(line[key]))
-            res[key][line[key]]['init_balance'] = self.create_report_line(
-                'Initial Balance in {0}'.format(line[key]))
-            res[key][line[key]]['xchange_total'] = self.create_report_line(
-                'Exchange Differencial in {0}'.format(line[key]))
+            for (row, title_str) in rows.iteritems(): 
+                res[key][line[key]][row] = self.create_report_line(
+                    title_str.format(line[key]))
         return True 
 
     def get_initial_balance(self, res, account, main_keys, ctx):
