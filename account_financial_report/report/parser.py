@@ -424,7 +424,7 @@ class account_balance(report_sxw.rml_parse):
         """
         group_dict = dict(
             init_balance={}, total={}, lines=[], real_total={},
-            xchange_lines=[], xchange_total={}
+            xchange_lines=[], xchange_total={}, filter_lines=[], 
         )
         rows = dict(
             total='Accumulated in {0}',
