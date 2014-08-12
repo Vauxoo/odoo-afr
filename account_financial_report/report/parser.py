@@ -426,6 +426,7 @@ class account_balance(report_sxw.rml_parse):
             init_balance={}, total={}, lines=[], real_total={},
             xchange_lines=[], xchange_total={}, filter_lines=[], 
         )
+        group_dict['partner'] = dict(total={}, lines=[])
         rows = dict(
             total='Accumulated in {0}',
             real_total='Total in {0}',
