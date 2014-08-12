@@ -361,19 +361,16 @@ class account_balance(report_sxw.rml_parse):
         """
         ctx = ctx or {}
         res = self._get_analytic_ledger(account, ctx=ctx)
-        if res:
-            remove_value = True if ctx['lines_detail'] == 'total' else False
-            if ctx['group_by'] == 'currency':
-                res2 = []
-                new_res = self.result_master(res, account, ctx)
-                for (key, value) in new_res['currency'].iteritems():
-                    res2.append([value['init_balance']] + value['lines'] + [value['total']])
-                return res2 
-            else:
-                res2 = self.aml_group_by_keys(res, ['partner', 'currency'])
-                return self.get_group_total(res2.values(), total_str='{partner} Total in {currency}', main_group='partner', remove_lines=remove_value)
+        #remove_value = True if ctx['lines_detail'] == 'total' else False
+        if ctx['group_by'] == 'currency':
+            res2 = []
+            new_res = self.result_master(res, account, ctx)
+            for (key, value) in new_res['currency'].iteritems():
+                res2.append([value['init_balance']] + value['lines'] + [value['total']])
+            return res2 
         else:
-            return []
+            res2 = self.aml_group_by_keys(res, ['partner', 'currency'])
+            return self.get_group_total(res2.values(), total_str='{partner} Total in {currency}', main_group='partner', remove_lines=False)
 
     def aml_group_by_keys(self, aml_list, group_by_keys):
         """
@@ -437,13 +434,23 @@ class account_balance(report_sxw.rml_parse):
             self.update_report_line(res, line, 'currency')
             self.update_report_line(res, line, 'partner')
         currency_ids = res['currency'].keys()
+        partner_ids = res['partner'].keys()
         for currency_id in currency_ids:
-            init_balance_line = self.get_group_total(
-                group_list=res['currency'][currency_id],
-                total_str=res['currency'][currency_id]['init_balance']['partner'],
-                main_group='currency', remove_lines=True)[0][0]
-            res['currency'][currency_id]['init_balance'].update(init_balance_line)
-            #res['partner'][partner]['init_balance'].update(init_balance_line)
+            res['currency'][currency_id]['init_balance'].update(
+                 res['currency'][currency_id]['total'])
+            res['currency'][currency_id]['total'].update(
+                {}.fromkeys([
+                    'amount_company_currency', 'amount_currency', 'balance',
+                    'credit', 'debit', 'differential'], 0.0))
+            res['currency'][currency_id]['lines'] = []
+        for partner_id in partner_ids:
+            res['partner'][partner_id]['init_balance'].update(
+                 res['partner'][partner_id]['total'])
+            res['partner'][partner_id]['total'].update(
+                {}.fromkeys([
+                    'amount_company_partner', 'amount_partner', 'balance',
+                    'credit', 'debit', 'differential'], 0.0))
+            res['partner'][partner_id]['lines'] = []
         return True
 
     def get_previous_periods(self, period_ids, ctx=None):
@@ -518,7 +525,8 @@ class account_balance(report_sxw.rml_parse):
                 'balance', 'currency', 'amount_currency',
                 'amount_company_currency', 'differential'])
             res3.update(
-                partner=total_str.format(**aml_group[0]),
+                partner=aml_group[0] and total_str.format(**aml_group[0]) or
+                'TOTAL',
                 debit=0.0, credit=0.0, balance=0.0,
                 amount_currency=0.0, amount_company_currency=0.0,
                 differential=0.0,
