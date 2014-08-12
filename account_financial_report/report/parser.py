@@ -411,11 +411,12 @@ class account_balance(report_sxw.rml_parse):
 
     def init_report_line_group(self, res, line, keyt, keyv):
         """
-        init dictionary use to define groups
+        Update the dictionary given in the paramenter res with the
+        initialization values of the group a init dictionary used to defined
+        the group.
         @param keyt: key type (the name of the column in the report).
         @param keyv: key value. 
-        @return: update the dictionary given in the paramenter res with the
-               initialization values of the group.
+        @return True 
         """
         group_dict = dict(init_balance={}, total={}, lines=[])
         if not res[keyt].get(keyv, False):
@@ -424,11 +425,13 @@ class account_balance(report_sxw.rml_parse):
                 'Total in {0}'.format(keyv))
             res[keyt][keyv]['init_balance'] = self.create_report_line(
                 'Initial Balance in {0}'.format(keyv))
-        return res
+        return True 
 
     def get_initial_balance(self, res, account, currency, partner, ctx):
         """
-        Dummy method that get the intial balance of an account.
+        This method update the res dictionary given with the inital balance of
+        the accounts.
+        @return True
         """
         ctx = ctx or {}
         if ctx['periods']:
@@ -444,7 +447,7 @@ class account_balance(report_sxw.rml_parse):
                 main_group='currency', remove_lines=True)[0][0]
             res['currency'][currency]['init_balance'].update(init_balance_line)
             res['partner'][partner]['init_balance'].update(init_balance_line)
-        return res 
+        return True
 
     def get_previous_periods(self, period_ids, ctx=None):
         """
@@ -482,7 +485,10 @@ class account_balance(report_sxw.rml_parse):
 
     def update_report_line(self, line, res, key1, key2):
         """
-        update master reult dictionary
+        Update the dictionary given in res to add the lines associaed to the
+        given group and to also update the total column while the move lines
+        have benn grouping.
+        @return True
         """
         res[key1][key2]['lines'] += [line]
         res[key1][key2]['total']['debit'] += line['debit']
@@ -491,7 +497,7 @@ class account_balance(report_sxw.rml_parse):
         res[key1][key2]['total']['amount_currency'] += line['amount_currency']
         res[key1][key2]['total']['amount_company_currency'] += line['amount_company_currency']
         res[key1][key2]['total']['differential'] += line['differential']
-        return res
+        return True
 
     def get_group_total(self, group_list, total_str, main_group, remove_lines=False):
         """
