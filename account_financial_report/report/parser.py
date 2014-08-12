@@ -433,10 +433,14 @@ class account_balance(report_sxw.rml_parse):
         """
         ctx = ctx or {}
         if ctx['periods']:
+            afr_periods = ctx['periods']
             ctx['periods'] = self.get_previous_periods(ctx['periods'], ctx)
             if res['currency'][currency]['lines']:
                 ctx['currency_id'] = res['currency'][currency]['lines'][0]['currency_id']
         res0 = self._get_analytic_ledger(account, ctx=ctx)
+        # re init the context with the original values
+        ctx['periods'] =  afr_periods
+        ctx.pop('currency_id', None)
         #print ' ----- cxt period', ctx['periods']
         #print ' ----- cxt currency_id', ctx['currency_id']
         #print ' ----- res0', res0 
