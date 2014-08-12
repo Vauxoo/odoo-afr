@@ -483,20 +483,22 @@ class account_balance(report_sxw.rml_parse):
             partner=title)
         return res
 
-    def update_report_line(self, res, line, key1, key2):
+    def update_report_line(self, res, line, keyt, keyv):
         """
         Update the dictionary given in res to add the lines associaed to the
         given group and to also update the total column while the move lines
         have benn grouping.
+        @param keyt: key type (the name of the column in the report).
+        @param keyv: key value. 
         @return True
         """
-        res[key1][key2]['lines'] += [line]
-        res[key1][key2]['total']['debit'] += line['debit']
-        res[key1][key2]['total']['credit'] += line['credit']
-        res[key1][key2]['total']['balance'] += line['balance']
-        res[key1][key2]['total']['amount_currency'] += line['amount_currency']
-        res[key1][key2]['total']['amount_company_currency'] += line['amount_company_currency']
-        res[key1][key2]['total']['differential'] += line['differential']
+        res[keyt][keyv]['lines'] += [line]
+        res[keyt][keyv]['total']['debit'] += line['debit']
+        res[keyt][keyv]['total']['credit'] += line['credit']
+        res[keyt][keyv]['total']['balance'] += line['balance']
+        res[keyt][keyv]['total']['amount_currency'] += line['amount_currency']
+        res[keyt][keyv]['total']['amount_company_currency'] += line['amount_company_currency']
+        res[keyt][keyv]['total']['differential'] += line['differential']
         return True
 
     def get_group_total(self, group_list, total_str, main_group, remove_lines=False):
