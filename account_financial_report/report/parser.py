@@ -402,19 +402,20 @@ class account_balance(report_sxw.rml_parse):
         res = dict(currency={}, partner={}, currency_partner={})
         for line in aml_list:
             pkey, ckey = line['partner'], line['currency']
-            self.init_report_line_group(line, res, 'currency', ckey)
-            self.init_report_line_group(line, res, 'partner', pkey)
+            self.init_report_line_group(res, line, 'currency', ckey)
+            self.init_report_line_group(res, line, 'partner', pkey)
             self.update_report_line(line, res, 'currency', ckey)
             self.update_report_line(line, res, 'partner', pkey)
             self.get_initial_balance(res, account, ckey, pkey, ctx=ctx.copy())
         return res
 
-    def init_report_line_group(self, line, res, keyt, keyv):
+    def init_report_line_group(self, res, line, keyt, keyv):
         """
         init dictionary use to define groups
         @param keyt: key type (the name of the column in the report).
         @param keyv: key value. 
-        @return a dictionary with the initialization values of the group.
+        @return: update the dictionary given in the paramenter res with the
+               initialization values of the group.
         """
         group_dict = dict(init_balance={}, total={}, lines=[])
         if not res[keyt].get(keyv, False):
