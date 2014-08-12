@@ -436,20 +436,19 @@ class account_balance(report_sxw.rml_parse):
         currency_ids = res['currency'].keys()
         partner_ids = res['partner'].keys()
         for currency_id in currency_ids:
+            res['currency'][currency_id]['total'].pop('partner', None)
             res['currency'][currency_id]['init_balance'].update(
                  res['currency'][currency_id]['total'])
-            res['currency'][currency_id]['total'].update(
-                {}.fromkeys([
-                    'amount_company_currency', 'amount_currency', 'balance',
-                    'credit', 'debit', 'differential'], 0.0))
+            res['currency'][currency_id]['total'] = self.create_report_line(
+                'Total in {0}'.format(currency_id))
             res['currency'][currency_id]['lines'] = []
+
         for partner_id in partner_ids:
+            res['partner'][partner_id]['total'].pop('partner', None)
             res['partner'][partner_id]['init_balance'].update(
                  res['partner'][partner_id]['total'])
-            res['partner'][partner_id]['total'].update(
-                {}.fromkeys([
-                    'amount_company_partner', 'amount_partner', 'balance',
-                    'credit', 'debit', 'differential'], 0.0))
+            res['partner'][partner_id]['total'] = self.create_report_line(
+                'Total in {0}'.format(partner_id))
             res['partner'][partner_id]['lines'] = []
         return True
 
