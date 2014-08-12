@@ -370,6 +370,9 @@ class account_balance(report_sxw.rml_parse):
                         [value['total']] + [value['real_total']])
             return res 
         else:
+            #for (key, value) in all_res['partner'].iteritems():
+            #    res.append([value['init_balance']] + value['lines'] +
+            #            [value['total']] + [value['real_total']])
             res = self.aml_group_by_keys(raw_aml_list, ['partner', 'currency'])
             return self.get_group_total(res.values(), total_str='{partner} Total in {currency}', main_group='partner', remove_lines=False)
 
