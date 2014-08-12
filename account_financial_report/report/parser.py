@@ -400,13 +400,11 @@ class account_balance(report_sxw.rml_parse):
         """
         ctx = ctx or {}
         res = dict(currency={}, partner={}, currency_partner={})
+        self.get_initial_balance(res, account, ctx=ctx.copy())
         for line in aml_list:
             pkey, ckey = line['partner'], line['currency']
-            self.init_report_line_group(res, line, 'currency', ckey)
-            self.init_report_line_group(res, line, 'partner', pkey)
             self.update_report_line(res, line, 'currency', ckey)
             self.update_report_line(res, line, 'partner', pkey)
-            self.get_initial_balance(res, account, ckey, pkey, ctx=ctx.copy())
         return res
 
     def init_report_line_group(self, res, line, keyt, keyv):
@@ -427,26 +425,26 @@ class account_balance(report_sxw.rml_parse):
                 'Initial Balance in {0}'.format(keyv))
         return True 
 
-    def get_initial_balance(self, res, account, currency, partner, ctx):
+    def get_initial_balance(self, res, account, ctx):
         """
         This method update the res dictionary given with the inital balance of
         the accounts.
         @return True
         """
         ctx = ctx or {}
-        if ctx['periods']:
-            afr_periods = ctx['periods']
-            ctx['periods'] = self.get_previous_periods(ctx['periods'], ctx)
-            if res['currency'][currency]['lines']:
-                ctx['currency_id'] = res['currency'][currency]['lines'][0]['currency_id']
-        res0 = self._get_analytic_ledger(account, ctx=ctx)
-        if res0:
+        ctx['periods'] = self.get_previous_periods(ctx['periods'], ctx)
+        previous_aml = self._get_analytic_ledger(account, ctx=ctx)
+        for line in previous_aml:
+            self.update_report_line(res, line, 'currency', line['currency'])
+            self.update_report_line(res, line, 'partner', line['partner'])
+        currency_ids = res['currency'].keys()
+        for currency_id in currency_ids:
             init_balance_line = self.get_group_total(
-                group_list=[res0],
-                total_str=res['currency'][currency]['init_balance']['partner'],
+                group_list=res['currency'][currency_id],
+                total_str=res['currency'][currency_id]['init_balance']['partner'],
                 main_group='currency', remove_lines=True)[0][0]
-            res['currency'][currency]['init_balance'].update(init_balance_line)
-            res['partner'][partner]['init_balance'].update(init_balance_line)
+            res['currency'][currency_id]['init_balance'].update(init_balance_line)
+            #res['partner'][partner]['init_balance'].update(init_balance_line)
         return True
 
     def get_previous_periods(self, period_ids, ctx=None):
@@ -492,6 +490,7 @@ class account_balance(report_sxw.rml_parse):
         @param keyv: key value. 
         @return True
         """
+        self.init_report_line_group(res, line, keyt, keyv)
         res[keyt][keyv]['lines'] += [line]
         update_fields_list = [
             'debit', 'credit', 'balance', 'amount_currency',
