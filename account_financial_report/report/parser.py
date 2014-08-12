@@ -412,11 +412,13 @@ class account_balance(report_sxw.rml_parse):
         @param keyv: key value. 
         @return True 
         """
-        group_dict = dict(init_balance={}, total={}, lines=[])
+        group_dict = dict(init_balance={}, total={}, lines=[], accum={})
         if not res[keyt].get(keyv, False):
             res[keyt][keyv] = group_dict.copy()
             res[keyt][keyv]['total'] = self.create_report_line(
                 'Total in {0}'.format(keyv))
+            res[keyt][keyv]['accum'] = self.create_report_line(
+                'Period Accumulated in {0}'.format(keyv))
             res[keyt][keyv]['init_balance'] = self.create_report_line(
                 'Initial Balance in {0}'.format(keyv))
         return True 
