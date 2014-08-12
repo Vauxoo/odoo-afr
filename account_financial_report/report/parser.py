@@ -362,10 +362,10 @@ class account_balance(report_sxw.rml_parse):
         ctx = ctx or {}
         raw_aml_list = self._get_analytic_ledger(account, ctx=ctx)
         #remove_value = True if ctx['lines_detail'] == 'total' else False
-        new_res = self.result_master(raw_aml_list, account, ctx)
+        all_res = self.result_master(raw_aml_list, account, ctx)
         if ctx['group_by'] == 'currency':
             res = []
-            for (key, value) in new_res['currency'].iteritems():
+            for (key, value) in all_res['currency'].iteritems():
                 res.append([value['init_balance']] + value['lines'] + [value['total']])
             return res 
         else:
