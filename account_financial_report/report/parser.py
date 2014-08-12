@@ -438,26 +438,20 @@ class account_balance(report_sxw.rml_parse):
         ctx = ctx or {}
         ctx['periods'] = self.get_previous_periods(ctx['periods'], ctx)
         previous_aml = self._get_analytic_ledger(account, ctx=ctx)
+        main_keys = ['currency', 'partner']
         for line in previous_aml:
-            self.update_report_line(res, line, 'currency')
-            self.update_report_line(res, line, 'partner')
-        currency_ids = res['currency'].keys()
-        partner_ids = res['partner'].keys()
-        for currency_id in currency_ids:
-            res['currency'][currency_id]['total'].pop('partner', None)
-            res['currency'][currency_id]['init_balance'].update(
-                 res['currency'][currency_id]['total'])
-            res['currency'][currency_id]['total'] = self.create_report_line(
-                'Accumulated in {0}'.format(currency_id))
-            res['currency'][currency_id]['lines'] = []
+            for key in main_keys:
+                self.update_report_line(res, line, key)
 
-        for partner_id in partner_ids:
-            res['partner'][partner_id]['total'].pop('partner', None)
-            res['partner'][partner_id]['init_balance'].update(
-                 res['partner'][partner_id]['total'])
-            res['partner'][partner_id]['total'] = self.create_report_line(
-                'Accumulated in in {0}'.format(partner_id))
-            res['partner'][partner_id]['lines'] = []
+        for key in main_keys:
+            key_ids = res[key].keys()
+            for key_id in key_ids:
+                res[key][key_id]['total'].pop('partner', None)
+                res[key][key_id]['init_balance'].update(
+                     res[key][key_id]['total'])
+                res[key][key_id]['total'] = self.create_report_line(
+                    'Accumulated in {0}'.format(key_id))
+                res[key][key_id]['lines'] = []
         return True
 
     def get_previous_periods(self, period_ids, ctx=None):
