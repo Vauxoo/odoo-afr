@@ -430,8 +430,8 @@ class account_balance(report_sxw.rml_parse):
         group_dict = dict(init_balance={}, total={}, lines=[])
         if not res[key1].get(key2, False):
             res[key1][key2] = group_dict.copy()
-            res[key1][key2]['total'] = self.create_report_line()
-            res[key1][key2]['init_balance'] = self.create_report_line()
+            res[key1][key2]['total'] = self.create_report_line('TOTAL')
+            res[key1][key2]['init_balance'] = self.create_report_line('INITIAL BALANCE')
         return res
 
     def get_initial_balance(self, res, account, currency, partner, ctx):
@@ -473,10 +473,11 @@ class account_balance(report_sxw.rml_parse):
             cr, uid, [('date_stop', '<=', date_init)], context=ctx)
         return ap_ids
 
-    def create_report_line(self):
+    def create_report_line(self, title):
         """
         return an empty dictionary to be use as a init balance line or a total
         line in the report.
+        @param title: name show in the line of the report
         """
         res = {}.fromkeys(['id', 'date', 'journal', 'partner', 'name',
             'entry', 'ref', 'debit', 'credit', 'analytic', 'period',
@@ -484,7 +485,8 @@ class account_balance(report_sxw.rml_parse):
             'amount_company_currency', 'differential'])
         res.update(
             debit=0.0, credit=0.0, balance=0.0, amount_currency=0.0,
-            amount_company_currency=0.0, differential=0.0)
+            amount_company_currency=0.0, differential=0.0,
+            partner=title)
         return res
 
     def update_report_line(self, line, res, key1, key2):
