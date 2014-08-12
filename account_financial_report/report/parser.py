@@ -367,7 +367,7 @@ class account_balance(report_sxw.rml_parse):
         if ctx['group_by'] == 'currency':
             for (key, value) in all_res['currency'].iteritems():
                 res.append([value['init_balance']] + value['lines'] +
-                        [value['total']] + [value['accum']])
+                        [value['total']] + [value['real_total']])
             return res 
         else:
             res = self.aml_group_by_keys(raw_aml_list, ['partner', 'currency'])
@@ -402,8 +402,8 @@ class account_balance(report_sxw.rml_parse):
         for line in aml_list:
             self.update_report_line(res, line, 'currency')
             self.update_report_line(res, line, 'partner')
-            self.get_accum_report_line(res, line, 'currency')
-            self.get_accum_report_line(res, line, 'partner')
+            self.get_real_total_report_line(res, line, 'currency')
+            self.get_real_total_report_line(res, line, 'partner')
         return res
 
     def init_report_line_group(self, res, line, keyt, keyv):
@@ -415,13 +415,13 @@ class account_balance(report_sxw.rml_parse):
         @param keyv: key value. 
         @return True 
         """
-        group_dict = dict(init_balance={}, total={}, lines=[], accum={})
+        group_dict = dict(init_balance={}, total={}, lines=[], real_total={})
         if not res[keyt].get(keyv, False):
             res[keyt][keyv] = group_dict.copy()
             res[keyt][keyv]['total'] = self.create_report_line(
+                'Select Periods Accumulated in {0}'.format(keyv))
+            res[keyt][keyv]['real_total'] = self.create_report_line(
                 'Total in {0}'.format(keyv))
-            res[keyt][keyv]['accum'] = self.create_report_line(
-                'Period Accumulated in {0}'.format(keyv))
             res[keyt][keyv]['init_balance'] = self.create_report_line(
                 'Initial Balance in {0}'.format(keyv))
         return True 
@@ -445,7 +445,7 @@ class account_balance(report_sxw.rml_parse):
             res['currency'][currency_id]['init_balance'].update(
                  res['currency'][currency_id]['total'])
             res['currency'][currency_id]['total'] = self.create_report_line(
-                'Total in {0}'.format(currency_id))
+                'Select Periods Accumulated in {0}'.format(currency_id))
             res['currency'][currency_id]['lines'] = []
 
         for partner_id in partner_ids:
@@ -453,7 +453,7 @@ class account_balance(report_sxw.rml_parse):
             res['partner'][partner_id]['init_balance'].update(
                  res['partner'][partner_id]['total'])
             res['partner'][partner_id]['total'] = self.create_report_line(
-                'Total in {0}'.format(partner_id))
+                'Select Periods Accumulated in in {0}'.format(partner_id))
             res['partner'][partner_id]['lines'] = []
         return True
 
@@ -508,9 +508,9 @@ class account_balance(report_sxw.rml_parse):
             res[key][line[key]]['total'][field] += line[field]
         return True
 
-    def get_accum_report_line(self, res, line, key):
+    def get_real_total_report_line(self, res, line, key):
         """
-        Update the dictionary given in res to the total accumulated of the
+        Update the dictionary given in res to the real total of the
         account.
         @param key: the name of the column in the report.
         @return True
@@ -519,7 +519,7 @@ class account_balance(report_sxw.rml_parse):
             'debit', 'credit', 'balance', 'amount_currency',
             'amount_company_currency', 'differential']
         for field in update_fields_list:
-            res[key][line[key]]['accum'][field] += \
+            res[key][line[key]]['real_total'][field] += \
             res[key][line[key]]['init_balance'][field] + res[key][line[key]]['total'][field] 
         return True
 
