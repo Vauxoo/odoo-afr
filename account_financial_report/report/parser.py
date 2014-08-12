@@ -493,12 +493,11 @@ class account_balance(report_sxw.rml_parse):
         @return True
         """
         res[keyt][keyv]['lines'] += [line]
-        res[keyt][keyv]['total']['debit'] += line['debit']
-        res[keyt][keyv]['total']['credit'] += line['credit']
-        res[keyt][keyv]['total']['balance'] += line['balance']
-        res[keyt][keyv]['total']['amount_currency'] += line['amount_currency']
-        res[keyt][keyv]['total']['amount_company_currency'] += line['amount_company_currency']
-        res[keyt][keyv]['total']['differential'] += line['differential']
+        update_fields_list = [
+            'debit', 'credit', 'balance', 'amount_currency',
+            'amount_company_currency', 'differential']
+        for field in update_fields_list:
+            res[keyt][keyv]['total'][field] += line[field]
         return True
 
     def get_group_total(self, group_list, total_str, main_group, remove_lines=False):
