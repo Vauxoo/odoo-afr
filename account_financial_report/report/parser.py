@@ -364,23 +364,11 @@ class account_balance(report_sxw.rml_parse):
         if res:
             remove_value = True if ctx['lines_detail'] == 'total' else False
             if ctx['group_by'] == 'currency':
-                #res2 = []
-                #new_res = self.result_master(res, account, ctx)
-                #for (key, value) in new_res['currency'].iteritems():
-                #    res2 += [value['init_balance']] + value['lines'] + [value['total']]
-                #pdb.set_trace()
-                #return res2
-
-                res2 = self.aml_group_by_keys(res, ['currency', 'partner'])
-                partner_total_list = self.get_group_total(
-                    res2.values(),
-                    total_str='{partner}',
-                    main_group='currency',
-                    remove_lines=remove_value)
-                return self.get_group_total(partner_total_list,
-                    main_group='currency',
-                    total_str='TOTAL IN {currency}',
-                    remove_lines=remove_value)
+                res2 = []
+                new_res = self.result_master(res, account, ctx)
+                for (key, value) in new_res['currency'].iteritems():
+                    res2.append([value['init_balance']] + value['lines'] + [value['total']])
+                return res2 
             else:
                 res2 = self.aml_group_by_keys(res, ['partner', 'currency'])
                 return self.get_group_total(res2.values(), total_str='{partner} Total in {currency}', main_group='partner', remove_lines=remove_value)
