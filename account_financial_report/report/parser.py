@@ -429,16 +429,31 @@ class account_balance(report_sxw.rml_parse):
                                 raise osv.except_osv('error', 'lines with other currencys in ' + cval_key)
                     if cval_key == 'partner':
                         for (partner_key, value4) in value3.iteritems():
-                            print ' -------- ', (partner_key)
-                            #for (pval_key, value5) in value4.iteritems():
-                            #    print ' ---------- ', pval_key
+                            print ' -------- ', (partner_key, )
+                            for (pval_key, value5) in value4.iteritems():
+                                print ' ---------- ', pval_key
+                                if isinstance(pval_key, list):
+                                    if value5:
+                                        error = [line
+                                                 for line in value5
+                                                 if line['currency'] != currency_key or line['partner'] != partner_key] 
+                                        if error:
+                                            raise osv.except_osv('error', 'lines with other currencys in ' + pval_key)
+                                if isinstance(pval_key, dict):
+                                    if value5:
+                                        error = (True if value5['currency'] !=
+                                                currency_key or
+                                                value5['partner'] !=
+                                                partner_key else False) 
+                                        if error:
+                                            raise osv.except_osv('error', 'lines with other currencys in ' + pval_key)
 
-        pprint.pprint((' ---- by currency', [
-            (currency, partner, values2)
-            for (currency, values) in all_res['currency'].iteritems()
-            for (partner, values2) in values['partner'].iteritems()
-            if partner == 'ASUSTeK'
-            ]))
+        #pprint.pprint((' ---- by currency', [
+        #    (currency, partner, values2)
+        #    for (currency, values) in all_res['currency'].iteritems()
+        #    for (partner, values2) in values['partner'].iteritems()
+        #    if partner == 'ASUSTeK'
+        #    ]))
         raise osv.except_osv('only', 'test')
 
 
@@ -563,8 +578,7 @@ class account_balance(report_sxw.rml_parse):
                             line for line in previous_aml
                             if line[subkey] == subkey_key]
                         for line in subkey_lines:
-                            #pdb.set_trace()
-                            self.update_report_line(resSK, line, key=subkey)
+                            self.update_report_line(res, line, key, [subkey], all_res=False)
                         resSK[subkey_key]['total'].pop('partner', None)
                         resSK[subkey_key]['init_balance'].update(
                              resSK[subkey_key]['total'])
@@ -612,7 +626,7 @@ class account_balance(report_sxw.rml_parse):
             partner=title)
         return res
 
-    def update_report_line(self, res, line, key, subkeys=None):
+    def update_report_line(self, res, line, key, subkeys, all_res=True):
         """
         Update the dictionary given in res to add the lines associaed to the
         given group and to also update the total column while the move lines
@@ -620,9 +634,6 @@ class account_balance(report_sxw.rml_parse):
         @param key: the name of the column in the report.
         @return True
         """
-       
-        pprint.pprint((' --- res at update', res))
-
         subkeys = subkeys or []
         self.init_report_line_group(res, line, key, subkeys)
         update_fields_list = [
@@ -630,12 +641,14 @@ class account_balance(report_sxw.rml_parse):
             'amount_company_currency', 'differential']
 
         if not line['differential']:
-            res[key][line[key]]['lines'] += [line]
+            if all_res:
+                res[key][line[key]]['lines'] += [line]
+                for field in update_fields_list:
+                    res[key][line[key]]['total'][field] += line[field]
+
             for subkey in subkeys:
                 res[key][line[key]][subkey][line[subkey]]['lines'] += [line]
-            for field in update_fields_list:
-                res[key][line[key]]['total'][field] += line[field]
-                for subkey in subkeys:
+                for field in update_fields_list:
                     res[key][line[key]][subkey][line[subkey]]['total'][field] += line[field]
         else:
             res[key][line[key]]['xchange_lines'] += [line]
