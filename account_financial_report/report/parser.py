@@ -569,6 +569,7 @@ class account_balance(report_sxw.rml_parse):
                 for field in update_fields_list:
                     res[key][key_id]['real_total'][field] = \
                         res[key][key_id]['init_balance'][field] + \
+                        res[key][key_id]['xchange_total'][field] + \
                         res[key][key_id]['total'][field]
         return True
 
