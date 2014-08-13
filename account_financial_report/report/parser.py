@@ -361,14 +361,7 @@ class account_balance(report_sxw.rml_parse):
         """
         ctx = ctx or {}
         raw_aml_list = self._get_analytic_ledger(account, ctx=ctx)
-        #remove_value = True if ctx['lines_detail'] == 'total' else False
         all_res = self.result_master(raw_aml_list, account, ctx)
-
-        #pprint.pprint(
-        #    [(currency, partner, len(values2['lines']), values2['total'])
-        #     for (currency, values) in all_res['currency'].iteritems()
-        #     for (partner, values2) in values['partner'].iteritems()])
-        #raise osv.except_osv('only', 'testing')
 
         res = []
         if ctx['group_by'] == 'currency':
