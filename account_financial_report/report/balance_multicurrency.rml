@@ -30,6 +30,10 @@
                         </tr>
                         <tr>
                             <td><para style="TOP_TITLE"></para></td>
+                            <td><para style="TITLE_CENTER">[[data['form']['target_move'].upper() or '']] ENTRIES</para></td>
+                        </tr>
+                        <tr>
+                            <td><para style="TOP_TITLE"></para></td>
                             <td><para style="TITLE_CENTER">[[data['form'] and get_month(data['form']) or '']]</para></td>
                         </tr>
                     </blockTable>
