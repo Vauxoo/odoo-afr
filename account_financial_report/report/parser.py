@@ -375,8 +375,7 @@ class account_balance(report_sxw.rml_parse):
             for (key, value) in all_res['currency'].iteritems():
                 aux_res = list()
                 aux_res.append(value['init_balance'])
-                aux_res = value['lines']
-                aux_res.append(value['total'])
+                aux_res.extend(value['filter_lines'])
                 aux_res.append(value['xchange_total'])
                 aux_res.append(value['real_total'])
                 res.append(aux_res)
@@ -419,6 +418,7 @@ class account_balance(report_sxw.rml_parse):
             for key in main_keys:
                 self.update_report_line(res, line, key)
         self.get_real_totals(res, main_keys)
+        self.get_filter_lines(res, main_keys)
         return res
 
     def init_report_line_group(self, res, line, key):
@@ -539,6 +539,17 @@ class account_balance(report_sxw.rml_parse):
 
         return True
 
+    def get_filter_lines(self, res, main_keys):
+        """
+        Update the dictionary given in res to the filter lines of every group
+        @return True
+        """
+        for key in main_keys:
+            key_ids = res[key].keys()
+            for key_id in key_ids:
+                for (partner, values) in res[key][key_id]['partner'].iteritems():
+                    res[key][key_id]['filter_lines'].append(values['total'])
+        return True
 
     def get_real_totals(self, res, main_keys):
         """
