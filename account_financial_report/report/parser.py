@@ -365,6 +365,7 @@ class account_balance(report_sxw.rml_parse):
         ctx = ctx or {}
         raw_aml_list = self._get_analytic_ledger(account, ctx=ctx)
         all_res = self.result_master(raw_aml_list, account, ctx)
+        self.check_result(all_res)
         detail_level = ctx['lines_detail']
         res = []
         if ctx['group_by'] == 'currency':
@@ -399,7 +400,6 @@ class account_balance(report_sxw.rml_parse):
                     res.append(aux_res)
         else:
             if detail_level == 'detail':
-                pdb.set_trace()
                 for (key, value) in all_res['partner'].iteritems():
                     aux_res = list()
                     aux_res.append(value['init_balance'])
@@ -409,6 +409,37 @@ class account_balance(report_sxw.rml_parse):
                     aux_res.append(value['real_total'])
                     res.append(aux_res)
         return res
+
+    def check_result(self, all_res):
+        """
+        check that the dicitionary is ok
+        """
+        for (main_key, value) in all_res.iteritems():
+            print ' -- ', main_key
+            for (currency_key, value2) in value.iteritems():
+                print ' ---- ', currency_key
+                for (cval_key, value3) in value2.iteritems():
+                    print ' ------ ', cval_key
+                    if isinstance(cval_key, list):
+                        error = [line
+                                 for line in value3
+                                 if line['currency'] != currency_key ] 
+                        if error:
+                            raise osv.except_osv('error', 'lines with other currencys in ' + cval_key)
+                    if cval_key == 'partner':
+                        for (partner_key, value4) in value3.iteritems():
+                            print ' -------- ', (partner_key)
+                            for (pval_key, value5) in value4.iteritems():
+                                print ' ---------- ', pval_key
+
+        pprint.pprint((' ---- by currency', [
+            (currency, partner, values2)
+            for (currency, values) in all_res['currency'].iteritems()
+            for (partner, values2) in values['partner'].iteritems()
+            if partner == 'ASUSTeK'
+            ]))
+        raise osv.except_osv('only', 'test')
+
 
     def aml_group_by_keys(self, aml_list, group_by_keys):
         """
@@ -435,7 +466,7 @@ class account_balance(report_sxw.rml_parse):
         """
         ctx = ctx or {}
         res = dict()
-        main_keys = {'currency': ['partner'], 'partner': ['currency']}
+        main_keys = {'currency': ['partner']}
         for key in main_keys.keys():
             res[key] = {}
         self.get_initial_balance(res, account, main_keys, ctx=ctx.copy())
