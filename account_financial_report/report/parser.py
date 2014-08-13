@@ -339,6 +339,7 @@ class account_balance(report_sxw.rml_parse):
                     'id': det['id'],
                     'date': det['date'],
                     'journal': det['diario'],
+                    'partner_id': det['partner_id'],
                     'partner': det['partner'],
                     'name': det['name'],
                     'entry': det['asiento'],
@@ -477,7 +478,7 @@ class account_balance(report_sxw.rml_parse):
         for subkey in subkeys:
             group_dict[subkey] = {}
 
-        subkey_dict = dict(total={}, lines=[])
+        subkey_dict = group_dict.copy()
         rows = dict(
             total='Accumulated in {0}',
             real_total='Total in {0}',
@@ -494,8 +495,9 @@ class account_balance(report_sxw.rml_parse):
             if not res[key][line[key]][subkey].get(line[subkey], False):
                 res[key][line[key]][subkey].update(
                     {line[subkey]: subkey_dict.copy()})
-                res[key][line[key]][subkey][line[subkey]]['total'] = self.create_report_line(
-                    '{0}'.format(line[subkey]))
+                for (row, title_str) in rows.iteritems(): 
+                    res[key][line[key]][subkey][line[subkey]][row] = self.create_report_line(
+                        title_str.format(line[subkey]))
         return True 
 
     def get_initial_balance(self, res, account, main_keys, ctx):
@@ -523,7 +525,21 @@ class account_balance(report_sxw.rml_parse):
                 res[key][key_id]['lines'] = []
                 res[key][key_id]['xchange_lines'] = []
                 for subkey in subkeys:
-                    res[key][key_id][subkey] = {}
+                    for subkey_key in res[key][key_id][subkey].keys():
+                        resSK = res[key][key_id][subkey][subkey_key]
+                        subkey_lines = [
+                            line for line in previous_aml
+                            if line[subkey] == subkey_key]
+                        for line in subkey_lines:
+                            self.update_report_line(resSK, line, key=subkey)
+                        resSK['total'].pop('partner', None)
+                        resSK['init_balance'].update(
+                             resSK['total'])
+                        resSK['total'] = self.create_report_line(
+                            'Accumulated in {0}'.format(subkey_key))
+                        resSK['lines'] = []
+                        resSK['xchange_lines'] = []
+
                 res[key][key_id]['xchange_total'] = self.create_report_line(
                     'Exchange Differencial in {0}'.format(key_id))
         return True
@@ -563,7 +579,7 @@ class account_balance(report_sxw.rml_parse):
             partner=title)
         return res
 
-    def update_report_line(self, res, line, key, subkeys):
+    def update_report_line(self, res, line, key, subkeys=None):
         """
         Update the dictionary given in res to add the lines associaed to the
         given group and to also update the total column while the move lines
@@ -571,6 +587,7 @@ class account_balance(report_sxw.rml_parse):
         @param key: the name of the column in the report.
         @return True
         """
+        subkeys = subkeys or []
         self.init_report_line_group(res, line, key, subkeys)
         update_fields_list = [
             'debit', 'credit', 'balance', 'amount_currency',
