@@ -414,12 +414,13 @@ class account_balance(report_sxw.rml_parse):
         """
         check that the dicitionary is ok
         """
+        level = '--'
         for (main_key, value) in all_res.iteritems():
-            print ' -- ', main_key
+            print level*1, main_key
             for (currency_key, value2) in value.iteritems():
-                print ' ---- ', currency_key
+                print level*2, currency_key
                 for (cval_key, value3) in value2.iteritems():
-                    print ' ------ ', cval_key
+                    print level*3, cval_key
                     if isinstance(cval_key, list):
                         if value3:
                             error = [line
@@ -429,9 +430,9 @@ class account_balance(report_sxw.rml_parse):
                                 raise osv.except_osv('error', 'lines with other currencys in ' + cval_key)
                     if cval_key == 'partner':
                         for (partner_key, value4) in value3.iteritems():
-                            print ' -------- ', (partner_key, )
+                            print level*4, (partner_key, )
                             for (pval_key, value5) in value4.iteritems():
-                                print ' ---------- ', pval_key
+                                print level*5, pval_key
                                 if isinstance(pval_key, list):
                                     if value5:
                                         error = [line
