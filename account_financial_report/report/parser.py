@@ -362,10 +362,10 @@ class account_balance(report_sxw.rml_parse):
         ctx = ctx or {}
         raw_aml_list = self._get_analytic_ledger(account, ctx=ctx)
         all_res = self.result_master(raw_aml_list, account, ctx)
-
+        detail_level = ctx['lines_detail']
         res = []
         if ctx['group_by'] == 'currency':
-            if ctx['lines_detail'] == 'detail':
+            if detail_level == 'detail':
                 for (key, value) in all_res['currency'].iteritems():
                     aux_res = list()
                     aux_res.append(value['init_balance'])
@@ -374,7 +374,7 @@ class account_balance(report_sxw.rml_parse):
                         aux_res.append(value['xchange_total'])
                     aux_res.append(value['real_total'])
                     res.append(aux_res)
-            elif ctx['lines_detail'] == 'total':
+            elif detail_level == 'total':
                 for (key, value) in all_res['currency'].iteritems():
                     aux_res = list()
                     aux_res.append(value['init_balance'])
@@ -382,7 +382,7 @@ class account_balance(report_sxw.rml_parse):
                         aux_res.append(value['xchange_total'])
                     aux_res.append(value['real_total'])
                     res.append(aux_res)
-            elif ctx['lines_detail'] == 'full':
+            elif detail_level == 'full':
                 for (key, value) in all_res['currency'].iteritems():
                     aux_res = list()
                     aux_res.append(value['init_balance'])
@@ -400,7 +400,7 @@ class account_balance(report_sxw.rml_parse):
             #    res.append([value['init_balance']] + value['lines'] +
             #            [value['total']] + [value['real_total']])
             res = self.aml_group_by_keys(raw_aml_list, ['partner', 'currency'])
-            return self.get_group_total(res.values(), total_str='{partner} Total in {currency}', main_group='partner', remove_lines=False)
+            return self.get_group_total(res.values(), total_str='{partner} Total in {currency}', main_group='partner', remove_lines=True if detail_level == 'total' else False)
 
     def aml_group_by_keys(self, aml_list, group_by_keys):
         """
