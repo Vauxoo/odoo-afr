@@ -372,13 +372,32 @@ class account_balance(report_sxw.rml_parse):
 
         res = []
         if ctx['group_by'] == 'currency':
-            for (key, value) in all_res['currency'].iteritems():
-                aux_res = list()
-                aux_res.append(value['init_balance'])
-                aux_res.extend(value['filter_lines'])
-                aux_res.append(value['xchange_total'])
-                aux_res.append(value['real_total'])
-                res.append(aux_res)
+            if ctx['lines_detail'] == 'detail':
+                for (key, value) in all_res['currency'].iteritems():
+                    aux_res = list()
+                    aux_res.append(value['init_balance'])
+                    aux_res.extend(value['filter_lines'])
+                    aux_res.append(value['xchange_total'])
+                    aux_res.append(value['real_total'])
+                    res.append(aux_res)
+            elif ctx['lines_detail'] == 'total':
+                for (key, value) in all_res['currency'].iteritems():
+                    aux_res = list()
+                    aux_res.append(value['init_balance'])
+                    aux_res.append(value['xchange_total'])
+                    aux_res.append(value['real_total'])
+                    res.append(aux_res)
+            elif ctx['lines_detail'] == 'full':
+                for (key, value) in all_res['currency'].iteritems():
+                    aux_res = list()
+                    aux_res.append(value['init_balance'])
+                    aux_res.extend(value['lines'])
+                    for line in value['filter_lines']:
+                        line['partner'] = 'Total for ' + line['partner']
+                    aux_res.extend(value['filter_lines'])
+                    aux_res.append(value['xchange_total'])
+                    aux_res.append(value['real_total'])
+                    res.append(aux_res)
             return res 
         else:
             #for (key, value) in all_res['partner'].iteritems():
