@@ -293,7 +293,6 @@ class account_balance(report_sxw.rml_parse):
     def _get_analytic_ledger(self, account, ctx=None):
         ctx = ctx or {}
         res = []
-
         if account['type'] in ('other', 'liquidity', 'receivable', 'payable'):
             #~ TODO: CUANDO EL PERIODO ESTE VACIO LLENARLO CON LOS PERIODOS DEL EJERCICIO
             #~ FISCAL, SIN LOS PERIODOS ESPECIALES
@@ -301,8 +300,10 @@ class account_balance(report_sxw.rml_parse):
             #~ periods = str(tuple(ctx['periods']))
             where = """where aml.period_id in (%s) and aa.id = %s and aml.state <> 'draft'""" % (
                 periods, account['id'])
-            if ctx.get('currency_id'):
+            if ctx.get('currency_id', False):
                 where = where + """ and aml.currency_id = {currency_id}""".format(currency_id=ctx['currency_id'])
+            if ctx.get('partner_id', False):
+                where = where + """ and aml.partner_id = {partner_id}""".format(currency_id=ctx['partner_id'])
             if ctx.get('state', 'posted') == 'posted':
                 where += "AND am.state = 'posted'"
             sql_detalle = """select aml.id as id, aj.name as diario, aa.name as descripcion,
@@ -311,6 +312,7 @@ class account_balance(report_sxw.rml_parse):
                 aml.ref as ref, 
                 (select name from res_currency where aml.currency_id = id) as currency,
                 aml.currency_id as currency_id,
+                aml.partner_id as partner_id,
                 aml.amount_currency as amount_currency,
                 case when aml.debit is null then 0.00 else aml.debit end as debit,
                 case when aml.credit is null then 0.00 else aml.credit end as credit,
@@ -394,9 +396,9 @@ class account_balance(report_sxw.rml_parse):
                         aux_res.append(value['xchange_total'])
                     aux_res.append(value['real_total'])
                     res.append(aux_res)
-            return res 
         else:
             if detail_level == 'detail':
+                pdb.set_trace()
                 for (key, value) in all_res['partner'].iteritems():
                     aux_res = list()
                     aux_res.append(value['init_balance'])
@@ -405,8 +407,7 @@ class account_balance(report_sxw.rml_parse):
                         aux_res.append(value['xchange_total'])
                     aux_res.append(value['real_total'])
                     res.append(aux_res)
-            #res = self.aml_group_by_keys(raw_aml_list, ['partner', 'currency'])
-            #return self.get_group_total(res.values(), total_str='{partner} Total in {currency}', main_group='partner', remove_lines=True if detail_level == 'total' else False)
+        return res
 
     def aml_group_by_keys(self, aml_list, group_by_keys):
         """
@@ -432,18 +433,20 @@ class account_balance(report_sxw.rml_parse):
         @return: a dictiory { (group_by_x, group_by_y, ..): [ amls.. ] } 
         """
         ctx = ctx or {}
-        res = dict(currency={}, partner={}, currency_partner={})
-        main_keys = ['currency', 'partner']
+        res = dict()
+        main_keys = {'currency': ['partner'], 'partner': ['currency']}
+        for key in main_keys.keys():
+            res[key] = {}
         self.get_initial_balance(res, account, main_keys, ctx=ctx.copy())
         for line in aml_list:
-            for key in main_keys:
-                self.update_report_line(res, line, key)
-        self.get_real_totals(res, main_keys)
+            for (key, subkeys) in main_keys.iteritems():
+                self.update_report_line(res, line, key, subkeys)
+        self.get_real_totals(res, main_keys.keys())
         self.get_filter_lines(res, main_keys)
-        self.remove_company_currency_exchange_line(res, main_keys, ctx=ctx.copy())
+        self.remove_company_currency_exchange_line(res, ctx=ctx.copy())
         return res
 
-    def remove_company_currency_exchange_line(self, res, main_keys, ctx=None):
+    def remove_company_currency_exchange_line(self, res, ctx=None):
         """
         Update the dictionary given in res. Remove the exchange line when the
         a group of currency is the company currency.
@@ -459,7 +462,7 @@ class account_balance(report_sxw.rml_parse):
         #TODO: check that this applies also for the grouping by partners.
         return True
 
-    def init_report_line_group(self, res, line, key):
+    def init_report_line_group(self, res, line, key, subkeys):
         """
         Update the dictionary given in the paramenter res with the
         initialization values of the group a init dictionary used to defined
@@ -470,9 +473,11 @@ class account_balance(report_sxw.rml_parse):
         group_dict = dict(
             init_balance={}, total={}, lines=[], real_total={},
             xchange_lines=[], xchange_total={}, filter_lines=[],
-            partner={},
         )
-        partner_dict = dict(total={}, lines=[])
+        for subkey in subkeys:
+            group_dict[subkey] = {}
+
+        subkey_dict = dict(total={}, lines=[])
         rows = dict(
             total='Accumulated in {0}',
             real_total='Total in {0}',
@@ -485,27 +490,29 @@ class account_balance(report_sxw.rml_parse):
                 res[key][line[key]][row] = self.create_report_line(
                     title_str.format(line[key]))
 
-        if not res[key][line[key]]['partner'].get(line['partner'], False):
-            res[key][line[key]]['partner'].update(
-                {line['partner']:  partner_dict.copy()})
-            res[key][line[key]]['partner'][line['partner']]['total'] = self.create_report_line(
-                '{0}'.format(line['partner']))
+        for subkey in subkeys:
+            if not res[key][line[key]][subkey].get(line[subkey], False):
+                res[key][line[key]][subkey].update(
+                    {line[subkey]: subkey_dict.copy()})
+                res[key][line[key]][subkey][line[subkey]]['total'] = self.create_report_line(
+                    '{0}'.format(line[subkey]))
         return True 
 
     def get_initial_balance(self, res, account, main_keys, ctx):
         """
         This method update the res dictionary given with the inital balance of
         the accounts.
+        @param main_keys: dictionary with the keys ans subkeys of every group.
         @return True
         """
         ctx = ctx or {}
         ctx['periods'] = self.get_previous_periods(ctx['periods'], ctx)
         previous_aml = self._get_analytic_ledger(account, ctx=ctx)
         for line in previous_aml:
-            for key in main_keys:
-                self.update_report_line(res, line, key)
+            for (key, subkeys) in main_keys.iteritems():
+                self.update_report_line(res, line, key, subkeys)
 
-        for key in main_keys:
+        for (key, subkeys) in main_keys.iteritems():
             key_ids = res[key].keys()
             for key_id in key_ids:
                 res[key][key_id]['total'].pop('partner', None)
@@ -515,7 +522,8 @@ class account_balance(report_sxw.rml_parse):
                     'Accumulated in {0}'.format(key_id))
                 res[key][key_id]['lines'] = []
                 res[key][key_id]['xchange_lines'] = []
-                res[key][key_id]['partner'] = {}
+                for subkey in subkeys:
+                    res[key][key_id][subkey] = {}
                 res[key][key_id]['xchange_total'] = self.create_report_line(
                     'Exchange Differencial in {0}'.format(key_id))
         return True
@@ -555,7 +563,7 @@ class account_balance(report_sxw.rml_parse):
             partner=title)
         return res
 
-    def update_report_line(self, res, line, key):
+    def update_report_line(self, res, line, key, subkeys):
         """
         Update the dictionary given in res to add the lines associaed to the
         given group and to also update the total column while the move lines
@@ -563,35 +571,39 @@ class account_balance(report_sxw.rml_parse):
         @param key: the name of the column in the report.
         @return True
         """
-        self.init_report_line_group(res, line, key)
+        self.init_report_line_group(res, line, key, subkeys)
         update_fields_list = [
             'debit', 'credit', 'balance', 'amount_currency',
             'amount_company_currency', 'differential']
 
         if not line['differential']:
             res[key][line[key]]['lines'] += [line]
-            res[key][line[key]]['partner'][line['partner']]['lines'] += [line]
+            for subkey in subkeys:
+                res[key][line[key]][subkey][line[subkey]]['lines'] += [line]
             for field in update_fields_list:
                 res[key][line[key]]['total'][field] += line[field]
-                res[key][line[key]]['partner'][line['partner']]['total'][field] += line[field]
-
+                for subkey in subkeys:
+                    res[key][line[key]][subkey][line[subkey]]['total'][field] += line[field]
         else:
             res[key][line[key]]['xchange_lines'] += [line]
             for field in update_fields_list:
                 res[key][line[key]]['xchange_total'][field] += line[field]
-
         return True
 
     def get_filter_lines(self, res, main_keys):
         """
         Update the dictionary given in res to the filter lines of every group
+        @param main_keys: dictionary { key: subkeys}
         @return True
         """
-        for key in main_keys:
+        for (key, subkeys) in main_keys.iteritems():
             key_ids = res[key].keys()
             for key_id in key_ids:
-                for (partner, values) in res[key][key_id]['partner'].iteritems():
-                    res[key][key_id]['filter_lines'].append(values['total'])
+                for subkey in subkeys:
+                    for (subkey_key, values) in res[key][key_id][subkey].iteritems():
+                        res[key][key_id]['filter_lines'].append(values['total'])
+        # TODO: add all the subkeys lines, need to filter this is some way to
+        # only print one subkey lines.
         return True
 
     def get_real_totals(self, res, main_keys):
