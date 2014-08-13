@@ -421,16 +421,17 @@ class account_balance(report_sxw.rml_parse):
                 for (cval_key, value3) in value2.iteritems():
                     print ' ------ ', cval_key
                     if isinstance(cval_key, list):
-                        error = [line
-                                 for line in value3
-                                 if line['currency'] != currency_key ] 
-                        if error:
-                            raise osv.except_osv('error', 'lines with other currencys in ' + cval_key)
+                        if value3:
+                            error = [line
+                                     for line in value3
+                                     if line['currency'] != currency_key ] 
+                            if error:
+                                raise osv.except_osv('error', 'lines with other currencys in ' + cval_key)
                     if cval_key == 'partner':
                         for (partner_key, value4) in value3.iteritems():
                             print ' -------- ', (partner_key)
-                            for (pval_key, value5) in value4.iteritems():
-                                print ' ---------- ', pval_key
+                            #for (pval_key, value5) in value4.iteritems():
+                            #    print ' ---------- ', pval_key
 
         pprint.pprint((' ---- by currency', [
             (currency, partner, values2)
@@ -502,14 +503,14 @@ class account_balance(report_sxw.rml_parse):
         @param key: the name of the column in the report.
         @return True 
         """
-        group_dict = dict(
+        basic = dict(
             init_balance={}, total={}, lines=[], real_total={},
             xchange_lines=[], xchange_total={}, filter_lines=[],
         )
+        group_dict = basic.copy()
         for subkey in subkeys:
             group_dict[subkey] = {}
 
-        subkey_dict = group_dict.copy()
         rows = dict(
             total='Accumulated in {0}',
             real_total='Total in {0}',
@@ -525,7 +526,7 @@ class account_balance(report_sxw.rml_parse):
         for subkey in subkeys:
             if not res[key][line[key]][subkey].get(line[subkey], False):
                 res[key][line[key]][subkey].update(
-                    {line[subkey]: subkey_dict.copy()})
+                    {line[subkey]: basic.copy()})
                 for (row, title_str) in rows.iteritems(): 
                     res[key][line[key]][subkey][line[subkey]][row] = self.create_report_line(
                         title_str.format(line[subkey]))
@@ -557,19 +558,20 @@ class account_balance(report_sxw.rml_parse):
                 res[key][key_id]['xchange_lines'] = []
                 for subkey in subkeys:
                     for subkey_key in res[key][key_id][subkey].keys():
-                        resSK = res[key][key_id][subkey][subkey_key]
+                        resSK = res[key][key_id][subkey]
                         subkey_lines = [
                             line for line in previous_aml
                             if line[subkey] == subkey_key]
                         for line in subkey_lines:
+                            #pdb.set_trace()
                             self.update_report_line(resSK, line, key=subkey)
-                        resSK['total'].pop('partner', None)
-                        resSK['init_balance'].update(
-                             resSK['total'])
-                        resSK['total'] = self.create_report_line(
+                        resSK[subkey_key]['total'].pop('partner', None)
+                        resSK[subkey_key]['init_balance'].update(
+                             resSK[subkey_key]['total'])
+                        resSK[subkey_key]['total'] = self.create_report_line(
                             'Accumulated in {0}'.format(subkey_key))
-                        resSK['lines'] = []
-                        resSK['xchange_lines'] = []
+                        resSK[subkey_key]['lines'] = []
+                        resSK[subkey_key]['xchange_lines'] = []
 
                 res[key][key_id]['xchange_total'] = self.create_report_line(
                     'Exchange Differencial in {0}'.format(key_id))
@@ -618,6 +620,9 @@ class account_balance(report_sxw.rml_parse):
         @param key: the name of the column in the report.
         @return True
         """
+       
+        pprint.pprint((' --- res at update', res))
+
         subkeys = subkeys or []
         self.init_report_line_group(res, line, key, subkeys)
         update_fields_list = [
