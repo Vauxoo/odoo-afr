@@ -491,13 +491,14 @@ class account_balance(report_sxw.rml_parse):
         ctx = ctx or {}
         ap_obj = self.pool.get('account.period')
         period_ids = isinstance(period_ids, (int, long)) and [period_ids] or period_ids
+        fy_id = ap_obj.browse(cr, uid, period_ids[0], context=ctx).fiscalyear_id.id
         early_dt_start_ap_id = ap_obj.search(
             cr, uid, [('id', 'in', period_ids)],
             context=ctx, order='date_start asc', limit=1)[0]
         date_init = ap_obj.browse(
             cr, uid, early_dt_start_ap_id, context=ctx).date_start
         ap_ids = ap_obj.search(
-            cr, uid, [('date_stop', '<=', date_init)], context=ctx)
+            cr, uid, [('date_stop', '<=', date_init,), ('fiscalyear_id', '=', fy_id)], context=ctx)
         return ap_ids
 
     def create_report_line(self, title):
