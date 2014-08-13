@@ -476,6 +476,10 @@ class account_balance(report_sxw.rml_parse):
                 res[key][key_id]['total'] = self.create_report_line(
                     'Accumulated in {0}'.format(key_id))
                 res[key][key_id]['lines'] = []
+                res[key][key_id]['xchange_lines'] = []
+                res[key][key_id]['partner'] = {}
+                res[key][key_id]['xchange_total'] = self.create_report_line(
+                    'Exchange Differencial in {0}'.format(key_id))
         return True
 
     def get_previous_periods(self, period_ids, ctx=None):
