@@ -370,14 +370,16 @@ class account_balance(report_sxw.rml_parse):
                     aux_res = list()
                     aux_res.append(value['init_balance'])
                     aux_res.extend(value['filter_lines'])
-                    aux_res.append(value['xchange_total'])
+                    if value['xchange_total']:
+                        aux_res.append(value['xchange_total'])
                     aux_res.append(value['real_total'])
                     res.append(aux_res)
             elif ctx['lines_detail'] == 'total':
                 for (key, value) in all_res['currency'].iteritems():
                     aux_res = list()
                     aux_res.append(value['init_balance'])
-                    aux_res.append(value['xchange_total'])
+                    if value['xchange_total']:
+                        aux_res.append(value['xchange_total'])
                     aux_res.append(value['real_total'])
                     res.append(aux_res)
             elif ctx['lines_detail'] == 'full':
@@ -388,7 +390,8 @@ class account_balance(report_sxw.rml_parse):
                     for line in value['filter_lines']:
                         line['partner'] = 'Total for ' + line['partner']
                     aux_res.extend(value['filter_lines'])
-                    aux_res.append(value['xchange_total'])
+                    if value['xchange_total']:
+                        aux_res.append(value['xchange_total'])
                     aux_res.append(value['real_total'])
                     res.append(aux_res)
             return res 
@@ -431,7 +434,24 @@ class account_balance(report_sxw.rml_parse):
                 self.update_report_line(res, line, key)
         self.get_real_totals(res, main_keys)
         self.get_filter_lines(res, main_keys)
+        self.remove_company_currency_exchange_line(res, main_keys, ctx=ctx.copy())
         return res
+
+    def remove_company_currency_exchange_line(self, res, main_keys, ctx=None):
+        """
+        Update the dictionary given in res. Remove the exchange line when the
+        a group of currency is the company currency.
+        @return True
+        """
+        cr, uid = self.cr, self.uid
+        ctx = ctx or {}
+        company_currency = self.pool.get('res.currency').browse(
+            cr, uid, self.get_company_currency(ctx['company_id'])).name
+        if res['currency'].get(company_currency, False):
+            res['currency'][company_currency]['xchange_lines'] = []
+            res['currency'][company_currency]['xchange_total'] = {}
+        #TODO: check that this applies also for the grouping by partners.
+        return True
 
     def init_report_line_group(self, res, line, key):
         """
@@ -1318,6 +1338,9 @@ class account_balance(report_sxw.rml_parse):
                 })
 
             result_acc.append(res2)
+
+        #pprint.pprint((' ---- report lines', result_acc))
+        #raise osv.except_osv('only', 'test')
         return result_acc
 
 report_sxw.report_sxw('report.afr.1cols',
