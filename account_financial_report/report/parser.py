@@ -534,7 +534,9 @@ class account_balance(report_sxw.rml_parse):
         self.get_initial_balance(res, account, main_keys, ctx=ctx.copy())
         for line in aml_list:
             for (key, subkeys) in main_keys.iteritems():
+                print ' --- call from result_master'
                 self.update_report_line(res, line, key, subkeys)
+                print ' --- return from result_master'
         self.check_result(res)
         self.get_real_totals(res, main_keys)
         self.get_filter_lines(res, main_keys)
@@ -606,39 +608,67 @@ class account_balance(report_sxw.rml_parse):
         previous_aml = self._get_analytic_ledger(account, ctx=ctx)
         for line in previous_aml:
             for (key, subkeys) in main_keys.iteritems():
+                print ' --- call from get_initial_balance', line['currency'], line['id'] or line
                 self.update_report_line(res, line, key, subkeys)
+                print ' --- return to get_initial_balance', line['currency'], line['id'] or line
 
+        print '\n'*3, 'CALCULANDO SUBKEYS'
+
+        #for (key, subkeys_list) in main_keys.iteritems():
+        #    for key_id in res[key].keys():
+        #        for subkey in subkeys_list:
+        #            for subkey_key in res[key][key_id][subkey].keys():
+        #                resSK = res[key][key_id][subkey]
+        #                subkey_lines = [
+        #                    line for line in previous_aml
+        #                    if line[subkey] == subkey_key]
+        #                for line in subkey_lines:
+        #                    print ' --- in subkey get_initial_balance', line['currency'], line['id'] or line
+        #                    self.update_report_line(res, line, key, [subkey], all_res=False)
+        #                    print ' --- outsubkey get_initial_balance', line['currency'], line['id'] or line
+        #                resSK[subkey_key]['total'].pop('title', None)
+        #                resSK[subkey_key]['init_balance'].update(
+        #                     resSK[subkey_key]['total'])
+        #                resSK[subkey_key]['total'] = self.create_report_line(
+        #                    'Accumulated in {0}'.format(subkey_key),
+        #                    {key: key_id, subkey: subkey_key})
+        #                resSK[subkey_key]['lines'] = []
+        #                resSK[subkey_key]['xchange_lines'] = []
+        #for (key, values1) in res.iteritems():
+        #    for (key_id, values2) in values1.iteritems():
+        #        for subkey_list in main_keys.values():
+        #            for subkey in subkey_list:
+        #                for (subkey_id, values3) in values2[subkey].iteritems():
+        #                    resSK = res[key][key_id][subkey][subkey_id]
+        #                    subkey_lines = [
+        #                        line for line in res[key][key_id]['lines']
+        #                        if line[subkey] == subkey_id]
+        #                    pprint.pprint((' ---- subkey_lines', [item['id'] for item in subkey_lines]))
+        #                    for line in subkey_lines:
+        #                        print ' --- in subkey get_initial_balance', line['currency'], line['id'] or line
+        #                        self.update_report_line(res, line, key, [subkey], all_res=False)
+        #                        print ' --- outsubkey get_initial_balance', line['currency'], line['id'] or line
+        
+        for (key, values1) in res.iteritems():
+            for (key_id, values2) in values1.iteritems():
+                for subkey_list in main_keys.values():
+                    pprint.pprint((key, key_id, [item['id'] for item in values2['lines']]))
+                    for subkey in subkey_list:
+                        for (subkey_id, values3) in values2[subkey].iteritems():
+                             pprint.pprint((key, key_id, subkey, subkey_id, [item['id'] for item in values3['lines']]))
+
+        self.check_result(res)
+
+        res2 = dict() 
         for (key, subkeys) in main_keys.iteritems():
-            key_ids = res[key].keys()
-            for key_id in key_ids:
-                res[key][key_id]['total'].pop('title', None)
-                res[key][key_id]['init_balance'].update(
+            res2[key] = {}
+            self.init_report_line_group(res2, line, key, subkeys)
+            for key_id in res2[key].keys():
+                res2[key][key_id]['init_balance'].update(
                      res[key][key_id]['total'])
-                res[key][key_id]['total'] = self.create_report_line(
-                    'Accumulated in {0}'.format(key_id), {key: key_id})
-                res[key][key_id]['lines'] = []
-                res[key][key_id]['xchange_lines'] = []
-                for subkey in subkeys:
-                    for subkey_key in res[key][key_id][subkey].keys():
-                        resSK = res[key][key_id][subkey]
-                        subkey_lines = [
-                            line for line in previous_aml
-                            if line[subkey] == subkey_key]
-                        for line in subkey_lines:
-                            self.update_report_line(res, line, key, [subkey], all_res=False)
-                        resSK[subkey_key]['total'].pop('title', None)
-                        resSK[subkey_key]['init_balance'].update(
-                             resSK[subkey_key]['total'])
-                        resSK[subkey_key]['total'] = self.create_report_line(
-                            'Accumulated in {0}'.format(subkey_key),
-                            {key: key_id, subkey: subkey_key})
-                        resSK[subkey_key]['lines'] = []
-                        resSK[subkey_key]['xchange_lines'] = []
 
-                res[key][key_id]['xchange_total'] = self.create_report_line(
-                    'Exchange Differencial in {0}'.format(key_id), {key: key_id})
-                for field in ['partner', 'currency']:
-                    res[key][key_id]['xchange_total'][field] = res[key][key_id]['init_balance'][field]
+        #res = res2
+
         return True
 
     def get_previous_periods(self, period_ids, ctx=None):
@@ -700,23 +730,29 @@ class account_balance(report_sxw.rml_parse):
         self.init_report_line_group(res, line, key, subkeys)
         update_fields_list, copy_fields_list = self.get_fields()
 
+        topprint = '{currency:<5}{id:<5}{amount_company_currency:<8}{amount_currency:<8}{differential}'
+        pprint.pprint((
+            #('- line', topprint.format(**line)),
+            #(' -----', line[key], 'total', topprint.format(**res[key][line[key]]['total'])),
+            (' -----', line[key], 'lines ', len(res[key][line[key]]['lines']), [ item['id'] for item in res[key][line[key]]['lines']]),
+            #([ topprint.format(**item) for item in res[key][line[key]]['lines']]),
+           )) 
+
         if not line['differential']:
             if all_res:
                 self._update_report_line(
                     res[key][line[key]], line, {key: line[key]})
-            for subkey in subkeys:
-                self._update_report_line(
-                    res[key][line[key]][subkey][line[subkey]], line,
-                    {key: line[key], subkey: line[subkey]})
+            else:
+                for subkey in subkeys:
+                    self._update_report_line(
+                        res[key][line[key]][subkey][line[subkey]], line,
+                        {key: line[key], subkey: line[subkey]})
 
-            if line[key] == 'USD':
-                topprint = '{currency:<5}{id:<5}{amount_company_currency:<8}{amount_currency:<8}{differential}'
-                pprint.pprint((
-                    '---- line', topprint.format(**line),
-                    ' ----- USD total', topprint.format(**res[key][line[key]]['total']),
-                    ' ----- USD lines ', [ topprint.format(**item)
-                        for item in res[key][line[key]]['lines']]
-                    ))
+            pprint.pprint((
+                #(' -- AF', line[key], 'total', topprint.format(**res[key][line[key]]['total'])),
+                (' -- AF', line[key], 'lines ', len(res[key][line[key]]['lines']), [ item['id'] for item in res[key][line[key]]['lines']]),
+                #([ topprint.format(**item) for item in res[key][line[key]]['lines']]),
+               )) 
 
         else:
             res[key][line[key]]['xchange_lines'] += [line]
