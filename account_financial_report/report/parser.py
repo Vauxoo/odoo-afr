@@ -614,8 +614,6 @@ class account_balance(report_sxw.rml_parse):
                      res[key][key_id]['total'])
                 res[key][key_id]['total'] = self.create_report_line(
                     'Accumulated in {0}'.format(key_id), {key: key_id})
-                for field in ['partner', 'currency']:
-                    res[key][key_id]['total'][field] = res[key][key_id]['init_balance'][field]
                 res[key][key_id]['lines'] = []
                 res[key][key_id]['xchange_lines'] = []
                 for subkey in subkeys:
@@ -630,9 +628,8 @@ class account_balance(report_sxw.rml_parse):
                         resSK[subkey_key]['init_balance'].update(
                              resSK[subkey_key]['total'])
                         resSK[subkey_key]['total'] = self.create_report_line(
-                            'Accumulated in {0}'.format(subkey_key))
-                        for field in ['partner', 'currency']:
-                            resSK[subkey_key]['total'][field] = resSK[subkey_key]['init_balance'][field]
+                            'Accumulated in {0}'.format(subkey_key),
+                            {key: key_id, subkey: subkey_key})
                         resSK[subkey_key]['lines'] = []
                         resSK[subkey_key]['xchange_lines'] = []
 
