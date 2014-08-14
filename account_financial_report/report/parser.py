@@ -528,6 +528,7 @@ class account_balance(report_sxw.rml_parse):
             for (key, subkeys) in main_keys.iteritems():
                 self.update_report_line(res, line, key, subkeys)
         self.get_real_totals(res, main_keys.keys())
+        self.check_result(res)
         self.get_filter_lines(res, main_keys)
         self.remove_company_currency_exchange_line(res, ctx=ctx.copy())
         return res
@@ -750,9 +751,10 @@ class account_balance(report_sxw.rml_parse):
                         res[key][key_id]['init_balance'][field] + \
                         res[key][key_id]['xchange_total'][field] + \
                         res[key][key_id]['total'][field]
-                for field in copy_fields_list:
+                for field in ['partner', 'currency']:
                     res[key][key_id]['real_total'][field] = \
-                        res[key][key_id]['init_balance'][field]
+                        res[key][key_id]['total'][field]
+                pprint.pprint(('----- res total line', res[key][key_id]['res_total']))
         return True
 
     def get_group_total(self, group_list, total_str, main_group, remove_lines=False):
