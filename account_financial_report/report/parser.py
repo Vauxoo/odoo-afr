@@ -365,7 +365,6 @@ class account_balance(report_sxw.rml_parse):
         ctx = ctx or {}
         raw_aml_list = self._get_analytic_ledger(account, ctx=ctx)
         all_res = self.result_master(raw_aml_list, account, ctx)
-        self.check_result(all_res)
         detail_level = ctx['lines_detail']
         res = []
         if ctx['group_by'] == 'currency':
@@ -398,17 +397,48 @@ class account_balance(report_sxw.rml_parse):
                         aux_res.append(value['xchange_total'])
                     aux_res.append(value['real_total'])
                     res.append(aux_res)
-        else:
+        elif ctx['group_by'] == 'partner':
+            partner_data = self.get_group_by_partner(all_res)
             if detail_level == 'detail':
-                for (key, value) in all_res['partner'].iteritems():
+                for (key, value) in partner_data.iteritems():
                     aux_res = list()
-                    aux_res.append(value['init_balance'])
+                    aux_res.extend(value['init_balance'])
                     aux_res.extend(value['filter_lines'])
                     if value['xchange_total']:
-                        aux_res.append(value['xchange_total'])
-                    aux_res.append(value['real_total'])
+                        aux_res.extend(value['xchange_total'])
+                    aux_res.extend(value['real_total'])
                     res.append(aux_res)
         return res
+
+    def get_group_by_partner(self, all_res):
+        """
+        """
+        basic = dict(
+            init_balance=[], total=[], lines=[], real_total=[],
+            xchange_lines=[], xchange_total=[], filter_lines=[],
+        )
+
+        currency_keys = all_res['currency'].keys()
+        partner_keys = set()
+        for (currency, values) in all_res['currency'].iteritems():
+            for (partner, values2) in values['partner'].iteritems():
+                partner_keys.add(partner)
+
+        partner_keys = list(partner_keys)
+        partner_data = {}.fromkeys(partner_keys)
+        for (key, value) in partner_data.iteritems():
+           partner_data[key] = basic.copy()
+
+        for (currency, values) in all_res['currency'].iteritems():
+            for (partner, values2) in values['partner'].iteritems():
+                for (field, values3) in values2.iteritems():
+                    aux_val = all_res['currency'][currency]['partner'][partner][field]
+                    if aux_val:
+                        partner_data[partner][field] += isinstance(aux_val, list) and aux_val or [aux_val] 
+
+        pprint.pprint(partner_data)
+        raise osv.except_osv('only', 'test')
+        return partner_data
 
     def check_result(self, all_res):
         """
