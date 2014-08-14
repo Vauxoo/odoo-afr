@@ -686,7 +686,7 @@ class account_balance(report_sxw.rml_parse):
         res['lines'] += [line]
         for field in update_fields_list:
             res['total'][field] += line[field]
-            res['total'].update(default_values)
+        res['total'].update(default_values)
 
     def update_report_line(self, res, line, key, subkeys, all_res=True):
         """
@@ -708,6 +708,16 @@ class account_balance(report_sxw.rml_parse):
                 self._update_report_line(
                     res[key][line[key]][subkey][line[subkey]], line,
                     {key: line[key], subkey: line[subkey]})
+
+            if line[key] == 'USD':
+                topprint = '{currency:<5}{id:<5}{amount_company_currency:<8}{amount_currency:<8}{differential}'
+                pprint.pprint((
+                    '---- line', topprint.format(**line),
+                    ' ----- USD total', topprint.format(**res[key][line[key]]['total']),
+                    ' ----- USD lines ', [ topprint.format(**item)
+                        for item in res[key][line[key]]['lines']]
+                    ))
+
         else:
             res[key][line[key]]['xchange_lines'] += [line]
             for field in update_fields_list:
