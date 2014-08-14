@@ -461,7 +461,8 @@ class account_balance(report_sxw.rml_parse):
             for (currency_key, value2) in value.iteritems():
                 print level*2, currency_key
                 for (cval_key, value3) in value2.iteritems():
-                    print level*3, cval_key
+                    print level*3, cval_key, isinstance(value3, list) and (len(value3) or '0') or '' 
+
                     if cval_key in ['lines', 'xchange_lines', 'filter_lines']:
                         error = [line
                             for line in value3
@@ -480,7 +481,7 @@ class account_balance(report_sxw.rml_parse):
                         for (partner_key, value4) in value3.iteritems():
                             print level*4, (partner_key, )
                             for (pval_key, value5) in value4.iteritems():
-                                print level*5, pval_key
+                                print level*5, pval_key, isinstance(value5, list) and (len(value5) or '0') or '' 
                                 if pval_key in ['lines', 'xchange_lines', 'filter_lines']:
                                     error = [line
                                         for line in value5
