@@ -447,6 +447,13 @@ class account_balance(report_sxw.rml_parse):
         """
         check that the dicitionary is ok
         """
+        pprint.pprint((' ---- by currency', [
+            (currency, partner, values2)
+            for (currency, values) in all_res['currency'].iteritems()
+            for (partner, values2) in values['partner'].iteritems()
+            if partner == 'ASUSTeK'
+            ]))
+
         level = '--'
         for (main_key, value) in all_res.iteritems():
             print level*1, main_key
@@ -486,12 +493,6 @@ class account_balance(report_sxw.rml_parse):
                             pprint.pprint(error)
                             raise osv.except_osv('error', 'lines with other currencys in ' + cval_key)
 
-        #pprint.pprint((' ---- by currency', [
-        #    (currency, partner, values2)
-        #    for (currency, values) in all_res['currency'].iteritems()
-        #    for (partner, values2) in values['partner'].iteritems()
-        #    if partner == 'ASUSTeK'
-        #    ]))
         raise osv.except_osv('only', 'test')
 
 
@@ -527,10 +528,10 @@ class account_balance(report_sxw.rml_parse):
         for line in aml_list:
             for (key, subkeys) in main_keys.iteritems():
                 self.update_report_line(res, line, key, subkeys)
-        self.get_real_totals(res, main_keys.keys())
-        self.check_result(res)
+        self.get_real_totals(res, main_keys)
         self.get_filter_lines(res, main_keys)
         self.remove_company_currency_exchange_line(res, ctx=ctx.copy())
+        pprint.pprint((' ---- res', res))
         return res
 
     def remove_company_currency_exchange_line(self, res, ctx=None):
@@ -670,6 +671,16 @@ class account_balance(report_sxw.rml_parse):
             title=title)
         return res
 
+    def _update_report_line(self, res, line):
+        """
+        """
+        update_fields_list, copy_fields_list = self.get_fields()
+        res['lines'] += [line]
+        for field in update_fields_list:
+            res['total'][field] += line[field]
+        for field in copy_fields_list:
+            res['total'][field] = line[field]
+
     def update_report_line(self, res, line, key, subkeys, all_res=True):
         """
         Update the dictionary given in res to add the lines associaed to the
@@ -684,18 +695,9 @@ class account_balance(report_sxw.rml_parse):
 
         if not line['differential']:
             if all_res:
-                res[key][line[key]]['lines'] += [line]
-                for field in update_fields_list:
-                    res[key][line[key]]['total'][field] += line[field]
-                for field in copy_fields_list:
-                    res[key][line[key]]['total'][field] = line[field]
-
+                self._update_report_line(res[key][line[key]], line)
             for subkey in subkeys:
-                res[key][line[key]][subkey][line[subkey]]['lines'] += [line]
-                for field in update_fields_list:
-                    res[key][line[key]][subkey][line[subkey]]['total'][field] += line[field]
-                for field in copy_fields_list:
-                    res[key][line[key]][subkey][line[subkey]]['total'][field] = line[field]
+                self._update_report_line(res[key][line[key]][subkey][line[subkey]], line)
         else:
             res[key][line[key]]['xchange_lines'] += [line]
             for field in update_fields_list:
@@ -736,25 +738,32 @@ class account_balance(report_sxw.rml_parse):
             'entry', 'ref', 'analytic', 'period', 'currency']
         return update_fields_list, copy_fields_list
 
+    def _get_real_totals(self, res, overwrite_fields):
+        """
+        """
+        update_fields_list, copy_fields_list = self.get_fields()
+        for field in update_fields_list:
+            res['real_total'][field] = \
+                res['init_balance'][field] + \
+                res['xchange_total'][field] + \
+                res['total'][field]
+        for field in overwrite_fields:
+            res['real_total'][field] = \
+                res['total'][field]
+        return res
+
     def get_real_totals(self, res, main_keys):
         """
         Update the dictionary given in res to the real total of every group
         @return True
         """
-        update_fields_list, copy_fields_list = self.get_fields()
-
-        for key in main_keys:
-            key_ids = res[key].keys()
-            for key_id in key_ids:
-                for field in update_fields_list:
-                    res[key][key_id]['real_total'][field] = \
-                        res[key][key_id]['init_balance'][field] + \
-                        res[key][key_id]['xchange_total'][field] + \
-                        res[key][key_id]['total'][field]
-                for field in ['partner', 'currency']:
-                    res[key][key_id]['real_total'][field] = \
-                        res[key][key_id]['total'][field]
-                pprint.pprint(('----- res total line', res[key][key_id]['res_total']))
+        for (key, subkey_list) in main_keys.iteritems():
+            for key_id in res[key].keys():
+                self._get_real_totals(res[key][key_id], [key])
+            for subkey in subkey_list: 
+                for subkey_key in res[key][key_id][subkey].keys():
+                    self._get_real_totals(res[key][key_id][subkey][subkey_key],
+                            [key, subkey])
         return True
 
     def get_group_total(self, group_list, total_str, main_group, remove_lines=False):
