@@ -707,7 +707,6 @@ class account_balance(report_sxw.rml_parse):
         # only print one subkey lines.
         return True
 
-    update_fields_list, copy_fields_list = self.get_fields()
     def get_fields(self):
         """
         """
