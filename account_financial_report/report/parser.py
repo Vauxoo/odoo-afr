@@ -484,7 +484,7 @@ class account_balance(report_sxw.rml_parse):
                     elif value3 and isinstance(value3, list):
                         error = [line
                                  for line in value3
-                                 if line['currency'] != currency_key ]
+                                 if line['currency'] != currency_key or line['partner'] ]
                         if error:
                             pprint.pprint(error)
                             raise osv.except_osv('error', 'lines with other currencys in ' + cval_key)
