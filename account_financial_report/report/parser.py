@@ -414,6 +414,7 @@ class account_balance(report_sxw.rml_parse):
     def get_group_by_partner(self, all_res):
         """
         """
+        self.check_result(all_res)
         basic = dict(
             init_balance=[], total=[], lines=[], real_total=[],
             xchange_lines=[], xchange_total=[], filter_lines=[],
@@ -453,33 +454,37 @@ class account_balance(report_sxw.rml_parse):
                 print level*2, currency_key
                 for (cval_key, value3) in value2.iteritems():
                     print level*3, cval_key
-                    if isinstance(cval_key, list):
-                        if value3:
-                            error = [line
-                                     for line in value3
-                                     if line['currency'] != currency_key ] 
-                            if error:
-                                raise osv.except_osv('error', 'lines with other currencys in ' + cval_key)
                     if cval_key == 'partner':
                         for (partner_key, value4) in value3.iteritems():
                             print level*4, (partner_key, )
                             for (pval_key, value5) in value4.iteritems():
                                 print level*5, pval_key
-                                if isinstance(pval_key, list):
-                                    if value5:
-                                        error = [line
-                                                 for line in value5
-                                                 if line['currency'] != currency_key or line['partner'] != partner_key] 
-                                        if error:
-                                            raise osv.except_osv('error', 'lines with other currencys in ' + pval_key)
-                                if isinstance(pval_key, dict):
-                                    if value5:
-                                        error = (True if value5['currency'] !=
-                                                currency_key or
-                                                value5['partner'] !=
-                                                partner_key else False) 
-                                        if error:
-                                            raise osv.except_osv('error', 'lines with other currencys in ' + pval_key)
+                                if value5 and isinstance(value5, list):
+                                    error = [line
+                                             for line in value5
+                                             if line['currency'] != currency_key or line['partner'] != partner_key] 
+                                    if error:
+                                        pprint.pprint(error)
+                                        raise osv.except_osv('error', 'lines with other currencys in ' + pval_key)
+                                if value5 and isinstance(value5, dict):
+                                    error = (
+                                        (value5['currency'] != currency_key or value5['partner'] != partner_key)
+                                        and value5 or '')
+                                    if error:
+                                        pprint.pprint(error)
+                                        raise osv.except_osv('error', 'lines with other currencys in ' + pval_key)
+                    elif value3 and isinstance(value3, list):
+                        error = [line
+                                 for line in value3
+                                 if line['currency'] != currency_key ]
+                        if error:
+                            pprint.pprint(error)
+                            raise osv.except_osv('error', 'lines with other currencys in ' + cval_key)
+                    elif value3 and isinstance(value3, dict):
+                        error = (value3['currency'] != currency_key and True or False) 
+                        if error:
+                            pprint.pprint(error)
+                            raise osv.except_osv('error', 'lines with other currencys in ' + cval_key)
 
         #pprint.pprint((' ---- by currency', [
         #    (currency, partner, values2)
@@ -705,10 +710,15 @@ class account_balance(report_sxw.rml_parse):
         @return True
         """
         for (key, subkeys) in main_keys.iteritems():
+            #print 'key', key
             key_ids = res[key].keys()
             for key_id in key_ids:
+                #print 'key_id', key_id
                 for subkey in subkeys:
+                    #print 'subkey', subkey
                     for (subkey_key, values) in res[key][key_id][subkey].iteritems():
+                        #print 'subkey_key', subkey_key
+                        #pprint.pprint(('values', values))
                         res[key][key_id]['filter_lines'].append(values['total'])
         # TODO: add all the subkeys lines, need to filter this is some way to
         # only print one subkey lines.
