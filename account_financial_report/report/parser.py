@@ -436,6 +436,7 @@ class account_balance(report_sxw.rml_parse):
                     aux_val = all_res['currency'][currency]['partner'][partner][field]
                     if aux_val:
                         partner_data[partner][field] += isinstance(aux_val, list) and aux_val or [aux_val] 
+                    pprint.pprint((currency, partner, field, aux_val))
 
         pprint.pprint(partner_data)
         raise osv.except_osv('only', 'test')
@@ -600,6 +601,8 @@ class account_balance(report_sxw.rml_parse):
                      res[key][key_id]['total'])
                 res[key][key_id]['total'] = self.create_report_line(
                     'Accumulated in {0}'.format(key_id))
+                for field in ['partner', 'currency']:
+                    res[key][key_id]['total'][field] = res[key][key_id]['init_balance'][field]
                 res[key][key_id]['lines'] = []
                 res[key][key_id]['xchange_lines'] = []
                 for subkey in subkeys:
@@ -615,11 +618,15 @@ class account_balance(report_sxw.rml_parse):
                              resSK[subkey_key]['total'])
                         resSK[subkey_key]['total'] = self.create_report_line(
                             'Accumulated in {0}'.format(subkey_key))
+                        for field in ['partner', 'currency']:
+                            resSK[subkey_key]['total'][field] = resSK[subkey_key]['init_balance'][field]
                         resSK[subkey_key]['lines'] = []
                         resSK[subkey_key]['xchange_lines'] = []
 
                 res[key][key_id]['xchange_total'] = self.create_report_line(
                     'Exchange Differencial in {0}'.format(key_id))
+                for field in ['partner', 'currency']:
+                    res[key][key_id]['xchange_total'][field] = res[key][key_id]['init_balance'][field]
         return True
 
     def get_previous_periods(self, period_ids, ctx=None):
@@ -735,7 +742,7 @@ class account_balance(report_sxw.rml_parse):
                         res[key][key_id]['total'][field]
                 for field in copy_fields_list:
                     res[key][key_id]['real_total'][field] = \
-                        res[key][key_id]['total'][field]
+                        res[key][key_id]['init_balance'][field]
         return True
 
     def get_group_total(self, group_list, total_str, main_group, remove_lines=False):
