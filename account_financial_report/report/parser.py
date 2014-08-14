@@ -695,13 +695,12 @@ class account_balance(report_sxw.rml_parse):
         self.init_report_line_group(res, line, key, subkeys)
         update_fields_list, copy_fields_list = self.get_fields()
 
-        topprint = '{currency:<5}{id:<5}{amount_company_currency:<8}{amount_currency:<8}{differential}'
-        pprint.pprint((
-            #('- line', topprint.format(**line)),
-            #(' -----', line[key], 'total', topprint.format(**res[key][line[key]]['total'])),
-            (' -----', line[key], 'lines ', len(res[key][line[key]]['lines']), [ item['id'] for item in res[key][line[key]]['lines']]),
+        topprint = '{amount_company_currency:<8}{amount_currency:<8}{differential}'
+        pprint.pprint(( (' -----', line[key], 'lines ', len(res[key][line[key]]['lines']), [ item['id'] for item in res[key][line[key]]['lines']], 'total', topprint.format(**res[key][line[key]]['total'])),
+            ( [( len(values['lines']), partner)
+                for (partner, values) in res[key][line[key]][subkeys[0]].iteritems()] )
             #([ topprint.format(**item) for item in res[key][line[key]]['lines']]),
-           )) 
+            )) 
 
         if not line['differential']:
             if all_res:
@@ -714,8 +713,15 @@ class account_balance(report_sxw.rml_parse):
                         {key: line[key], subkey: line[subkey]})
 
             pprint.pprint((
-                #(' -- AF', line[key], 'total', topprint.format(**res[key][line[key]]['total'])),
-                (' -- AF', line[key], 'lines ', len(res[key][line[key]]['lines']), [ item['id'] for item in res[key][line[key]]['lines']]),
+                (' -- AF', line[key], 'lines ',
+                    len(res[key][line[key]]['lines']), [ item['id'] for item in
+                        res[key][line[key]]['lines']],'total',
+                    topprint.format(**res[key][line[key]]['total'])),
+                ( [( len(values['lines']), partner, [item['id'] for item in
+                    values['lines']], topprint.format(**values['total'])  )
+                for (partner, values) in
+                res[key][line[key]][subkeys[0]].iteritems()] ),
+                ()
                 #([ topprint.format(**item) for item in res[key][line[key]]['lines']]),
                )) 
 
