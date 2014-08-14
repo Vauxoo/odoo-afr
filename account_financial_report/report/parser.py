@@ -462,7 +462,7 @@ class account_balance(report_sxw.rml_parse):
                 print level*2, currency_key
                 for (cval_key, value3) in value2.iteritems():
                     print level*3, cval_key
-                    elif cval_key in ['lines', 'xchange_lines', 'filter_lines']:
+                    if cval_key in ['lines', 'xchange_lines', 'filter_lines']:
                         error = [line
                             for line in value3
                             if line['currency'] != currency_key]
@@ -476,7 +476,7 @@ class account_balance(report_sxw.rml_parse):
                         if error:
                             pprint.pprint(error)
                             raise osv.except_osv('error', 'lines with other currencys in ' + cval_key)
-                    if cval_key == 'partner':
+                    elif cval_key == 'partner':
                         for (partner_key, value4) in value3.iteritems():
                             print level*4, (partner_key, )
                             for (pval_key, value5) in value4.iteritems():
