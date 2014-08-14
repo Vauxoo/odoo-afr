@@ -481,25 +481,22 @@ class account_balance(report_sxw.rml_parse):
                                     if error:
                                         pprint.pprint(error)
                                         raise osv.except_osv('error', 'lines with other currencys in ' + pval_key)
-                    if cval_key == 'lines':
+                    elif cval_key in ['lines', 'xchange_lines', 'filter_lines']:
                         error = [line
                             for line in value3
                             if line['currency'] != currency_key]
                         if error:
                             pprint.pprint(error)
                             raise osv.except_osv('error', 'lines with other currencys in ' + cval_key)
-                    elif value3 and isinstance(value3, list):
-                        error = [line
-                            for line in value3
-                            if line['currency'] != currency_key or line['partner'] ]
+                    elif cval_key in ['real_total', 'init_balance', 'total', 'xchange_total']:
+                        error = (
+                            (value3['currency'] != currency_key  or value3['partner'])
+                            and value3 or False)
                         if error:
                             pprint.pprint(error)
                             raise osv.except_osv('error', 'lines with other currencys in ' + cval_key)
-                    elif value3 and isinstance(value3, dict):
-                        error = (value3['currency'] != currency_key and True or False) 
-                        if error:
-                            pprint.pprint(error)
-                            raise osv.except_osv('error', 'lines with other currencys in ' + cval_key)
+                    else:
+                            raise osv.except_osv('error', 'missing case ' + cval_key)
 
         raise osv.except_osv('only', 'test')
 
