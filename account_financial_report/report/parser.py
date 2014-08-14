@@ -481,10 +481,17 @@ class account_balance(report_sxw.rml_parse):
                                     if error:
                                         pprint.pprint(error)
                                         raise osv.except_osv('error', 'lines with other currencys in ' + pval_key)
+                    if cval_key == 'lines':
+                        error = [line
+                            for line in value3
+                            if line['currency'] != currency_key]
+                        if error:
+                            pprint.pprint(error)
+                            raise osv.except_osv('error', 'lines with other currencys in ' + cval_key)
                     elif value3 and isinstance(value3, list):
                         error = [line
-                                 for line in value3
-                                 if line['currency'] != currency_key or line['partner'] ]
+                            for line in value3
+                            if line['currency'] != currency_key or line['partner'] ]
                         if error:
                             pprint.pprint(error)
                             raise osv.except_osv('error', 'lines with other currencys in ' + cval_key)
@@ -526,10 +533,10 @@ class account_balance(report_sxw.rml_parse):
         for key in main_keys.keys():
             res[key] = {}
         self.get_initial_balance(res, account, main_keys, ctx=ctx.copy())
-        self.check_result(res)
         for line in aml_list:
             for (key, subkeys) in main_keys.iteritems():
                 self.update_report_line(res, line, key, subkeys)
+        self.check_result(res)
         self.get_real_totals(res, main_keys)
         self.get_filter_lines(res, main_keys)
         self.remove_company_currency_exchange_line(res, ctx=ctx.copy())
