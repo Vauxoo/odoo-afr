@@ -154,7 +154,7 @@
 -->
                     <tr noRowsplits="1">
                         <td>
-                            <para style="TITLES_NEW">PARTNER</para>
+                            <para style="TITLES_NEW">DESCRIPTION</para>
                         </td>
                         <td>
                             <para style="TITLE_LEFT_ALIGN"></para>
@@ -220,7 +220,7 @@
                     <tr>
                         <td>
                             <para style="TITLES_NEW">
-                                <font>[[ m['partner'] ]]</font>
+                                <font>[[ m['title'] ]]</font>
                             </para>
                         </td>
                         <td>

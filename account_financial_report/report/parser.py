@@ -339,6 +339,7 @@ class account_balance(report_sxw.rml_parse):
                     'id': det['id'],
                     'date': det['date'],
                     'journal': det['diario'],
+                    'title': 'NOT DEFINED',
                     'partner_id': det['partner_id'],
                     'partner': det['partner'],
                     'name': det['name'],
@@ -391,7 +392,7 @@ class account_balance(report_sxw.rml_parse):
                     aux_res.append(value['init_balance'])
                     aux_res.extend(value['lines'])
                     for line in value['filter_lines']:
-                        line['partner'] = 'Total for ' + line['partner']
+                        line['title'] = 'Total for ' + line['partner']
                     aux_res.extend(value['filter_lines'])
                     if value['xchange_total']:
                         aux_res.append(value['xchange_total'])
@@ -538,7 +539,6 @@ class account_balance(report_sxw.rml_parse):
         if res['currency'].get(company_currency, False):
             res['currency'][company_currency]['xchange_lines'] = []
             res['currency'][company_currency]['xchange_total'] = {}
-        #TODO: check that this applies also for the grouping by partners.
         return True
 
     def init_report_line_group(self, res, line, key, subkeys):
@@ -595,7 +595,7 @@ class account_balance(report_sxw.rml_parse):
         for (key, subkeys) in main_keys.iteritems():
             key_ids = res[key].keys()
             for key_id in key_ids:
-                res[key][key_id]['total'].pop('partner', None)
+                res[key][key_id]['total'].pop('title', None)
                 res[key][key_id]['init_balance'].update(
                      res[key][key_id]['total'])
                 res[key][key_id]['total'] = self.create_report_line(
@@ -610,7 +610,7 @@ class account_balance(report_sxw.rml_parse):
                             if line[subkey] == subkey_key]
                         for line in subkey_lines:
                             self.update_report_line(res, line, key, [subkey], all_res=False)
-                        resSK[subkey_key]['total'].pop('partner', None)
+                        resSK[subkey_key]['total'].pop('title', None)
                         resSK[subkey_key]['init_balance'].update(
                              resSK[subkey_key]['total'])
                         resSK[subkey_key]['total'] = self.create_report_line(
@@ -647,14 +647,14 @@ class account_balance(report_sxw.rml_parse):
         line in the report.
         @param title: name show in the line of the report
         """
-        res = {}.fromkeys(['id', 'date', 'journal', 'partner', 'name',
+        res = {}.fromkeys(['id', 'date', 'journal', 'partner', 'title', 'name',
             'entry', 'ref', 'debit', 'credit', 'analytic', 'period',
             'balance', 'currency', 'amount_currency',
             'amount_company_currency', 'differential'], str())
         res.update(
             debit=0.0, credit=0.0, balance=0.0, amount_currency=0.0,
             amount_company_currency=0.0, differential=0.0,
-            partner=title)
+            title=title)
         return res
 
     def update_report_line(self, res, line, key, subkeys, all_res=True):
@@ -671,20 +671,30 @@ class account_balance(report_sxw.rml_parse):
             'debit', 'credit', 'balance', 'amount_currency',
             'amount_company_currency', 'differential']
 
+        copy_fields_list = [
+            'id', 'date', 'journal', 'partner', 'title', 'name',
+            'entry', 'ref', 'analytic', 'period', 'currency']
+
         if not line['differential']:
             if all_res:
                 res[key][line[key]]['lines'] += [line]
                 for field in update_fields_list:
                     res[key][line[key]]['total'][field] += line[field]
+                for field in copy_fields_list:
+                    res[key][line[key]]['total'][field] = line[field]
 
             for subkey in subkeys:
                 res[key][line[key]][subkey][line[subkey]]['lines'] += [line]
                 for field in update_fields_list:
                     res[key][line[key]][subkey][line[subkey]]['total'][field] += line[field]
+                for field in copy_fields_list:
+                    res[key][line[key]][subkey][line[subkey]]['total'][field] = line[field]
         else:
             res[key][line[key]]['xchange_lines'] += [line]
             for field in update_fields_list:
                 res[key][line[key]]['xchange_total'][field] += line[field]
+            for field in copy_fields_list:
+                res[key][line[key]]['xchange_total'][field] = line[field]
         return True
 
     def get_filter_lines(self, res, main_keys):
@@ -711,6 +721,10 @@ class account_balance(report_sxw.rml_parse):
         update_fields_list = [
             'debit', 'credit', 'balance', 'amount_currency',
             'amount_company_currency', 'differential']
+        copy_fields_list = [
+            'id', 'date', 'journal', 'partner', 'title', 'name',
+            'entry', 'ref', 'analytic', 'period', 'currency']
+
         for key in main_keys:
             key_ids = res[key].keys()
             for key_id in key_ids:
@@ -718,6 +732,9 @@ class account_balance(report_sxw.rml_parse):
                     res[key][key_id]['real_total'][field] = \
                         res[key][key_id]['init_balance'][field] + \
                         res[key][key_id]['xchange_total'][field] + \
+                        res[key][key_id]['total'][field]
+                for field in copy_fields_list:
+                    res[key][key_id]['real_total'][field] = \
                         res[key][key_id]['total'][field]
         return True
 
@@ -737,12 +754,13 @@ class account_balance(report_sxw.rml_parse):
         """
         total_group = dict()
         for aml_group in group_list:
-            res3 = {}.fromkeys(['id', 'date', 'journal', 'partner', 'name',
+            res3 = {}.fromkeys(['id', 'date', 'journal', 'partner', 'title',
+                'name',
                 'entry', 'ref', 'debit', 'credit', 'analytic', 'period',
                 'balance', 'currency', 'amount_currency',
                 'amount_company_currency', 'differential'])
             res3.update(
-                partner=aml_group[0] and total_str.format(**aml_group[0]) or
+                title=aml_group[0] and total_str.format(**aml_group[0]) or
                 'TOTAL',
                 debit=0.0, credit=0.0, balance=0.0,
                 amount_currency=0.0, amount_company_currency=0.0,
