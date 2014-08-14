@@ -447,12 +447,13 @@ class account_balance(report_sxw.rml_parse):
         """
         check that the dicitionary is ok
         """
-        pprint.pprint((' ---- by currency', [
-            (currency, partner, values2)
-            for (currency, values) in all_res['currency'].iteritems()
-            for (partner, values2) in values['partner'].iteritems()
-            if partner == 'ASUSTeK'
-            ]))
+        #pprint.pprint((all_res))
+        #pprint.pprint((' ---- by currency', [
+        #    (currency, partner, values2)
+        #    for (currency, values) in all_res['currency'].iteritems()
+        #    for (partner, values2) in values['partner'].iteritems()
+        #    if partner == 'ASUSTeK'
+        #    ]))
 
         level = '--'
         for (main_key, value) in all_res.iteritems():
@@ -525,6 +526,7 @@ class account_balance(report_sxw.rml_parse):
         for key in main_keys.keys():
             res[key] = {}
         self.get_initial_balance(res, account, main_keys, ctx=ctx.copy())
+        self.check_result(res)
         for line in aml_list:
             for (key, subkeys) in main_keys.iteritems():
                 self.update_report_line(res, line, key, subkeys)
@@ -673,15 +675,15 @@ class account_balance(report_sxw.rml_parse):
         res.update(default_values)
         return res
 
-    def _update_report_line(self, res, line):
+    def _update_report_line(self, res, line, default_values):
         """
         """
+        default_values = default_values or {}
         update_fields_list, copy_fields_list = self.get_fields()
         res['lines'] += [line]
         for field in update_fields_list:
             res['total'][field] += line[field]
-        for field in copy_fields_list:
-            res['total'][field] = line[field]
+            res['total'].update(default_values)
 
     def update_report_line(self, res, line, key, subkeys, all_res=True):
         """
@@ -697,9 +699,12 @@ class account_balance(report_sxw.rml_parse):
 
         if not line['differential']:
             if all_res:
-                self._update_report_line(res[key][line[key]], line)
+                self._update_report_line(
+                    res[key][line[key]], line, {key: line[key]})
             for subkey in subkeys:
-                self._update_report_line(res[key][line[key]][subkey][line[subkey]], line)
+                self._update_report_line(
+                    res[key][line[key]][subkey][line[subkey]], line,
+                    {key: line[key], subkey: line[subkey]})
         else:
             res[key][line[key]]['xchange_lines'] += [line]
             for field in update_fields_list:
