@@ -573,9 +573,9 @@ class account_balance(report_sxw.rml_parse):
         )
         if not res[key].get(line[key], False):
             res[key][line[key]] = group_dict.copy()
-            for (row, title_str) in rows.iteritems(): 
+            for (row, title_str) in rows.iteritems():
                 res[key][line[key]][row] = self.create_report_line(
-                    title_str.format(line[key]))
+                    title_str.format(line[key]), {key: line[key]})
 
         for subkey in subkeys:
             if not res[key][line[key]][subkey].get(line[subkey], False):
@@ -583,7 +583,7 @@ class account_balance(report_sxw.rml_parse):
                     {line[subkey]: basic.copy()})
                 for (row, title_str) in rows.iteritems(): 
                     res[key][line[key]][subkey][line[subkey]][row] = self.create_report_line(
-                        title_str.format(line[subkey]))
+                        title_str.format(line[subkey]), {key: line[key], subkey: line[subkey]})
         return True 
 
     def get_initial_balance(self, res, account, main_keys, ctx):
@@ -607,7 +607,7 @@ class account_balance(report_sxw.rml_parse):
                 res[key][key_id]['init_balance'].update(
                      res[key][key_id]['total'])
                 res[key][key_id]['total'] = self.create_report_line(
-                    'Accumulated in {0}'.format(key_id))
+                    'Accumulated in {0}'.format(key_id), {key: key_id})
                 for field in ['partner', 'currency']:
                     res[key][key_id]['total'][field] = res[key][key_id]['init_balance'][field]
                 res[key][key_id]['lines'] = []
@@ -631,7 +631,7 @@ class account_balance(report_sxw.rml_parse):
                         resSK[subkey_key]['xchange_lines'] = []
 
                 res[key][key_id]['xchange_total'] = self.create_report_line(
-                    'Exchange Differencial in {0}'.format(key_id))
+                    'Exchange Differencial in {0}'.format(key_id), {key: key_id})
                 for field in ['partner', 'currency']:
                     res[key][key_id]['xchange_total'][field] = res[key][key_id]['init_balance'][field]
         return True
@@ -655,12 +655,13 @@ class account_balance(report_sxw.rml_parse):
             cr, uid, [('date_stop', '<=', date_init,), ('fiscalyear_id', '=', fy_id)], context=ctx)
         return ap_ids
 
-    def create_report_line(self, title):
+    def create_report_line(self, title, default_values=None):
         """
         return an empty dictionary to be use as a init balance line or a total
         line in the report.
         @param title: name show in the line of the report
         """
+        default_values = default_values or {}
         res = {}.fromkeys(['id', 'date', 'journal', 'partner', 'title', 'name',
             'entry', 'ref', 'debit', 'credit', 'analytic', 'period',
             'balance', 'currency', 'amount_currency',
@@ -669,6 +670,7 @@ class account_balance(report_sxw.rml_parse):
             debit=0.0, credit=0.0, balance=0.0, amount_currency=0.0,
             amount_company_currency=0.0, differential=0.0,
             title=title)
+        res.update(default_values)
         return res
 
     def _update_report_line(self, res, line):
