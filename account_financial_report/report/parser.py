@@ -462,6 +462,20 @@ class account_balance(report_sxw.rml_parse):
                 print level*2, currency_key
                 for (cval_key, value3) in value2.iteritems():
                     print level*3, cval_key
+                    elif cval_key in ['lines', 'xchange_lines', 'filter_lines']:
+                        error = [line
+                            for line in value3
+                            if line['currency'] != currency_key]
+                        if error:
+                            pprint.pprint(error)
+                            raise osv.except_osv('error', 'lines with other currencys in ' + cval_key)
+                    elif cval_key in ['real_total', 'init_balance', 'total', 'xchange_total']:
+                        error = (
+                            (value3['currency'] != currency_key  or value3['partner'])
+                            and value3 or False)
+                        if error:
+                            pprint.pprint(error)
+                            raise osv.except_osv('error', 'lines with other currencys in ' + cval_key)
                     if cval_key == 'partner':
                         for (partner_key, value4) in value3.iteritems():
                             print level*4, (partner_key, )
@@ -481,20 +495,6 @@ class account_balance(report_sxw.rml_parse):
                                     if error:
                                         pprint.pprint(error)
                                         raise osv.except_osv('error', 'lines with other currencys in ' + pval_key)
-                    elif cval_key in ['lines', 'xchange_lines', 'filter_lines']:
-                        error = [line
-                            for line in value3
-                            if line['currency'] != currency_key]
-                        if error:
-                            pprint.pprint(error)
-                            raise osv.except_osv('error', 'lines with other currencys in ' + cval_key)
-                    elif cval_key in ['real_total', 'init_balance', 'total', 'xchange_total']:
-                        error = (
-                            (value3['currency'] != currency_key  or value3['partner'])
-                            and value3 or False)
-                        if error:
-                            pprint.pprint(error)
-                            raise osv.except_osv('error', 'lines with other currencys in ' + cval_key)
                     else:
                             raise osv.except_osv('error', 'missing case ' + cval_key)
 
