@@ -37,6 +37,7 @@ from tools.translate import _
 from osv import osv
 from openerp.tools.safe_eval import safe_eval as eval
 import pdb, pprint
+import copy
 
 
 class account_balance(report_sxw.rml_parse):
@@ -468,6 +469,8 @@ class account_balance(report_sxw.rml_parse):
                         error = [line
                             for line in value3
                             if line['currency'] != currency_key]
+                        for line in value3:
+                            print ' '*25, '\t\t{amount_company_currency}\t{amount_currency}\t{differential}'.format(**line)
                         if error:
                             pprint.pprint(error)
                             raise osv.except_osv('error', 'lines with other currencys in ' + cval_key)
@@ -487,6 +490,8 @@ class account_balance(report_sxw.rml_parse):
                                     error = [line
                                         for line in value5
                                         if line['currency'] != currency_key or line['partner'] != partner_key]
+                                    for line in value5:
+                                        print ' '*25, '\t\t{amount_company_currency}\t{amount_currency}\t{differential}'.format(**line)
                                     if error:
                                         pprint.pprint(error)
                                         raise osv.except_osv('error', 'lines with other currencys in ' + pval_key)
@@ -500,7 +505,7 @@ class account_balance(report_sxw.rml_parse):
                     else:
                             raise osv.except_osv('error', 'missing case ' + cval_key)
 
-        raise osv.except_osv('only', 'test')
+        raise osv.except_osv('its', 'ok')
 
 
     def aml_group_by_keys(self, aml_list, group_by_keys):
@@ -529,15 +534,17 @@ class account_balance(report_sxw.rml_parse):
         ctx = ctx or {}
         res = dict()
         main_keys = {'currency': ['partner']}
+
         for key in main_keys.keys():
             res[key] = {}
-        self.get_initial_balance(res, account, main_keys, ctx=ctx.copy())
-        for line in aml_list:
-            for (key, subkeys) in main_keys.iteritems():
-                print ' --- call from result_master'
-                self.update_report_line(res, line, key, subkeys)
-                print ' --- return from result_master'
+
+        resInit = copy.deepcopy(res)
+        resInit = self.get_initial_balance(resInit, account, main_keys, ctx=ctx.copy())
+        self.check_result(resInit)
+
+        res = self.fill_result(res, aml_list, main_keys)
         self.check_result(res)
+
         self.get_real_totals(res, main_keys)
         self.get_filter_lines(res, main_keys)
         self.remove_company_currency_exchange_line(res, ctx=ctx.copy())
@@ -606,35 +613,34 @@ class account_balance(report_sxw.rml_parse):
         ctx = ctx or {}
         ctx['periods'] = self.get_previous_periods(ctx['periods'], ctx)
         previous_aml = self._get_analytic_ledger(account, ctx=ctx)
-        for line in previous_aml:
+        res = self.fill_result(res, previous_aml, main_keys)
+        return res 
+
+    def fill_result(self, res, aml_list, main_keys):
+        """
+        """
+        for line in aml_list:
             for (key, subkeys) in main_keys.iteritems():
-                print ' --- call from get_initial_balance', line['currency'], line['id'] or line
+                #print ' --- ', line['currency'], line['id'] or line
                 self.update_report_line(res, line, key, subkeys)
-                print ' --- return to get_initial_balance', line['currency'], line['id'] or line
 
-        print '\n'*3, 'CALCULANDO SUBKEYS'
 
+        # TODO: delete this debug print
+        topprint = '{amount_company_currency:<8}{amount_currency:<8}{differential}'
         for (key, values1) in res.iteritems():
             for (key_id, values2) in values1.iteritems():
                 for subkey_list in main_keys.values():
-                    pprint.pprint((key, key_id, [item['id'] for item in values2['lines']]))
+                    pprint.pprint((key_id,
+                        [item['id'] for item in values2['lines']],
+                        (topprint.format(**values2['total'])),
+                        ))
                     for subkey in subkey_list:
                         for (subkey_id, values3) in values2[subkey].iteritems():
-                             pprint.pprint((key, key_id, subkey, subkey_id, [item['id'] for item in values3['lines']]))
-
-        self.check_result(res)
-
-        res2 = dict() 
-        for (key, subkeys) in main_keys.iteritems():
-            res2[key] = {}
-            self.init_report_line_group(res2, line, key, subkeys)
-            for key_id in res2[key].keys():
-                res2[key][key_id]['init_balance'].update(
-                     res[key][key_id]['total'])
-
-        #res = res2
-
-        return True
+                             pprint.pprint((key_id, subkey_id,
+                                 [item['id'] for item in values3['lines']],
+                                 (topprint.format(**values3['total'])),
+                                 ))
+        return res 
 
     def get_previous_periods(self, period_ids, ctx=None):
         """
@@ -673,17 +679,19 @@ class account_balance(report_sxw.rml_parse):
         res.update(default_values)
         return res
 
-    def _update_report_line(self, res, line, default_values):
+    def _update_report_line(self, res, line, key, subkey):
         """
         """
-        default_values = default_values or {}
         update_fields_list, copy_fields_list = self.get_fields()
-        res['lines'] += [line]
+        res[key][line[key]]['lines'] += [line]
         for field in update_fields_list:
-            res['total'][field] += line[field]
-        res['total'].update(default_values)
+            res[key][line[key]]['total'][field] += line[field]
+            res[key][line[key]][subkey][line[subkey]]['total'][field] += line[field]
+        res[key][line[key]]['total'].update({key: line[key]})
+        res[key][line[key]][subkey][line[subkey]]['total'].update({key: line[key], subkey:
+            line[subkey]})
 
-    def update_report_line(self, res, line, key, subkeys, all_res=True):
+    def update_report_line(self, res, line, key, subkeys):
         """
         Update the dictionary given in res to add the lines associaed to the
         given group and to also update the total column while the move lines
@@ -695,35 +703,31 @@ class account_balance(report_sxw.rml_parse):
         self.init_report_line_group(res, line, key, subkeys)
         update_fields_list, copy_fields_list = self.get_fields()
 
-        topprint = '{amount_company_currency:<8}{amount_currency:<8}{differential}'
-        pprint.pprint(( (' -----', line[key], 'lines ', len(res[key][line[key]]['lines']), [ item['id'] for item in res[key][line[key]]['lines']], 'total', topprint.format(**res[key][line[key]]['total'])),
-            ( [( len(values['lines']), partner)
-                for (partner, values) in res[key][line[key]][subkeys[0]].iteritems()] )
-            #([ topprint.format(**item) for item in res[key][line[key]]['lines']]),
-            )) 
+        ## TODO: comment print
+        #topprint = '{amount_company_currency:<8}{amount_currency:<8}{differential}'
+        #pprint.pprint(( (' -----', line[key], 'lines ', len(res[key][line[key]]['lines']), [ item['id'] for item in res[key][line[key]]['lines']], 'total', topprint.format(**res[key][line[key]]['total'])),
+        #    ( [( len(values['lines']), partner)
+        #        for (partner, values) in res[key][line[key]][subkeys[0]].iteritems()] )
+        #    #([ topprint.format(**item) for item in res[key][line[key]]['lines']]),
+        #    )) 
 
         if not line['differential']:
-            if all_res:
-                self._update_report_line(
-                    res[key][line[key]], line, {key: line[key]})
-            else:
-                for subkey in subkeys:
-                    self._update_report_line(
-                        res[key][line[key]][subkey][line[subkey]], line,
-                        {key: line[key], subkey: line[subkey]})
 
-            pprint.pprint((
-                (' -- AF', line[key], 'lines ',
-                    len(res[key][line[key]]['lines']), [ item['id'] for item in
-                        res[key][line[key]]['lines']],'total',
-                    topprint.format(**res[key][line[key]]['total'])),
-                ( [( len(values['lines']), partner, [item['id'] for item in
-                    values['lines']], topprint.format(**values['total'])  )
-                for (partner, values) in
-                res[key][line[key]][subkeys[0]].iteritems()] ),
-                ()
-                #([ topprint.format(**item) for item in res[key][line[key]]['lines']]),
-               )) 
+            for subkey in subkeys:
+                self._update_report_line(res, line, key, subkey)
+
+           # pprint.pprint((
+           #     (' -- F1', line[key], 'lines ',
+           #         len(res[key][line[key]]['lines']), [ item['id'] for item in
+           #             res[key][line[key]]['lines']],'total',
+           #         topprint.format(**res[key][line[key]]['total'])),
+           #     ( [( len(values['lines']), partner, [item['id'] for item in
+           #         values['lines']], topprint.format(**values['total'])  )
+           #     for (partner, values) in
+           #     res[key][line[key]][subkeys[0]].iteritems()] ),
+           #     ()
+           #     #([ topprint.format(**item) for item in res[key][line[key]]['lines']]),
+           #    )) 
 
         else:
             res[key][line[key]]['xchange_lines'] += [line]
