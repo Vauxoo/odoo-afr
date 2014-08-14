@@ -614,41 +614,6 @@ class account_balance(report_sxw.rml_parse):
 
         print '\n'*3, 'CALCULANDO SUBKEYS'
 
-        #for (key, subkeys_list) in main_keys.iteritems():
-        #    for key_id in res[key].keys():
-        #        for subkey in subkeys_list:
-        #            for subkey_key in res[key][key_id][subkey].keys():
-        #                resSK = res[key][key_id][subkey]
-        #                subkey_lines = [
-        #                    line for line in previous_aml
-        #                    if line[subkey] == subkey_key]
-        #                for line in subkey_lines:
-        #                    print ' --- in subkey get_initial_balance', line['currency'], line['id'] or line
-        #                    self.update_report_line(res, line, key, [subkey], all_res=False)
-        #                    print ' --- outsubkey get_initial_balance', line['currency'], line['id'] or line
-        #                resSK[subkey_key]['total'].pop('title', None)
-        #                resSK[subkey_key]['init_balance'].update(
-        #                     resSK[subkey_key]['total'])
-        #                resSK[subkey_key]['total'] = self.create_report_line(
-        #                    'Accumulated in {0}'.format(subkey_key),
-        #                    {key: key_id, subkey: subkey_key})
-        #                resSK[subkey_key]['lines'] = []
-        #                resSK[subkey_key]['xchange_lines'] = []
-        #for (key, values1) in res.iteritems():
-        #    for (key_id, values2) in values1.iteritems():
-        #        for subkey_list in main_keys.values():
-        #            for subkey in subkey_list:
-        #                for (subkey_id, values3) in values2[subkey].iteritems():
-        #                    resSK = res[key][key_id][subkey][subkey_id]
-        #                    subkey_lines = [
-        #                        line for line in res[key][key_id]['lines']
-        #                        if line[subkey] == subkey_id]
-        #                    pprint.pprint((' ---- subkey_lines', [item['id'] for item in subkey_lines]))
-        #                    for line in subkey_lines:
-        #                        print ' --- in subkey get_initial_balance', line['currency'], line['id'] or line
-        #                        self.update_report_line(res, line, key, [subkey], all_res=False)
-        #                        print ' --- outsubkey get_initial_balance', line['currency'], line['id'] or line
-        
         for (key, values1) in res.iteritems():
             for (key_id, values2) in values1.iteritems():
                 for subkey_list in main_keys.values():
