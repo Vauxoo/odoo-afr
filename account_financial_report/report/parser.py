@@ -547,7 +547,6 @@ class account_balance(report_sxw.rml_parse):
         res = self.update_init_balance(res, resInit, main_keys)
         self.check_result(res)
 
-        self.get_filter_lines(res, main_keys)
         self.remove_company_currency_exchange_line(res, ctx=ctx.copy())
         pprint.pprint((' ---- res', res))
         return res
@@ -652,6 +651,7 @@ class account_balance(report_sxw.rml_parse):
                 self.update_report_line(res, line, key, subkeys)
 
         res = self.get_real_totals(res, main_keys)
+        res = self.get_filter_lines(res, main_keys)
 
         # TODO: delete this debug print
         topprint = '{amount_company_currency:<8}{amount_currency:<8}{differential}'
@@ -777,7 +777,7 @@ class account_balance(report_sxw.rml_parse):
                         res[key][key_id]['filter_lines'].append(values['total'])
         # TODO: add all the subkeys lines, need to filter this is some way to
         # only print one subkey lines.
-        return True
+        return res
 
     def get_fields(self):
         """
