@@ -404,6 +404,8 @@ class account_balance(report_sxw.rml_parse):
             if detail_level == 'detail':
                 for (key, value) in partner_data.iteritems():
                     aux_res = list()
+                    aux_res.append(self.create_report_line(
+                        'Resume of partner {0}'.format(key), {'partner': key}))
                     aux_res.extend(value['init_balance'])
                     aux_res.extend(value['filter_lines'])
                     if value['xchange_total']:
