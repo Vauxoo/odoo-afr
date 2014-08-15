@@ -340,7 +340,7 @@ class account_balance(report_sxw.rml_parse):
                     'id': det['id'],
                     'date': det['date'],
                     'journal': det['diario'],
-                    'title': 'NOT DEFINED',
+                    'title': '\t\t{date:<15}\t\t{periodo:<12}\t\t{partner:<150}\t\t{asiento:<20}'.format(**det),
                     'partner_id': det['partner_id'],
                     'partner': det['partner'],
                     'name': det['name'],
@@ -768,6 +768,7 @@ class account_balance(report_sxw.rml_parse):
                         #print 'subkey_key', subkey_key
                         #pprint.pprint(('values', values))
                         res[key][key_id]['filter_lines'].append(values['total'])
+                        res[key][key_id][subkey][subkey_key]['filter_lines'] = res[key][key_id][subkey][subkey_key]['lines']
         # TODO: add all the subkeys lines, need to filter this is some way to
         # only print one subkey lines.
         return res
