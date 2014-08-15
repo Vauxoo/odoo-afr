@@ -558,12 +558,12 @@ class account_balance(report_sxw.rml_parse):
         for (key, values1) in resInit.iteritems():
             for (key_id, values2) in values1.iteritems():
                 line = {key: key_id}
-                self.init_report_line_group(res, line, key, [])
+                res = self.init_report_line_group(res, line, key, [])
                 for subkey_list in main_keys.values():
                     for subkey in subkey_list:
                         for (subkey_id, values3) in values2[subkey].iteritems():
                             line = {key: key_id, subkey: subkey_id}
-                            self.init_report_line_group(res, line, key, [subkey])
+                            res = self.init_report_line_group(res, line, key, [subkey])
 
         for (key, values1) in resInit.iteritems():
             for (key_id, values2) in values1.iteritems():
@@ -633,7 +633,7 @@ class account_balance(report_sxw.rml_parse):
                 for (row, title_str) in rows.iteritems(): 
                     res[key][line[key]][subkey][line[subkey]][row] = self.create_report_line(
                         title_str.format(line[subkey]), {key: line[key], subkey: line[subkey]})
-        return True 
+        return res 
 
     def get_initial_balance(self, res, account, main_keys, ctx):
         """
@@ -720,6 +720,7 @@ class account_balance(report_sxw.rml_parse):
         """
         update_fields_list, copy_fields_list = self.get_fields()
         res[key][line[key]][line_field] += [line]
+        res[key][line[key]][subkey][line[subkey]][line_field] += [line]
         for field in update_fields_list:
             res[key][line[key]][total_field][field] += line[field]
             res[key][line[key]][subkey][line[subkey]][total_field][field] += line[field]
@@ -736,9 +737,7 @@ class account_balance(report_sxw.rml_parse):
         @return True
         """
         subkeys = subkeys or []
-        self.init_report_line_group(res, line, key, subkeys)
-        update_fields_list, copy_fields_list = self.get_fields()
-
+        res = self.init_report_line_group(res, line, key, subkeys)
         if not line['differential']:
             for subkey in subkeys:
                 self._update_report_line(res, line, key, subkey, 'lines', 'total')
