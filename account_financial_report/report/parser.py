@@ -547,7 +547,6 @@ class account_balance(report_sxw.rml_parse):
         res = self.update_init_balance(res, resInit, main_keys)
         self.check_result(res)
 
-        self.get_real_totals(res, main_keys)
         self.get_filter_lines(res, main_keys)
         self.remove_company_currency_exchange_line(res, ctx=ctx.copy())
         pprint.pprint((' ---- res', res))
@@ -652,6 +651,7 @@ class account_balance(report_sxw.rml_parse):
                 #print ' --- ', line['currency'], line['id'] or line
                 self.update_report_line(res, line, key, subkeys)
 
+        res = self.get_real_totals(res, main_keys)
 
         # TODO: delete this debug print
         topprint = '{amount_company_currency:<8}{amount_currency:<8}{differential}'
@@ -820,7 +820,7 @@ class account_balance(report_sxw.rml_parse):
                 for subkey_key in res[key][key_id][subkey].keys():
                     self._get_real_totals(res[key][key_id][subkey][subkey_key],
                             [key, subkey])
-        return True
+        return res
 
     def get_group_total(self, group_list, total_str, main_group, remove_lines=False):
         """
