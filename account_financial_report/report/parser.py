@@ -758,11 +758,8 @@ class account_balance(report_sxw.rml_parse):
            #    )) 
 
         else:
-            res[key][line[key]]['xchange_lines'] += [line]
-            for field in update_fields_list:
-                res[key][line[key]]['xchange_total'][field] += line[field]
-            for field in copy_fields_list:
-                res[key][line[key]]['xchange_total'][field] = line[field]
+            for subkey in subkeys:
+                self._update_report_line(res, line, key, subkey, 'xchange_lines', 'xchange_total')
         return True
 
     def get_filter_lines(self, res, main_keys):
