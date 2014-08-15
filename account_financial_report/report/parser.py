@@ -36,6 +36,8 @@ from tools import config
 from tools.translate import _
 from osv import osv
 from openerp.tools.safe_eval import safe_eval as eval
+import pdb, pprint
+import copy
 
 
 class account_balance(report_sxw.rml_parse):
@@ -110,7 +112,8 @@ class account_balance(report_sxw.rml_parse):
             name = _('Balance Sheet')
         elif form['inf_type'] == 'IS':
             name = _('Income Statement')
-
+        if form['columns'] == 'currency':
+            name = _('End Balance Multicurrency')
         return name
 
     def get_month(self, form):
@@ -288,9 +291,9 @@ class account_balance(report_sxw.rml_parse):
             unknown and res.append(unknown)
         return res
 
-    def _get_analytic_ledger(self, account, ctx={}):
+    def _get_analytic_ledger(self, account, ctx=None):
+        ctx = ctx or {}
         res = []
-
         if account['type'] in ('other', 'liquidity', 'receivable', 'payable'):
             #~ TODO: CUANDO EL PERIODO ESTE VACIO LLENARLO CON LOS PERIODOS DEL EJERCICIO
             #~ FISCAL, SIN LOS PERIODOS ESPECIALES
@@ -298,12 +301,20 @@ class account_balance(report_sxw.rml_parse):
             #~ periods = str(tuple(ctx['periods']))
             where = """where aml.period_id in (%s) and aa.id = %s and aml.state <> 'draft'""" % (
                 periods, account['id'])
+            if ctx.get('currency_id', False):
+                where = where + """ and aml.currency_id = {currency_id}""".format(currency_id=ctx['currency_id'])
+            if ctx.get('partner_id', False):
+                where = where + """ and aml.partner_id = {partner_id}""".format(currency_id=ctx['partner_id'])
             if ctx.get('state', 'posted') == 'posted':
                 where += "AND am.state = 'posted'"
             sql_detalle = """select aml.id as id, aj.name as diario, aa.name as descripcion,
                 (select name from res_partner where aml.partner_id = id) as partner,
-                aa.code as cuenta, aml.name as name,
-                aml.ref as ref,
+                aa.code as cuenta, aa.id as aa_id, aml.name as name,
+                aml.ref as ref, 
+                (select name from res_currency where aml.currency_id = id) as currency,
+                aml.currency_id as currency_id,
+                aml.partner_id as partner_id,
+                aml.amount_currency as amount_currency,
                 case when aml.debit is null then 0.00 else aml.debit end as debit,
                 case when aml.credit is null then 0.00 else aml.credit end as credit,
                 (select code from account_analytic_account where  aml.analytic_account_id = id) as analitica,
@@ -319,12 +330,18 @@ class account_balance(report_sxw.rml_parse):
             self.cr.execute(sql_detalle)
             resultat = self.cr.dictfetchall()
             balance = account['balanceinit']
+            company_currency = self.pool.get('res.currency').browse(
+                self.cr, self.uid, self.get_company_currency(ctx['company_id'])).name
             for det in resultat:
                 balance += det['debit'] - det['credit']
                 res.append({
+                    'aa_id': det['aa_id'],
+                    'cuenta': det['cuenta'],
                     'id': det['id'],
                     'date': det['date'],
                     'journal': det['diario'],
+                    'title': '\t\t{date:<15}\t\t{periodo:<12}\t\t{partner:<150}\t\t{asiento:<20}'.format(**det),
+                    'partner_id': det['partner_id'],
                     'partner': det['partner'],
                     'name': det['name'],
                     'entry': det['asiento'],
@@ -334,8 +351,507 @@ class account_balance(report_sxw.rml_parse):
                     'analytic': det['analitica'],
                     'period': det['periodo'],
                     'balance': balance,
+                    'currency': det['currency'] or company_currency,
+                    'currency_id': det['currency_id'],
+                    'amount_currency': det['amount_currency'],
+                    'amount_company_currency': det['debit'] - det['credit'] if
+                    det['currency'] == None else 0.0,
+                    'differential': det['debit'] - det['credit'] if det['currency'] != None and not det['amount_currency'] else 0.0,
                 })
         return res
+
+    def _get_balance_multicurrency(self, account, ctx=None):
+        """
+        @return the lines of the balance multicurrency report.
+        """
+        ctx = ctx or {}
+        raw_aml_list = self._get_analytic_ledger(account, ctx=ctx)
+        all_res = self.result_master(raw_aml_list, account, ctx)
+        detail_level = ctx['lines_detail']
+        res = []
+        if ctx['group_by'] == 'currency':
+            if detail_level == 'detail':
+                for (key, value) in all_res['currency'].iteritems():
+                    aux_res = list()
+                    aux_res.append(self.create_report_line(
+                        'Resume Currency {0}'.format(key), {'currency': key}))
+                    aux_res.append(value['init_balance'])
+                    aux_res.extend(value['filter_lines'])
+                    if value['xchange_total']:
+                        aux_res.append(value['xchange_total'])
+                    aux_res.append(value['real_total'])
+                    res.append(aux_res)
+            elif detail_level == 'total':
+                for (key, value) in all_res['currency'].iteritems():
+                    aux_res = list()
+                    aux_res.append(self.create_report_line(
+                        'Resume Currency {0}'.format(key), {'currency': key}))
+                    aux_res.append(value['init_balance'])
+                    if value['xchange_total']:
+                        aux_res.append(value['xchange_total'])
+                    aux_res.append(value['real_total'])
+                    res.append(aux_res)
+            elif detail_level == 'full':
+                for (key, value) in all_res['currency'].iteritems():
+                    aux_res = list()
+                    aux_res.append(self.create_report_line(
+                        'Resume Currency {0}'.format(key), {'currency': key}))
+                    aux_res.append(value['init_balance'])
+                    aux_res.extend(value['lines'])
+                    for line in value['filter_lines']:
+                        line['title'] = 'Total for ' + line['partner']
+                    aux_res.extend(value['filter_lines'])
+                    if value['xchange_total']:
+                        aux_res.append(value['xchange_total'])
+                    aux_res.append(value['real_total'])
+                    res.append(aux_res)
+        elif ctx['group_by'] == 'partner':
+            partner_data = self.get_group_by_partner(all_res)
+            if detail_level in ['detail', 'full']:
+                for (key, value) in partner_data.iteritems():
+                    aux_res = list()
+                    aux_res.append(self.create_report_line(
+                        'Resume of partner {0}'.format(key), {'partner': key}))
+                    aux_res.extend(value['init_balance'])
+                    aux_res.extend(value['filter_lines'])
+                    if value['xchange_total']:
+                        aux_res.extend(value['xchange_total'])
+                    aux_res.extend(value['real_total'])
+                    res.append(aux_res)
+            if detail_level == 'total':
+                for (key, value) in partner_data.iteritems():
+                    aux_res = list()
+                    aux_res.append(self.create_report_line(
+                        'Resume of partner {0}'.format(key), {'partner': key}))
+                    aux_res.extend(value['init_balance'])
+                    if value['xchange_total']:
+                        aux_res.extend(value['xchange_total'])
+                    aux_res.extend(value['real_total'])
+                    res.append(aux_res)
+        return res
+
+    def get_group_by_partner(self, all_res):
+        """
+        """
+        basic = dict(
+            init_balance=[], total=[], lines=[], real_total=[],
+            xchange_lines=[], xchange_total=[], filter_lines=[],
+        )
+
+        currency_keys = all_res['currency'].keys()
+        partner_keys = set()
+        for (currency, values) in all_res['currency'].iteritems():
+            for (partner, values2) in values['partner'].iteritems():
+                partner_keys.add(partner)
+
+        partner_keys = list(partner_keys)
+        partner_data = {}.fromkeys(partner_keys)
+        for (key, value) in partner_data.iteritems():
+           partner_data[key] = copy.deepcopy(basic)
+
+        for (currency, values) in all_res['currency'].iteritems():
+            for (partner, values2) in values['partner'].iteritems():
+                for (field, values3) in values2.iteritems():
+                    aux_val = copy.deepcopy(all_res['currency'][currency]['partner'][partner][field])
+                    if aux_val:
+                        partner_data[partner][field] += isinstance(aux_val, list) and aux_val or [aux_val] 
+        return partner_data
+
+    def check_result(self, all_res):
+        """
+        check that the dicitionary is ok
+        """
+        #pprint.pprint((all_res))
+        #pprint.pprint((' ---- by currency', [
+        #    (currency, partner, values2)
+        #    for (currency, values) in all_res['currency'].iteritems()
+        #    for (partner, values2) in values['partner'].iteritems()
+        #    if partner == 'ASUSTeK'
+        #    ]))
+
+        level = '--'
+        for (main_key, value) in all_res.iteritems():
+            print level*1, main_key
+            for (currency_key, value2) in value.iteritems():
+                print level*2, currency_key
+                for (cval_key, value3) in value2.iteritems():
+                    print level*3, '{0: <20}'.format(cval_key), isinstance(value3, list) and (len(value3) or '0') or cval_key != 'partner' and (value3 and '\t\t{amount_company_currency}\t{amount_currency}\t{differential}'.format(**value3) or '') or ''
+                    
+
+                    if cval_key in ['lines', 'xchange_lines', 'filter_lines']:
+                        error = [line
+                            for line in value3
+                            if line
+                            if line['currency'] != currency_key or value3.count(line) != 1]
+                        for line in value3:
+                            print ' '*25, '\t\t{amount_company_currency}\t{amount_currency}\t{differential}'.format(**line)
+                        if error:
+                            pprint.pprint(error)
+                            raise osv.except_osv('error', 'lines with other currencys in ' + cval_key)
+                    elif cval_key in ['real_total', 'init_balance', 'total', 'xchange_total']:
+                        error = (
+                            value3 and (value3['currency'] != currency_key  or value3['partner'])
+                            and value3 or False)
+                        if error:
+                            pprint.pprint(error)
+                            raise osv.except_osv('error', 'lines with other currencys in ' + cval_key)
+                    elif cval_key == 'partner':
+                        for (partner_key, value4) in value3.iteritems():
+                            print level*4, (partner_key, )
+                            for (pval_key, value5) in value4.iteritems():
+                                print level*5, '{0: <15}'.format(pval_key), isinstance(value5, list) and (len(value5) or '0') or (value5 and '\t\t{amount_company_currency}\t{amount_currency}\t{differential}'.format(**value5) or '')
+                                if pval_key in ['lines', 'xchange_lines', 'filter_lines']:
+                                    error = [line
+                                        for line in value5
+                                        if line
+                                        if line['currency'] != currency_key or line['partner'] != partner_key or value5.count(line) != 1]
+                                    for line in value5:
+                                        print ' '*25, '\t\t{amount_company_currency}\t{amount_currency}\t{differential}'.format(**line)
+                                    if error:
+                                        pprint.pprint(error)
+                                        raise osv.except_osv('error', 'lines with other currencys in ' + pval_key)
+                                elif pval_key in ['real_total', 'init_balance', 'total', 'xchange_total']:
+                                    error = (
+                                        value5 and (value5['currency'] != currency_key or value5['partner'] != partner_key)
+                                        and value5 or False)
+                                    if error:
+                                        pprint.pprint(error)
+                                        raise osv.except_osv('error', 'lines with other currencys in ' + pval_key)
+                    else:
+                            raise osv.except_osv('error', 'missing case ' + cval_key)
+
+        raise osv.except_osv('its', 'ok')
+
+
+    def aml_group_by_keys(self, aml_list, group_by_keys):
+        """
+        given a list of amls return a dictionary of groups given for
+        group_by_keys
+        @param aml_list: and aml list is a list of dictionaries where every
+        dictionary represent a report line.
+        @param group_by_keys: a list of the aml keys that you want to group
+        @return: a dictiory { (group_by_x, group_by_y, ..): [ amls.. ] } 
+        """
+        res = dict()
+        for item in aml_list:
+            key = tuple([item[col] for col in group_by_keys])
+            res[key] = res.get(key, False) and res[key] + [item] or [item]
+        return res
+
+
+    def result_master(self, aml_list, account, ctx=None):
+        """
+        @param aml_list: and aml list is a list of dictionaries where every
+        dictionary represent a report line.
+        @param group_by_keys: a list of the aml keys that you want to group
+        @return: a dictiory { (group_by_x, group_by_y, ..): [ amls.. ] } 
+        """
+        ctx = ctx or {}
+        res = dict()
+        main_keys = {'currency': ['partner']}
+
+        for key in main_keys.keys():
+            res[key] = {}
+
+        resInit = copy.deepcopy(res)
+        resInit = self.get_initial_balance(resInit, account, main_keys, ctx=ctx.copy())
+
+        res = self.fill_result(res, aml_list, main_keys, context=ctx)
+        res = self.update_init_balance(res, resInit, main_keys)
+
+        return res
+
+    def update_init_balance(self, res, resInit, main_keys):
+        """
+        """
+        for (key, values1) in resInit.iteritems():
+            for (key_id, values2) in values1.iteritems():
+                line = {key: key_id}
+                res = self.init_report_line_group(res, line, key, [])
+                for subkey_list in main_keys.values():
+                    for subkey in subkey_list:
+                        for (subkey_id, values3) in values2[subkey].iteritems():
+                            line = {key: key_id, subkey: subkey_id}
+                            res = self.init_report_line_group(res, line, key, [subkey])
+
+        for (key, values1) in resInit.iteritems():
+            for (key_id, values2) in values1.iteritems():
+                resInit[key][key_id]['total'].pop('title')
+                res[key][key_id]['init_balance'].update(resInit[key][key_id]['total'])
+                for subkey_list in main_keys.values():
+                    for subkey in subkey_list:
+                        for (subkey_id, values3) in values2[subkey].iteritems():
+                            resInit[key][key_id][subkey][subkey_id]['total'].pop('title')
+                            res[key][key_id][subkey][subkey_id]['init_balance'].update(
+                                resInit[key][key_id][subkey][subkey_id]['total'])
+
+        return res 
+
+    def remove_company_currency_exchange_line(self, res, main_keys, context=None):
+        """
+        Update the dictionary given in res. Remove the exchange line when the
+        a group of currency is the company currency.
+        @return True
+        """
+        cr, uid = self.cr, self.uid
+        ctx = context or {}
+        company_currency = self.pool.get('res.currency').browse(
+            cr, uid, self.get_company_currency(ctx['company_id'])).name
+        if res['currency'].get(company_currency, False):
+            res['currency'][company_currency]['xchange_lines'] = []
+            res['currency'][company_currency]['xchange_total'] = {}
+            for subkey_list in main_keys.values():
+                for subkey in subkey_list:
+                    for (subkey_id, values) in res['currency'][company_currency][subkey].iteritems():
+                        res['currency'][company_currency][subkey][subkey_id]['xchange_total'] = []
+                        res['currency'][company_currency][subkey][subkey_id]['xchange_total'] = {}
+        return res
+
+    def init_report_line_group(self, res, line, key, subkeys):
+        """
+        Update the dictionary given in the paramenter res with the
+        initialization values of the group a init dictionary used to defined
+        the group.
+        @param key: the name of the column in the report.
+        @return True 
+        """
+        basic = dict(
+            init_balance={}, total={}, lines=[], real_total={},
+            xchange_lines=[], xchange_total={}, filter_lines=[],
+        )
+        group_dict = copy.deepcopy(basic)
+        for subkey in subkeys:
+            group_dict[subkey] = {}
+
+        rows = dict(
+            total='Accumulated in {0}',
+            real_total='Total in {0}',
+            init_balance='Initial Balance in {0}',
+            xchange_total='Exchange Differencial in {0}',
+        )
+        if not res[key].get(line[key], False):
+            res[key][line[key]] = copy.deepcopy(group_dict)
+            for (row, title_str) in rows.iteritems():
+                res[key][line[key]][row] = self.create_report_line(
+                    title_str.format(line[key]), {key: line[key]})
+
+        for subkey in subkeys:
+            if not res[key][line[key]][subkey].get(line[subkey], False):
+                res[key][line[key]][subkey].update(
+                    {line[subkey]: copy.deepcopy(basic)})
+                for (row, title_str) in rows.iteritems(): 
+                    res[key][line[key]][subkey][line[subkey]][row] = self.create_report_line(
+                        title_str.format(line[subkey])+' in {0}'.format(line[key]), {key: line[key], subkey: line[subkey]})
+        return res 
+
+    def get_initial_balance(self, res, account, main_keys, ctx):
+        """
+        This method update the res dictionary given with the inital balance of
+        the accounts.
+        @param main_keys: dictionary with the keys ans subkeys of every group.
+        @return True
+        """
+        ctx = ctx or {}
+        ctx['periods'] = self.get_previous_periods(ctx['periods'], ctx)
+        previous_aml = self._get_analytic_ledger(account, ctx=ctx)
+        res = self.fill_result(res, previous_aml, main_keys, context=ctx)
+        return res 
+
+    def fill_result(self, res, aml_list, main_keys, context=None):
+        """
+        """
+        ctx = context or {}
+        for line in aml_list:
+            for (key, subkeys) in main_keys.iteritems():
+                #print ' --- ', line['currency'], line['id'] or line
+                self.update_report_line(res, line, key, subkeys)
+
+        res = self.get_real_totals(res, main_keys)
+        res = self.get_filter_lines(res, main_keys)
+        res = self.remove_company_currency_exchange_line(res, main_keys, context=ctx.copy())
+
+        # TODO: Uncomment this block of code to print the debug data.
+        #topprint = '{amount_company_currency:<8}{amount_currency:<8}{differential}'
+        #for (key, values1) in res.iteritems():
+        #    for (key_id, values2) in values1.iteritems():
+        #        for subkey_list in main_keys.values():
+        #            pprint.pprint((key_id,
+        #                [item['id'] for item in values2['lines']],
+        #                (topprint.format(**values2['total'])),
+        #                ))
+        #            for subkey in subkey_list:
+        #                for (subkey_id, values3) in values2[subkey].iteritems():
+        #                     pprint.pprint((key_id, subkey_id,
+        #                         [item['id'] for item in values3['lines']],
+        #                         (topprint.format(**values3['total'])),
+        #                         ))
+        return res 
+
+    def get_previous_periods(self, period_ids, ctx=None):
+        """
+        @param period_ids: recieve a list of periods, period ids list.
+        @return the previous period ids. 
+        """
+        cr, uid = self.cr, self.uid
+        ctx = ctx or {}
+        ap_obj = self.pool.get('account.period')
+        period_ids = isinstance(period_ids, (int, long)) and [period_ids] or period_ids
+        fy_id = ap_obj.browse(cr, uid, period_ids[0], context=ctx).fiscalyear_id.id
+        early_dt_start_ap_id = ap_obj.search(
+            cr, uid, [('id', 'in', period_ids)],
+            context=ctx, order='date_start asc', limit=1)[0]
+        date_init = ap_obj.browse(
+            cr, uid, early_dt_start_ap_id, context=ctx).date_start
+        ap_ids = ap_obj.search(
+            cr, uid, [('date_stop', '<=', date_init,), ('fiscalyear_id', '=', fy_id)], context=ctx)
+        return ap_ids
+
+    def create_report_line(self, title, default_values=None):
+        """
+        return an empty dictionary to be use as a init balance line or a total
+        line in the report.
+        @param title: name show in the line of the report
+        """
+        default_values = default_values or {}
+        res = {}.fromkeys(['id', 'date', 'journal', 'partner', 'title', 'name',
+            'entry', 'ref', 'debit', 'credit', 'analytic', 'period',
+            'balance', 'currency', 'amount_currency',
+            'amount_company_currency', 'differential'], str())
+        res.update(
+            debit=0.0, credit=0.0, balance=0.0, amount_currency=0.0,
+            amount_company_currency=0.0, differential=0.0,
+            title=title)
+        res.update(default_values)
+        return res
+
+    def _update_report_line(self, res, line, key, subkey, line_field, total_field):
+        """
+        """
+        update_fields_list, copy_fields_list = self.get_fields()
+        res[key][line[key]][line_field] += [line]
+        res[key][line[key]][subkey][line[subkey]][line_field] += [line]
+        for field in update_fields_list:
+            res[key][line[key]][total_field][field] += line[field]
+            res[key][line[key]][subkey][line[subkey]][total_field][field] += line[field]
+        res[key][line[key]][total_field].update({key: line[key]})
+        res[key][line[key]][subkey][line[subkey]][total_field].update({key: line[key], subkey:
+            line[subkey]})
+
+    def update_report_line(self, res, line, key, subkeys):
+        """
+        Update the dictionary given in res to add the lines associaed to the
+        given group and to also update the total column while the move lines
+        have benn grouping.
+        @param key: the name of the column in the report.
+        @return True
+        """
+        subkeys = subkeys or []
+        res = self.init_report_line_group(res, line, key, subkeys)
+        if not line['differential']:
+            for subkey in subkeys:
+                self._update_report_line(res, line, key, subkey, 'lines', 'total')
+        else:
+            for subkey in subkeys:
+                self._update_report_line(res, line, key, subkey, 'xchange_lines', 'xchange_total')
+        return True
+
+    def get_filter_lines(self, res, main_keys):
+        """
+        Update the dictionary given in res to the filter lines of every group
+        @param main_keys: dictionary { key: subkeys}
+        @return True
+        """
+        for (key, subkeys) in main_keys.iteritems():
+            for key_id in res[key].keys():
+                for subkey in subkeys:
+                    for (subkey_key, values) in res[key][key_id][subkey].iteritems():
+                        #print 'subkey_key', subkey_key
+                        #pprint.pprint(('values', values))
+                        res[key][key_id]['filter_lines'].append(values['total'])
+                        res[key][key_id][subkey][subkey_key]['filter_lines'] = res[key][key_id][subkey][subkey_key]['lines']
+        # TODO: add all the subkeys lines, need to filter this is some way to
+        # only print one subkey lines.
+        return res
+
+    def get_fields(self):
+        """
+        """
+        update_fields_list = [
+            'debit', 'credit', 'balance', 'amount_currency',
+            'amount_company_currency', 'differential']
+        copy_fields_list = [
+            'id', 'date', 'journal', 'partner', 'title', 'name',
+            'entry', 'ref', 'analytic', 'period', 'currency']
+        return update_fields_list, copy_fields_list
+
+    def _get_real_totals(self, res, overwrite_fields):
+        """
+        """
+        update_fields_list, copy_fields_list = self.get_fields()
+        for field in update_fields_list:
+            res['real_total'][field] = \
+                res['init_balance'][field] + \
+                res['xchange_total'][field] + \
+                res['total'][field]
+        for field in overwrite_fields:
+            res['real_total'][field] = \
+                res['total'][field]
+        return res
+
+    def get_real_totals(self, res, main_keys):
+        """
+        Update the dictionary given in res to the real total of every group
+        @return True
+        """
+        for (key, subkey_list) in main_keys.iteritems():
+            for key_id in res[key].keys():
+                self._get_real_totals(res[key][key_id], [key])
+                for subkey in subkey_list: 
+                    for subkey_key in res[key][key_id][subkey].keys():
+                        self._get_real_totals(res[key][key_id][subkey][subkey_key],
+                                [key, subkey])
+        return res
+
+    def get_group_total(self, group_list, total_str, main_group, remove_lines=False):
+        """
+        @param group_list: list of dictionaries every list represent a group of
+        aml lines, and every dictionary represent a aml line.
+        @param remove_lines: Flag that indicate what to return. If not set
+        (default False) will return all the group lines and plus the new line
+        for the total of the group. If set (call with remove_lines=True) will
+        only the line with the total of the group of lines. 
+        @return a list of lines to prin in the balance multicurrency report.
+        Return one totalization line by a given lists of groups.
+
+        Note: A list of groups is a list o dictionaries where every dictionary
+        represent a report line.
+        """
+        total_group = dict()
+        for aml_group in group_list:
+            res3 = {}.fromkeys(['id', 'date', 'journal', 'partner', 'title',
+                'name',
+                'entry', 'ref', 'debit', 'credit', 'analytic', 'period',
+                'balance', 'currency', 'amount_currency',
+                'amount_company_currency', 'differential'])
+            res3.update(
+                title=aml_group[0] and total_str.format(**aml_group[0]) or
+                'TOTAL',
+                debit=0.0, credit=0.0, balance=0.0,
+                amount_currency=0.0, amount_company_currency=0.0,
+                differential=0.0,
+                currency=aml_group[0]['currency'])
+            for line in aml_group:
+                res3['debit'] += line['debit']
+                res3['credit'] += line['credit']
+                res3['balance'] += line['balance']
+                res3['amount_currency'] += line['amount_currency']
+                res3['amount_company_currency'] += line['amount_company_currency']
+                res3['differential'] += line['differential']
+
+            key = aml_group[0][main_group]
+            total_group[key] = total_group.get(key, False) and total_group[key] + [res3] or [res3]
+            aml_group += [res3]
+        return total_group.values() if remove_lines else group_list
 
     def _get_journal_ledger(self, account, ctx={}):
         res = []
@@ -906,7 +1422,8 @@ class account_balance(report_sxw.rml_parse):
                     else:
                         # Include all accounts
                         to_include = True
-
+                elif form['columns'] in ('currency'):
+                    to_include = True
                 else:
 
                     if form['display_account'] == 'mov' and aa_id[3].parent_id:
@@ -926,8 +1443,19 @@ class account_balance(report_sxw.rml_parse):
                         to_include = True
 
                 #~ ANALYTIC LEDGER
-                if to_include and form['analytic_ledger'] and form['columns'] == 'four' and form['inf_type'] == 'BS' and res['type'] in ('other', 'liquidity', 'receivable', 'payable'):
+                ctx_end.update(
+                    company_id=(form['company_id'] and
+                        type(form['company_id']) in (list, tuple) and
+                        form['company_id'][0] or form['company_id']),
+                    group_by=form['group_by'],
+                    lines_detail=form['lines_detail'],
+                    )
+                if (to_include and form['analytic_ledger'] and form['columns']
+                    == 'four' and form['inf_type'] == 'BS' and res['type']
+                    in ('other', 'liquidity', 'receivable', 'payable')):
                     res['mayor'] = self._get_analytic_ledger(res, ctx=ctx_end)
+                elif form['columns'] == 'currency':
+                    res['mayor'] = self._get_balance_multicurrency(res, ctx=ctx_end)
                 elif to_include and form['journal_ledger'] and form['columns'] == 'four' and form['inf_type'] == 'BS' and res['type'] in ('other', 'liquidity', 'receivable', 'payable'):
                     res['journal'] = self._get_journal_ledger(res, ctx=ctx_end)
                 elif to_include and form['partner_balance'] and form['columns'] == 'four' and form['inf_type'] == 'BS' and res['type'] in ('other', 'liquidity', 'receivable', 'payable'):
@@ -1017,6 +1545,9 @@ class account_balance(report_sxw.rml_parse):
                 })
 
             result_acc.append(res2)
+
+        #pprint.pprint((' ---- report lines', result_acc))
+        #raise osv.except_osv('only', 'test')
         return result_acc
 
 report_sxw.report_sxw('report.afr.1cols',
@@ -1040,6 +1571,11 @@ report_sxw.report_sxw('report.afr.4cols',
 report_sxw.report_sxw('report.afr.analytic.ledger',
                       'wizard.report',
                       'account_financial_report/report/balance_full_4_cols_analytic_ledger.rml',
+                      parser=account_balance,
+                      header=False)
+report_sxw.report_sxw('report.afr.multicurrency',
+                      'wizard.report',
+                      'account_financial_report/report/balance_multicurrency.rml',
                       parser=account_balance,
                       header=False)
 

@@ -40,7 +40,14 @@ class wizard_report(osv.osv_memory):
         'company_id': fields.many2one('res.company', 'Company', required=True),
         'currency_id': fields.many2one('res.currency', 'Currency', help="Currency at which this report will be expressed. If not selected will be used the one set in the company"),
         'inf_type': fields.selection([('BS', 'Balance Sheet'), ('IS', 'Income Statement')], 'Type', required=True),
-        'columns': fields.selection([('one', 'End. Balance'), ('two', 'Debit | Credit'), ('four', 'Initial | Debit | Credit | YTD'), ('five', 'Initial | Debit | Credit | Period | YTD'), ('qtr', "4 QTR's | YTD"), ('thirteen', '12 Months | YTD')], 'Columns', required=True),
+        'columns': fields.selection([
+            ('one', 'End. Balance'),
+            ('two', 'Debit | Credit'),
+            ('four', 'Initial | Debit | Credit | YTD'),
+            ('five', 'Initial | Debit | Credit | Period | YTD'),
+            ('qtr', "4 QTR's | YTD"), 
+            ('thirteen', '12 Months | YTD'),
+            ('currency', 'End. Balance Currency')], 'Columns', required=True),
         'display_account': fields.selection([('all', 'All Accounts'), ('bal', 'With Balance'), ('mov', 'With movements'), ('bal_mov', 'With Balance / Movements')], 'Display accounts'),
         'display_account_level': fields.integer('Up to level', help='Display accounts up to this level (0 to show all)'),
 
@@ -65,6 +72,15 @@ class wizard_report(osv.osv_memory):
         'filter': fields.selection([('bydate', 'By Date'), ('byperiod', 'By Period'), ('all', 'By Date and Period'), ('none', 'No Filter')], 'Date/Period Filter'),
         'date_to': fields.date('End date'),
         'date_from': fields.date('Start date'),
+        'group_by': fields.selection([('currency', 'Currency'), ('partner',
+            'Partner')], 'Group by', help='Only applies in the way of the end'
+            ' balance multicurrency report is show.'),
+        'lines_detail': fields.selection([
+            ('detail', 'Detail'), ('full', 'Full Detail'),
+            ('total', 'Totals')],
+            'Line Details',
+            help='Only applies in the way of the end balance multicurrency'
+            ' report is show.'),
     }
 
     _defaults = {
@@ -78,6 +94,8 @@ class wizard_report(osv.osv_memory):
         'display_account': lambda *a: 'bal_mov',
         'columns': lambda *a: 'five',
         'target_move': 'posted',
+        'group_by': 'currency',
+        'lines_detail': 'total',
     }
 
     def onchange_inf_type(self, cr, uid, ids, inf_type, context=None):
@@ -269,6 +287,8 @@ class wizard_report(osv.osv_memory):
                     raise osv.except_osv(_('Error !'), _(
                         'La interseccion entre el periodo y fecha es vacio'))
 
+        if data['form']['columns'] == 'currency':
+            name = 'afr.multicurrency'
         if data['form']['columns'] == 'one':
             name = 'afr.1cols'
         if data['form']['columns'] == 'two':

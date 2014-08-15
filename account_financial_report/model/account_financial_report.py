@@ -141,7 +141,8 @@ class account_financial_report(osv.osv):
 
         if columns != 'four':
             res['value'].update({'analytic_ledger': False})
-
+        if columns != 'currency':
+            res['value'].update({'analytic_ledger': True})
         if columns in ('qtr', 'thirteen'):
             p_obj = self.pool.get("account.period")
             period_ids = p_obj.search(cr, uid, [('fiscalyear_id', '=', fiscalyear_id), (
