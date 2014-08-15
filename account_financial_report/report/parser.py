@@ -415,7 +415,6 @@ class account_balance(report_sxw.rml_parse):
     def get_group_by_partner(self, all_res):
         """
         """
-        self.check_result(all_res)
         basic = dict(
             init_balance=[], total=[], lines=[], real_total=[],
             xchange_lines=[], xchange_total=[], filter_lines=[],
@@ -438,10 +437,6 @@ class account_balance(report_sxw.rml_parse):
                     aux_val = all_res['currency'][currency]['partner'][partner][field]
                     if aux_val:
                         partner_data[partner][field] += isinstance(aux_val, list) and aux_val or [aux_val] 
-                    pprint.pprint((currency, partner, field, aux_val))
-
-        pprint.pprint(partner_data)
-        raise osv.except_osv('only', 'test')
         return partner_data
 
     def check_result(self, all_res):
@@ -542,14 +537,10 @@ class account_balance(report_sxw.rml_parse):
 
         resInit = copy.deepcopy(res)
         resInit = self.get_initial_balance(resInit, account, main_keys, ctx=ctx.copy())
-        #self.check_result(resInit)
 
         res = self.fill_result(res, aml_list, main_keys, context=ctx)
-        #pprint.pprint((' ----- res', (res), ' ---- resInit', (resInit))) 
         res = self.update_init_balance(res, resInit, main_keys)
-        self.check_result(res)
 
-        pprint.pprint((' ---- res', res))
         return res
 
     def update_init_balance(self, res, resInit, main_keys):
@@ -661,21 +652,21 @@ class account_balance(report_sxw.rml_parse):
         res = self.get_filter_lines(res, main_keys)
         res = self.remove_company_currency_exchange_line(res, main_keys, context=ctx.copy())
 
-        # TODO: delete this debug print
-        topprint = '{amount_company_currency:<8}{amount_currency:<8}{differential}'
-        for (key, values1) in res.iteritems():
-            for (key_id, values2) in values1.iteritems():
-                for subkey_list in main_keys.values():
-                    pprint.pprint((key_id,
-                        [item['id'] for item in values2['lines']],
-                        (topprint.format(**values2['total'])),
-                        ))
-                    for subkey in subkey_list:
-                        for (subkey_id, values3) in values2[subkey].iteritems():
-                             pprint.pprint((key_id, subkey_id,
-                                 [item['id'] for item in values3['lines']],
-                                 (topprint.format(**values3['total'])),
-                                 ))
+        # TODO: Uncomment this block of code to print the debug data.
+        #topprint = '{amount_company_currency:<8}{amount_currency:<8}{differential}'
+        #for (key, values1) in res.iteritems():
+        #    for (key_id, values2) in values1.iteritems():
+        #        for subkey_list in main_keys.values():
+        #            pprint.pprint((key_id,
+        #                [item['id'] for item in values2['lines']],
+        #                (topprint.format(**values2['total'])),
+        #                ))
+        #            for subkey in subkey_list:
+        #                for (subkey_id, values3) in values2[subkey].iteritems():
+        #                     pprint.pprint((key_id, subkey_id,
+        #                         [item['id'] for item in values3['lines']],
+        #                         (topprint.format(**values3['total'])),
+        #                         ))
         return res 
 
     def get_previous_periods(self, period_ids, ctx=None):
