@@ -407,13 +407,23 @@ class account_balance(report_sxw.rml_parse):
                     res.append(aux_res)
         elif ctx['group_by'] == 'partner':
             partner_data = self.get_group_by_partner(all_res)
-            if detail_level == 'detail':
+            if detail_level in ['detail', 'full']:
                 for (key, value) in partner_data.iteritems():
                     aux_res = list()
                     aux_res.append(self.create_report_line(
                         'Resume of partner {0}'.format(key), {'partner': key}))
                     aux_res.extend(value['init_balance'])
                     aux_res.extend(value['filter_lines'])
+                    if value['xchange_total']:
+                        aux_res.extend(value['xchange_total'])
+                    aux_res.extend(value['real_total'])
+                    res.append(aux_res)
+            if detail_level == 'total':
+                for (key, value) in partner_data.iteritems():
+                    aux_res = list()
+                    aux_res.append(self.create_report_line(
+                        'Resume of partner {0}'.format(key), {'partner': key}))
+                    aux_res.extend(value['init_balance'])
                     if value['xchange_total']:
                         aux_res.extend(value['xchange_total'])
                     aux_res.extend(value['real_total'])
