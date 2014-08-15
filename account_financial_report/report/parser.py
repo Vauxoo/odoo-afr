@@ -462,12 +462,13 @@ class account_balance(report_sxw.rml_parse):
             for (currency_key, value2) in value.iteritems():
                 print level*2, currency_key
                 for (cval_key, value3) in value2.iteritems():
-                    print level*3, '{0: <20}'.format(cval_key), isinstance(value3, list) and (len(value3) or '0') or cval_key != 'partner' and '\t\t{amount_company_currency}\t{amount_currency}\t{differential}'.format(**value3) or ''
+                    print level*3, '{0: <20}'.format(cval_key), isinstance(value3, list) and (len(value3) or '0') or cval_key != 'partner' and (value3 and '\t\t{amount_company_currency}\t{amount_currency}\t{differential}'.format(**value3) or '') or ''
                     
 
                     if cval_key in ['lines', 'xchange_lines', 'filter_lines']:
                         error = [line
                             for line in value3
+                            if line
                             if line['currency'] != currency_key or value3.count(line) != 1]
                         for line in value3:
                             print ' '*25, '\t\t{amount_company_currency}\t{amount_currency}\t{differential}'.format(**line)
@@ -476,7 +477,7 @@ class account_balance(report_sxw.rml_parse):
                             raise osv.except_osv('error', 'lines with other currencys in ' + cval_key)
                     elif cval_key in ['real_total', 'init_balance', 'total', 'xchange_total']:
                         error = (
-                            (value3['currency'] != currency_key  or value3['partner'])
+                            value3 and (value3['currency'] != currency_key  or value3['partner'])
                             and value3 or False)
                         if error:
                             pprint.pprint(error)
@@ -485,10 +486,11 @@ class account_balance(report_sxw.rml_parse):
                         for (partner_key, value4) in value3.iteritems():
                             print level*4, (partner_key, )
                             for (pval_key, value5) in value4.iteritems():
-                                print level*5, '{0: <15}'.format(pval_key), isinstance(value5, list) and (len(value5) or '0') or '\t\t{amount_company_currency}\t{amount_currency}\t{differential}'.format(**value5)
+                                print level*5, '{0: <15}'.format(pval_key), isinstance(value5, list) and (len(value5) or '0') or (value5 and '\t\t{amount_company_currency}\t{amount_currency}\t{differential}'.format(**value5) or '')
                                 if pval_key in ['lines', 'xchange_lines', 'filter_lines']:
                                     error = [line
                                         for line in value5
+                                        if line
                                         if line['currency'] != currency_key or line['partner'] != partner_key or value5.count(line) != 1]
                                     for line in value5:
                                         print ' '*25, '\t\t{amount_company_currency}\t{amount_currency}\t{differential}'.format(**line)
@@ -497,7 +499,7 @@ class account_balance(report_sxw.rml_parse):
                                         raise osv.except_osv('error', 'lines with other currencys in ' + pval_key)
                                 elif pval_key in ['real_total', 'init_balance', 'total', 'xchange_total']:
                                     error = (
-                                        (value5['currency'] != currency_key or value5['partner'] != partner_key)
+                                        value5 and (value5['currency'] != currency_key or value5['partner'] != partner_key)
                                         and value5 or False)
                                     if error:
                                         pprint.pprint(error)
@@ -540,14 +542,13 @@ class account_balance(report_sxw.rml_parse):
 
         resInit = copy.deepcopy(res)
         resInit = self.get_initial_balance(resInit, account, main_keys, ctx=ctx.copy())
-        #self.check_result(resInit)
+        self.check_result(resInit)
 
-        res = self.fill_result(res, aml_list, main_keys)
+        res = self.fill_result(res, aml_list, main_keys, context=ctx)
         #pprint.pprint((' ----- res', (res), ' ---- resInit', (resInit))) 
         res = self.update_init_balance(res, resInit, main_keys)
         self.check_result(res)
 
-        self.remove_company_currency_exchange_line(res, ctx=ctx.copy())
         pprint.pprint((' ---- res', res))
         return res
 
@@ -577,20 +578,25 @@ class account_balance(report_sxw.rml_parse):
 
         return res 
 
-    def remove_company_currency_exchange_line(self, res, ctx=None):
+    def remove_company_currency_exchange_line(self, res, main_keys, context=None):
         """
         Update the dictionary given in res. Remove the exchange line when the
         a group of currency is the company currency.
         @return True
         """
         cr, uid = self.cr, self.uid
-        ctx = ctx or {}
+        ctx = context or {}
         company_currency = self.pool.get('res.currency').browse(
             cr, uid, self.get_company_currency(ctx['company_id'])).name
         if res['currency'].get(company_currency, False):
             res['currency'][company_currency]['xchange_lines'] = []
             res['currency'][company_currency]['xchange_total'] = {}
-        return True
+            for subkey_list in main_keys.values():
+                for subkey in subkey_list:
+                    for (subkey_id, values) in res['currency'][company_currency][subkey].iteritems():
+                        res['currency'][company_currency][subkey][subkey_id]['xchange_total'] = []
+                        res['currency'][company_currency][subkey][subkey_id]['xchange_total'] = {}
+        return res
 
     def init_report_line_group(self, res, line, key, subkeys):
         """
@@ -639,12 +645,13 @@ class account_balance(report_sxw.rml_parse):
         ctx = ctx or {}
         ctx['periods'] = self.get_previous_periods(ctx['periods'], ctx)
         previous_aml = self._get_analytic_ledger(account, ctx=ctx)
-        res = self.fill_result(res, previous_aml, main_keys)
+        res = self.fill_result(res, previous_aml, main_keys, context=ctx)
         return res 
 
-    def fill_result(self, res, aml_list, main_keys):
+    def fill_result(self, res, aml_list, main_keys, context=None):
         """
         """
+        ctx = context or {}
         for line in aml_list:
             for (key, subkeys) in main_keys.iteritems():
                 #print ' --- ', line['currency'], line['id'] or line
@@ -652,6 +659,7 @@ class account_balance(report_sxw.rml_parse):
 
         res = self.get_real_totals(res, main_keys)
         res = self.get_filter_lines(res, main_keys)
+        res = self.remove_company_currency_exchange_line(res, main_keys, context=ctx.copy())
 
         # TODO: delete this debug print
         topprint = '{amount_company_currency:<8}{amount_currency:<8}{differential}'
