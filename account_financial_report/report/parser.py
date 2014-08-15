@@ -769,12 +769,8 @@ class account_balance(report_sxw.rml_parse):
         @return True
         """
         for (key, subkeys) in main_keys.iteritems():
-            #print 'key', key
-            key_ids = res[key].keys()
-            for key_id in key_ids:
-                #print 'key_id', key_id
+            for key_id in res[key].keys():
                 for subkey in subkeys:
-                    #print 'subkey', subkey
                     for (subkey_key, values) in res[key][key_id][subkey].iteritems():
                         #print 'subkey_key', subkey_key
                         #pprint.pprint(('values', values))
