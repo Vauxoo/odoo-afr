@@ -542,7 +542,7 @@ class account_balance(report_sxw.rml_parse):
 
         resInit = copy.deepcopy(res)
         resInit = self.get_initial_balance(resInit, account, main_keys, ctx=ctx.copy())
-        self.check_result(resInit)
+        #self.check_result(resInit)
 
         res = self.fill_result(res, aml_list, main_keys, context=ctx)
         #pprint.pprint((' ----- res', (res), ' ---- resInit', (resInit))) 
