@@ -739,32 +739,9 @@ class account_balance(report_sxw.rml_parse):
         self.init_report_line_group(res, line, key, subkeys)
         update_fields_list, copy_fields_list = self.get_fields()
 
-        ## TODO: comment print
-        #topprint = '{amount_company_currency:<8}{amount_currency:<8}{differential}'
-        #pprint.pprint(( (' -----', line[key], 'lines ', len(res[key][line[key]]['lines']), [ item['id'] for item in res[key][line[key]]['lines']], 'total', topprint.format(**res[key][line[key]]['total'])),
-        #    ( [( len(values['lines']), partner)
-        #        for (partner, values) in res[key][line[key]][subkeys[0]].iteritems()] )
-        #    #([ topprint.format(**item) for item in res[key][line[key]]['lines']]),
-        #    )) 
-
         if not line['differential']:
-
             for subkey in subkeys:
                 self._update_report_line(res, line, key, subkey, 'lines', 'total')
-
-           # pprint.pprint((
-           #     (' -- F1', line[key], 'lines ',
-           #         len(res[key][line[key]]['lines']), [ item['id'] for item in
-           #             res[key][line[key]]['lines']],'total',
-           #         topprint.format(**res[key][line[key]]['total'])),
-           #     ( [( len(values['lines']), partner, [item['id'] for item in
-           #         values['lines']], topprint.format(**values['total'])  )
-           #     for (partner, values) in
-           #     res[key][line[key]][subkeys[0]].iteritems()] ),
-           #     ()
-           #     #([ topprint.format(**item) for item in res[key][line[key]]['lines']]),
-           #    )) 
-
         else:
             for subkey in subkeys:
                 self._update_report_line(res, line, key, subkey, 'xchange_lines', 'xchange_total')
