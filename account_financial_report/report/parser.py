@@ -707,16 +707,16 @@ class account_balance(report_sxw.rml_parse):
         res.update(default_values)
         return res
 
-    def _update_report_line(self, res, line, key, subkey):
+    def _update_report_line(self, res, line, key, subkey, line_field, total_field):
         """
         """
         update_fields_list, copy_fields_list = self.get_fields()
-        res[key][line[key]]['lines'] += [line]
+        res[key][line[key]][line_field] += [line]
         for field in update_fields_list:
-            res[key][line[key]]['total'][field] += line[field]
-            res[key][line[key]][subkey][line[subkey]]['total'][field] += line[field]
-        res[key][line[key]]['total'].update({key: line[key]})
-        res[key][line[key]][subkey][line[subkey]]['total'].update({key: line[key], subkey:
+            res[key][line[key]][total_field][field] += line[field]
+            res[key][line[key]][subkey][line[subkey]][total_field][field] += line[field]
+        res[key][line[key]][total_field].update({key: line[key]})
+        res[key][line[key]][subkey][line[subkey]][total_field].update({key: line[key], subkey:
             line[subkey]})
 
     def update_report_line(self, res, line, key, subkeys):
@@ -742,7 +742,7 @@ class account_balance(report_sxw.rml_parse):
         if not line['differential']:
 
             for subkey in subkeys:
-                self._update_report_line(res, line, key, subkey)
+                self._update_report_line(res, line, key, subkey, 'lines', 'total')
 
            # pprint.pprint((
            #     (' -- F1', line[key], 'lines ',
