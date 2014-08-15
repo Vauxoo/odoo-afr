@@ -558,17 +558,21 @@ class account_balance(report_sxw.rml_parse):
         """
         for (key, values1) in resInit.iteritems():
             for (key_id, values2) in values1.iteritems():
-                #pprint.pprint((' ---- ', key, key_id))
                 line = {key: key_id}
                 self.init_report_line_group(res, line, key, [])
+                for subkey_list in main_keys.values():
+                    for subkey in subkey_list:
+                        for (subkey_id, values3) in values2[subkey].iteritems():
+                            line = {key: key_id, subkey: subkey_id}
+                            self.init_report_line_group(res, line, key, [subkey])
+
+        for (key, values1) in resInit.iteritems():
+            for (key_id, values2) in values1.iteritems():
                 resInit[key][key_id]['total'].pop('title')
                 res[key][key_id]['init_balance'].update(resInit[key][key_id]['total'])
                 for subkey_list in main_keys.values():
                     for subkey in subkey_list:
                         for (subkey_id, values3) in values2[subkey].iteritems():
-                            #pprint.pprint((' ---- ', key, key_id, subkey, subkey_id))
-                            line = {key: key_id, subkey: subkey_id}
-                            self.init_report_line_group(res, line, key, [subkey])
                             resInit[key][key_id][subkey][subkey_id]['total'].pop('title')
                             res[key][key_id][subkey][subkey_id]['init_balance'].update(
                                 resInit[key][key_id][subkey][subkey_id]['total'])
