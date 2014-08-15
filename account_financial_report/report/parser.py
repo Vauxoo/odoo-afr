@@ -606,7 +606,7 @@ class account_balance(report_sxw.rml_parse):
             init_balance={}, total={}, lines=[], real_total={},
             xchange_lines=[], xchange_total={}, filter_lines=[],
         )
-        group_dict = basic.copy()
+        group_dict = copy.deepcopy(basic)
         for subkey in subkeys:
             group_dict[subkey] = {}
 
@@ -617,7 +617,7 @@ class account_balance(report_sxw.rml_parse):
             xchange_total='Exchange Differencial in {0}',
         )
         if not res[key].get(line[key], False):
-            res[key][line[key]] = group_dict.copy()
+            res[key][line[key]] = copy.deepcopy(group_dict)
             for (row, title_str) in rows.iteritems():
                 res[key][line[key]][row] = self.create_report_line(
                     title_str.format(line[key]), {key: line[key]})
@@ -625,7 +625,7 @@ class account_balance(report_sxw.rml_parse):
         for subkey in subkeys:
             if not res[key][line[key]][subkey].get(line[subkey], False):
                 res[key][line[key]][subkey].update(
-                    {line[subkey]: basic.copy()})
+                    {line[subkey]: copy.deepcopy(basic)})
                 for (row, title_str) in rows.iteritems(): 
                     res[key][line[key]][subkey][line[subkey]][row] = self.create_report_line(
                         title_str.format(line[subkey]), {key: line[key], subkey: line[subkey]})
