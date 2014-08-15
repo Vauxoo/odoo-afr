@@ -631,7 +631,7 @@ class account_balance(report_sxw.rml_parse):
                     {line[subkey]: copy.deepcopy(basic)})
                 for (row, title_str) in rows.iteritems(): 
                     res[key][line[key]][subkey][line[subkey]][row] = self.create_report_line(
-                        title_str.format(line[subkey]), {key: line[key], subkey: line[subkey]})
+                        title_str.format(line[subkey])+' in {0}'.format(line[key]), {key: line[key], subkey: line[subkey]})
         return res 
 
     def get_initial_balance(self, res, account, main_keys, ctx):
