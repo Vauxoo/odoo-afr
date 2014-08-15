@@ -468,7 +468,7 @@ class account_balance(report_sxw.rml_parse):
                     if cval_key in ['lines', 'xchange_lines', 'filter_lines']:
                         error = [line
                             for line in value3
-                            if line['currency'] != currency_key]
+                            if line['currency'] != currency_key or value3.count(line) != 1]
                         for line in value3:
                             print ' '*25, '\t\t{amount_company_currency}\t{amount_currency}\t{differential}'.format(**line)
                         if error:
@@ -489,7 +489,7 @@ class account_balance(report_sxw.rml_parse):
                                 if pval_key in ['lines', 'xchange_lines', 'filter_lines']:
                                     error = [line
                                         for line in value5
-                                        if line['currency'] != currency_key or line['partner'] != partner_key]
+                                        if line['currency'] != currency_key or line['partner'] != partner_key or value5.count(line) != 1]
                                     for line in value5:
                                         print ' '*25, '\t\t{amount_company_currency}\t{amount_currency}\t{differential}'.format(**line)
                                     if error:
