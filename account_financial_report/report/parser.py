@@ -795,10 +795,10 @@ class account_balance(report_sxw.rml_parse):
         for (key, subkey_list) in main_keys.iteritems():
             for key_id in res[key].keys():
                 self._get_real_totals(res[key][key_id], [key])
-            for subkey in subkey_list: 
-                for subkey_key in res[key][key_id][subkey].keys():
-                    self._get_real_totals(res[key][key_id][subkey][subkey_key],
-                            [key, subkey])
+                for subkey in subkey_list: 
+                    for subkey_key in res[key][key_id][subkey].keys():
+                        self._get_real_totals(res[key][key_id][subkey][subkey_key],
+                                [key, subkey])
         return res
 
     def get_group_total(self, group_list, total_str, main_group, remove_lines=False):
