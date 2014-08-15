@@ -373,6 +373,8 @@ class account_balance(report_sxw.rml_parse):
             if detail_level == 'detail':
                 for (key, value) in all_res['currency'].iteritems():
                     aux_res = list()
+                    aux_res.append(self.create_report_line(
+                        'Resume Currency {0}'.format(key), {'currency': key}))
                     aux_res.append(value['init_balance'])
                     aux_res.extend(value['filter_lines'])
                     if value['xchange_total']:
@@ -382,6 +384,8 @@ class account_balance(report_sxw.rml_parse):
             elif detail_level == 'total':
                 for (key, value) in all_res['currency'].iteritems():
                     aux_res = list()
+                    aux_res.append(self.create_report_line(
+                        'Resume Currency {0}'.format(key), {'currency': key}))
                     aux_res.append(value['init_balance'])
                     if value['xchange_total']:
                         aux_res.append(value['xchange_total'])
@@ -390,6 +394,8 @@ class account_balance(report_sxw.rml_parse):
             elif detail_level == 'full':
                 for (key, value) in all_res['currency'].iteritems():
                     aux_res = list()
+                    aux_res.append(self.create_report_line(
+                        'Resume Currency {0}'.format(key), {'currency': key}))
                     aux_res.append(value['init_balance'])
                     aux_res.extend(value['lines'])
                     for line in value['filter_lines']:
@@ -431,12 +437,12 @@ class account_balance(report_sxw.rml_parse):
         partner_keys = list(partner_keys)
         partner_data = {}.fromkeys(partner_keys)
         for (key, value) in partner_data.iteritems():
-           partner_data[key] = basic.copy()
+           partner_data[key] = copy.deepcopy(basic)
 
         for (currency, values) in all_res['currency'].iteritems():
             for (partner, values2) in values['partner'].iteritems():
                 for (field, values3) in values2.iteritems():
-                    aux_val = all_res['currency'][currency]['partner'][partner][field]
+                    aux_val = copy.deepcopy(all_res['currency'][currency]['partner'][partner][field])
                     if aux_val:
                         partner_data[partner][field] += isinstance(aux_val, list) and aux_val or [aux_val] 
         return partner_data
