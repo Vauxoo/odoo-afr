@@ -540,9 +540,11 @@ class account_balance(report_sxw.rml_parse):
 
         resInit = copy.deepcopy(res)
         resInit = self.get_initial_balance(resInit, account, main_keys, ctx=ctx.copy())
-        self.check_result(resInit)
+        #self.check_result(resInit)
 
         res = self.fill_result(res, aml_list, main_keys)
+        #pprint.pprint((' ----- res', (res), ' ---- resInit', (resInit))) 
+        res = self.update_init_balance(res, resInit, main_keys)
         self.check_result(res)
 
         self.get_real_totals(res, main_keys)
@@ -550,6 +552,28 @@ class account_balance(report_sxw.rml_parse):
         self.remove_company_currency_exchange_line(res, ctx=ctx.copy())
         pprint.pprint((' ---- res', res))
         return res
+
+    def update_init_balance(self, res, resInit, main_keys):
+        """
+        """
+        for (key, values1) in resInit.iteritems():
+            for (key_id, values2) in values1.iteritems():
+                for subkey_list in main_keys.values():
+                    for subkey in subkey_list:
+                        for (subkey_id, values3) in values2[subkey].iteritems():
+                            #pprint.pprint((' ---- ', key, key_id, subkey, subkey_id))
+                            line = {key: key_id, subkey: subkey_id}
+                            self.init_report_line_group(res, line, key, [subkey])
+                            resInit[key][key_id][subkey][subkey_id]['total'].pop('title')
+                            res[key][key_id][subkey][subkey_id]['init_balance'].update(
+                                resInit[key][key_id][subkey][subkey_id]['total'])
+
+                    #pprint.pprint((' ---- ', key, key_id))
+                    resInit[key][key_id]['total'].pop('title')
+                    res[key][key_id]['init_balance'].update(resInit[key][key_id]['total'])
+
+
+        return True
 
     def remove_company_currency_exchange_line(self, res, ctx=None):
         """
