@@ -199,7 +199,7 @@ class account_balance(report_sxw.rml_parse):
         ctx = ctx or {}
         if account['type'] in ('other', 'liquidity', 'receivable', 'payable'):
             sql_query = """
-                SELECT 
+                SELECT
                     CASE
                         WHEN aml.partner_id IS NOT NULL
                        THEN (SELECT name FROM res_partner WHERE aml.partner_id = id)
@@ -216,7 +216,7 @@ class account_balance(report_sxw.rml_parse):
                     %s
                 FROM account_move_line AS aml
                 INNER JOIN account_account aa ON aa.id = aml.account_id
-                INNER JOIN account_move am ON am.id = aml.move_id 
+                INNER JOIN account_move am ON am.id = aml.move_id
                 %s
                 GROUP BY p_idx, partner_name
                 """
@@ -229,8 +229,8 @@ class account_balance(report_sxw.rml_parse):
             init_periods = ', '.join([str(i) for i in init_period])
 
             WHERE = """
-                WHERE aml.period_id IN (%s) 
-                    AND aa.id = %s 
+                WHERE aml.period_id IN (%s)
+                    AND aa.id = %s
                     AND aml.state <> 'draft'
                     """ % (init_periods, account['id'])
             query_init = sql_query % ('SUM(aml.debit) AS init_dr',
@@ -240,8 +240,8 @@ class account_balance(report_sxw.rml_parse):
                                       WHERE + WHERE_POSTED)
 
             WHERE = """
-                WHERE aml.period_id IN (%s) 
-                    AND aa.id = %s 
+                WHERE aml.period_id IN (%s)
+                    AND aa.id = %s
                     AND aml.state <> 'draft'
                     """ % (cur_periods, account['id'])
 
@@ -253,8 +253,8 @@ class account_balance(report_sxw.rml_parse):
 
             query = '''
                 SELECT
-                    partner_name, 
-                    p_idx, 
+                    partner_name,
+                    p_idx,
                     SUM(init_dr)-SUM(init_cr) AS balanceinit,
                     SUM(bal_dr) AS debit,
                     SUM(bal_cr) AS credit,
@@ -310,7 +310,7 @@ class account_balance(report_sxw.rml_parse):
             sql_detalle = """select aml.id as id, aj.name as diario, aa.name as descripcion,
                 (select name from res_partner where aml.partner_id = id) as partner,
                 aa.code as cuenta, aa.id as aa_id, aml.name as name,
-                aml.ref as ref, 
+                aml.ref as ref,
                 (select name from res_currency where aml.currency_id = id) as currency,
                 aml.currency_id as currency_id,
                 aml.partner_id as partner_id,
@@ -340,7 +340,7 @@ class account_balance(report_sxw.rml_parse):
                     'id': det['id'],
                     'date': det['date'],
                     'journal': det['diario'],
-                    'title': '\t\t{date:<15}\t\t{periodo:<12}\t\t{partner:<150}\t\t{asiento:<20}'.format(**det),
+                    'title': u'\t\t{date:<15}\t\t{periodo:<12}\t\t{partner:<150}\t\t{asiento:<20}'.format(**det),
                     'partner_id': det['partner_id'],
                     'partner': det['partner'],
                     'name': det['name'],
@@ -454,7 +454,7 @@ class account_balance(report_sxw.rml_parse):
                 for (field, values3) in values2.iteritems():
                     aux_val = copy.deepcopy(all_res['currency'][currency]['partner'][partner][field])
                     if aux_val:
-                        partner_data[partner][field] += isinstance(aux_val, list) and aux_val or [aux_val] 
+                        partner_data[partner][field] += isinstance(aux_val, list) and aux_val or [aux_val]
         return partner_data
 
     def check_result(self, all_res):
@@ -476,7 +476,7 @@ class account_balance(report_sxw.rml_parse):
                 print level*2, currency_key
                 for (cval_key, value3) in value2.iteritems():
                     print level*3, '{0: <20}'.format(cval_key), isinstance(value3, list) and (len(value3) or '0') or cval_key != 'partner' and (value3 and '\t\t{amount_company_currency}\t{amount_currency}\t{differential}'.format(**value3) or '') or ''
-                    
+
 
                     if cval_key in ['lines', 'xchange_lines', 'filter_lines']:
                         error = [line
@@ -530,7 +530,7 @@ class account_balance(report_sxw.rml_parse):
         @param aml_list: and aml list is a list of dictionaries where every
         dictionary represent a report line.
         @param group_by_keys: a list of the aml keys that you want to group
-        @return: a dictiory { (group_by_x, group_by_y, ..): [ amls.. ] } 
+        @return: a dictiory { (group_by_x, group_by_y, ..): [ amls.. ] }
         """
         res = dict()
         for item in aml_list:
@@ -544,7 +544,7 @@ class account_balance(report_sxw.rml_parse):
         @param aml_list: and aml list is a list of dictionaries where every
         dictionary represent a report line.
         @param group_by_keys: a list of the aml keys that you want to group
-        @return: a dictiory { (group_by_x, group_by_y, ..): [ amls.. ] } 
+        @return: a dictiory { (group_by_x, group_by_y, ..): [ amls.. ] }
         """
         ctx = ctx or {}
         res = dict()
@@ -585,7 +585,7 @@ class account_balance(report_sxw.rml_parse):
                             res[key][key_id][subkey][subkey_id]['init_balance'].update(
                                 resInit[key][key_id][subkey][subkey_id]['total'])
 
-        return res 
+        return res
 
     def remove_company_currency_exchange_line(self, res, main_keys, context=None):
         """
@@ -613,7 +613,7 @@ class account_balance(report_sxw.rml_parse):
         initialization values of the group a init dictionary used to defined
         the group.
         @param key: the name of the column in the report.
-        @return True 
+        @return True
         """
         basic = dict(
             init_balance={}, total={}, lines=[], real_total={},
@@ -639,10 +639,10 @@ class account_balance(report_sxw.rml_parse):
             if not res[key][line[key]][subkey].get(line[subkey], False):
                 res[key][line[key]][subkey].update(
                     {line[subkey]: copy.deepcopy(basic)})
-                for (row, title_str) in rows.iteritems(): 
+                for (row, title_str) in rows.iteritems():
                     res[key][line[key]][subkey][line[subkey]][row] = self.create_report_line(
                         title_str.format(line[subkey])+' in {0}'.format(line[key]), {key: line[key], subkey: line[subkey]})
-        return res 
+        return res
 
     def get_initial_balance(self, res, account, main_keys, ctx):
         """
@@ -655,7 +655,7 @@ class account_balance(report_sxw.rml_parse):
         ctx['periods'] = self.get_previous_periods(ctx['periods'], ctx)
         previous_aml = self._get_analytic_ledger(account, ctx=ctx)
         res = self.fill_result(res, previous_aml, main_keys, context=ctx)
-        return res 
+        return res
 
     def fill_result(self, res, aml_list, main_keys, context=None):
         """
@@ -685,12 +685,12 @@ class account_balance(report_sxw.rml_parse):
         #                         [item['id'] for item in values3['lines']],
         #                         (topprint.format(**values3['total'])),
         #                         ))
-        return res 
+        return res
 
     def get_previous_periods(self, period_ids, ctx=None):
         """
         @param period_ids: recieve a list of periods, period ids list.
-        @return the previous period ids. 
+        @return the previous period ids.
         """
         cr, uid = self.cr, self.uid
         ctx = ctx or {}
@@ -806,7 +806,7 @@ class account_balance(report_sxw.rml_parse):
         for (key, subkey_list) in main_keys.iteritems():
             for key_id in res[key].keys():
                 self._get_real_totals(res[key][key_id], [key])
-                for subkey in subkey_list: 
+                for subkey in subkey_list:
                     for subkey_key in res[key][key_id][subkey].keys():
                         self._get_real_totals(res[key][key_id][subkey][subkey_key],
                                 [key, subkey])
@@ -819,7 +819,7 @@ class account_balance(report_sxw.rml_parse):
         @param remove_lines: Flag that indicate what to return. If not set
         (default False) will return all the group lines and plus the new line
         for the total of the group. If set (call with remove_lines=True) will
-        only the line with the total of the group of lines. 
+        only the line with the total of the group of lines.
         @return a list of lines to prin in the balance multicurrency report.
         Return one totalization line by a given lists of groups.
 
@@ -866,11 +866,11 @@ class account_balance(report_sxw.rml_parse):
                 periods, account['id'])
             if ctx.get('state', 'posted') == 'posted':
                 where += "AND am.state = 'posted'"
-            sql_detalle = """SELECT 
+            sql_detalle = """SELECT
                 DISTINCT am.id as am_id,
                 aj.name as diario,
                 am.name as name,
-                am.date as date, 
+                am.date as date,
                 ap.name as periodo
                 from account_move_line aml
                 inner join account_journal aj on aj.id = aml.journal_id
