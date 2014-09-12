@@ -374,7 +374,7 @@ class account_balance(report_sxw.rml_parse):
                 for (key, value) in all_res['currency'].iteritems():
                     aux_res = list()
                     aux_res.append(self.create_report_line(
-                        'Resume Currency {0}'.format(key), {'currency': key}))
+                        u'Resume Currency {0}'.format(key), {'currency': key}))
                     aux_res.append(value['init_balance'])
                     aux_res.extend(value['filter_lines'])
                     if value['xchange_total']:
@@ -385,7 +385,7 @@ class account_balance(report_sxw.rml_parse):
                 for (key, value) in all_res['currency'].iteritems():
                     aux_res = list()
                     aux_res.append(self.create_report_line(
-                        'Resume Currency {0}'.format(key), {'currency': key}))
+                        u'Resume Currency {0}'.format(key), {'currency': key}))
                     aux_res.append(value['init_balance'])
                     if value['xchange_total']:
                         aux_res.append(value['xchange_total'])
@@ -395,7 +395,7 @@ class account_balance(report_sxw.rml_parse):
                 for (key, value) in all_res['currency'].iteritems():
                     aux_res = list()
                     aux_res.append(self.create_report_line(
-                        'Resume Currency {0}'.format(key), {'currency': key}))
+                        u'Resume Currency {0}'.format(key), {'currency': key}))
                     aux_res.append(value['init_balance'])
                     aux_res.extend(value['lines'])
                     for line in value['filter_lines']:
@@ -411,7 +411,7 @@ class account_balance(report_sxw.rml_parse):
                 for (key, value) in partner_data.iteritems():
                     aux_res = list()
                     aux_res.append(self.create_report_line(
-                        'Resume of partner {0}'.format(key), {'partner': key}))
+                        u'Resume of partner {0}'.format(key), {'partner': key}))
                     aux_res.extend(value['init_balance'])
                     aux_res.extend(value['filter_lines'])
                     if value['xchange_total']:
@@ -422,7 +422,7 @@ class account_balance(report_sxw.rml_parse):
                 for (key, value) in partner_data.iteritems():
                     aux_res = list()
                     aux_res.append(self.create_report_line(
-                        'Resume of partner {0}'.format(key), {'partner': key}))
+                        u'Resume of partner {0}'.format(key), {'partner': key}))
                     aux_res.extend(value['init_balance'])
                     if value['xchange_total']:
                         aux_res.extend(value['xchange_total'])
@@ -475,7 +475,7 @@ class account_balance(report_sxw.rml_parse):
             for (currency_key, value2) in value.iteritems():
                 print level*2, currency_key
                 for (cval_key, value3) in value2.iteritems():
-                    print level*3, '{0: <20}'.format(cval_key), isinstance(value3, list) and (len(value3) or '0') or cval_key != 'partner' and (value3 and '\t\t{amount_company_currency}\t{amount_currency}\t{differential}'.format(**value3) or '') or ''
+                    print level*3, u'{0: <20}'.format(cval_key), isinstance(value3, list) and (len(value3) or '0') or cval_key != 'partner' and (value3 and u'\t\t{amount_company_currency}\t{amount_currency}\t{differential}'.format(**value3) or '') or ''
 
 
                     if cval_key in ['lines', 'xchange_lines', 'filter_lines']:
@@ -484,7 +484,7 @@ class account_balance(report_sxw.rml_parse):
                             if line
                             if line['currency'] != currency_key or value3.count(line) != 1]
                         for line in value3:
-                            print ' '*25, '\t\t{amount_company_currency}\t{amount_currency}\t{differential}'.format(**line)
+                            print ' '*25, u'\t\t{amount_company_currency}\t{amount_currency}\t{differential}'.format(**line)
                         if error:
                             pprint.pprint(error)
                             raise osv.except_osv('error', 'lines with other currencys in ' + cval_key)
@@ -499,14 +499,14 @@ class account_balance(report_sxw.rml_parse):
                         for (partner_key, value4) in value3.iteritems():
                             print level*4, (partner_key, )
                             for (pval_key, value5) in value4.iteritems():
-                                print level*5, '{0: <15}'.format(pval_key), isinstance(value5, list) and (len(value5) or '0') or (value5 and '\t\t{amount_company_currency}\t{amount_currency}\t{differential}'.format(**value5) or '')
+                                print level*5, u'{0: <15}'.format(pval_key), isinstance(value5, list) and (len(value5) or '0') or (value5 and u'\t\t{amount_company_currency}\t{amount_currency}\t{differential}'.format(**value5) or '')
                                 if pval_key in ['lines', 'xchange_lines', 'filter_lines']:
                                     error = [line
                                         for line in value5
                                         if line
                                         if line['currency'] != currency_key or line['partner'] != partner_key or value5.count(line) != 1]
                                     for line in value5:
-                                        print ' '*25, '\t\t{amount_company_currency}\t{amount_currency}\t{differential}'.format(**line)
+                                        print ' '*25, u'\t\t{amount_company_currency}\t{amount_currency}\t{differential}'.format(**line)
                                     if error:
                                         pprint.pprint(error)
                                         raise osv.except_osv('error', 'lines with other currencys in ' + pval_key)
@@ -641,7 +641,7 @@ class account_balance(report_sxw.rml_parse):
                     {line[subkey]: copy.deepcopy(basic)})
                 for (row, title_str) in rows.iteritems():
                     res[key][line[key]][subkey][line[subkey]][row] = self.create_report_line(
-                        title_str.format(line[subkey])+' in {0}'.format(line[key]), {key: line[key], subkey: line[subkey]})
+                        title_str.format(line[subkey])+u' in {0}'.format(line[key]), {key: line[key], subkey: line[subkey]})
         return res
 
     def get_initial_balance(self, res, account, main_keys, ctx):
