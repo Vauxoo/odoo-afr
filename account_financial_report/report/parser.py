@@ -624,10 +624,10 @@ class account_balance(report_sxw.rml_parse):
             group_dict[subkey] = {}
 
         rows = dict(
-            total='Accumulated in {0}',
-            real_total='Total in {0}',
-            init_balance='Initial Balance in {0}',
-            xchange_total='Exchange Differencial in {0}',
+            total=u'Accumulated in {0}',
+            real_total=u'Total in {0}',
+            init_balance=u'Initial Balance in {0}',
+            xchange_total=u'Exchange Differencial in {0}',
         )
         if not res[key].get(line[key], False):
             res[key][line[key]] = copy.deepcopy(group_dict)
