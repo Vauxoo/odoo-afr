@@ -294,12 +294,10 @@
                     <tr>
                         <td>
                             <para style="TITLES_NEW">
-                                <font> [[ formatLang( y.date, date=True) ]]</font>
                             </para>
                         </td>
                         <td>
                             <para style="TITLES_NEW">
-                                <font>[[ y.period_id.name ]]</font>
                             </para>
                         </td>
                         <td>
@@ -309,7 +307,7 @@
                         </td>
                         <td>
                             <para style="TITLES_NEW">
-                                <font>[[ y.am_id.name ]]</font>
+                                <font>[[ y.percentage ]]</font>
                             </para>
 <!--
                             <para style="TITLES_NEW">
@@ -319,25 +317,22 @@
                         </td>
                         <td>
                             <para style="TITLES_NEW">
-                                <font>[[ y.partner_id.name ]]</font>
                             </para>
                         </td>
                         <td>
                             <para style="TITLE_LEFT_ALIGN">
                                 <font>[[ a['type']&lt;&gt;'view' and setTag('para','para',{'fontName':"Courier"}) or removeParentNode('font') ]]</font>
-                                <font>[[ (a['total']==True) and formatLang(y.amount, digits=2, grouping=True) or '']]</font>
+                                <font>[[ (a['total']==True) and y.amount &lt; 0.0 and formatLang(y.amount * -1, digits=2, grouping=True) or '']]</font>
                             </para>
                                 </td>
                                 <td>
                             <para style="TITLE_LEFT_ALIGN">
                                 <font>[[ a['type']&lt;&gt;'view' and setTag('para','para',{'fontName':"Courier"}) or removeParentNode('font') ]]</font>
-                                <font>[[ (a['total']==True) and formatLang(y.amount, digits=2, grouping=True) or '']]</font>
+                                <font>[[ (a['total']==True) and y.amount &gt;= 0.0  and formatLang(y.amount, digits=2, grouping=True) or '']]</font>
                             </para>
                                 </td>
                                 <td>
                             <para style="TITLE_LEFT_ALIGN">
-                                <font>[[ a['type']&lt;&gt;'view' and setTag('para','para',{'fontName':"Courier"}) or removeParentNode('font') ]]</font>
-                                <font>[[ (a['total']==True) and formatLang(y.amount * a.get('change_sign',1.0) or 0.0, digits=2, grouping=True) or '']]</font>
                             </para>
                         </td>
                     </tr>
