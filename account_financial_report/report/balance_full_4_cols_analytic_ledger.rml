@@ -289,7 +289,7 @@
 
             <section>
                 <!-- TODO: add analytic lines here -->
-                <para>[[ repeatIn(m['aml_brw'].analytic_lines, 'y') ]]</para>
+                <para>[[ repeatIn([z for z in m['aml_brw'].analytic_lines if data['form']['print_analytic_lines']], 'y') ]]</para>
                 <blockTable colWidths="2.25cm,2.0cm,7.75cm,2.5cm,4.0cm,2.5cm,2.5cm,2.5cm" style="BODY_LINE" repeatRows="1">
                     <tr>
                         <td>
