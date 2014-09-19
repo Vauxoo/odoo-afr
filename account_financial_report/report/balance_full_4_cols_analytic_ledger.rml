@@ -302,7 +302,7 @@
                         </td>
                         <td>
                             <para style="TITLES_NEW">
-                                <font>AAL [[ y.name ]] [[ y.ref and (' - Ref %s'%y.ref) or '' ]] </font>
+                                <font>[[ y.name ]] [[ y.ref and (' - Ref %s'%y.ref) or '' ]] </font>
                             </para>
                         </td>
                         <td>
