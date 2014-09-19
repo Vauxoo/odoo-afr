@@ -81,6 +81,10 @@ class wizard_report(osv.osv_memory):
             'Line Details',
             help='Only applies in the way of the end balance multicurrency'
             ' report is show.'),
+        'print_analytic_lines': fields.boolean('Print Analytic Lines',
+            help="If this checkbox is active will print the analytic lines in"
+            " the analytic ledger four columns report. This option only"
+            " applies when the analytic ledger is selected.")
     }
 
     _defaults = {
