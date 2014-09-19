@@ -48,6 +48,7 @@
                         <field name="partner_balance"  
                         attrs="{'readonly':['|',('columns','!=','four'),('inf_type','!=','BS')],}" 
                         />
+                        <field name="print_analytic_lines" attrs="{'readonly':[('analytic_ledger', '=', False)]}"/>
                     </group>
                 </group>
                 <group>
