@@ -286,6 +286,58 @@
                         </td>
                     </tr>
                 </blockTable>
+
+            <section>
+                <!-- TODO: add analytic lines here -->
+                <para>[[ repeatIn([z for z in m['aml_brw'].analytic_lines if data['form']['print_analytic_lines']], 'y') ]]</para>
+                <blockTable colWidths="2.25cm,2.0cm,7.75cm,2.5cm,4.0cm,2.5cm,2.5cm,2.5cm" style="BODY_LINE" repeatRows="1">
+                    <tr>
+                        <td>
+                            <para style="TITLES_NEW">
+                            </para>
+                        </td>
+                        <td>
+                            <para style="TITLES_NEW">
+                            </para>
+                        </td>
+                        <td>
+                            <para style="TITLES_NEW">
+                                <font>[[ y.name ]] [[ y.ref and (' - Ref %s'%y.ref) or '' ]] </font>
+                            </para>
+                        </td>
+                        <td>
+                            <para style="TITLES_NEW">
+                                <font>[[ y.percentage ]]</font>
+                            </para>
+<!--
+                            <para style="TITLES_NEW">
+                                <font>[[ y['journal'] ]]</font>
+                            </para>
+-->
+                        </td>
+                        <td>
+                            <para style="TITLES_NEW">
+                            </para>
+                        </td>
+                        <td>
+                            <para style="TITLE_LEFT_ALIGN">
+                                <font>[[ a['type']&lt;&gt;'view' and setTag('para','para',{'fontName':"Courier"}) or removeParentNode('font') ]]</font>
+                                <font>[[ (a['total']==True) and y.amount &lt; 0.0 and formatLang(y.amount * -1, digits=2, grouping=True) or '']]</font>
+                            </para>
+                                </td>
+                                <td>
+                            <para style="TITLE_LEFT_ALIGN">
+                                <font>[[ a['type']&lt;&gt;'view' and setTag('para','para',{'fontName':"Courier"}) or removeParentNode('font') ]]</font>
+                                <font>[[ (a['total']==True) and y.amount &gt;= 0.0  and formatLang(y.amount, digits=2, grouping=True) or '']]</font>
+                            </para>
+                                </td>
+                                <td>
+                            <para style="TITLE_LEFT_ALIGN">
+                            </para>
+                        </td>
+                    </tr>
+                </blockTable>
+            </section>
         </section>
         <spacer length="2.5mm"/>
     </section>

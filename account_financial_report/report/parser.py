@@ -294,6 +294,7 @@ class account_balance(report_sxw.rml_parse):
     def _get_analytic_ledger(self, account, ctx=None):
         ctx = ctx or {}
         res = []
+        aml_obj = self.pool.get('account.move.line')
         if account['type'] in ('other', 'liquidity', 'receivable', 'payable'):
             #~ TODO: CUANDO EL PERIODO ESTE VACIO LLENARLO CON LOS PERIODOS DEL EJERCICIO
             #~ FISCAL, SIN LOS PERIODOS ESPECIALES
@@ -338,6 +339,7 @@ class account_balance(report_sxw.rml_parse):
                     'aa_id': det['aa_id'],
                     'cuenta': det['cuenta'],
                     'id': det['id'],
+                    'aml_brw': aml_obj.browse(self.cr, self.uid, det['id'], context=ctx),
                     'date': det['date'],
                     'journal': det['diario'],
                     'title': u'\t\t{date:<15}\t\t{periodo:<12}\t\t{partner:<150}\t\t{asiento:<20}'.format(**det),
