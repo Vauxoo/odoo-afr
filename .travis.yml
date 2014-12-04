@@ -7,14 +7,14 @@ python:
   - "2.7"
 
 env:
-  - VERSION="8.0" ODOO_REPO="odoo/odoo"
-  - VERSION="8.0" ODOO_REPO="odoo/odoo" UNIT_TEST="1"
+  - VERSION="7.0" ODOO_REPO="odoo/odoo"
+  - VERSION="7.0" ODOO_REPO="odoo/odoo" UNIT_TEST="1"
 
 virtualenv:
   system_site_packages: true
 
 install:
-  - git clone --single-branch --depth=1 https://github.com/oca/maintainer-quality-tools.git -b master ${HOME}/maintainer-quality-tools
+  - git clone --single-branch --depth=1 https://github.com/vauxoo/maintainer-quality-tools.git -b master ${HOME}/maintainer-quality-tools
   - export PATH=${HOME}/maintainer-quality-tools/travis:${PATH}
   - travis_install_nightly
 
