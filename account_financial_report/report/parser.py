@@ -373,11 +373,7 @@ class account_balance(report_sxw.rml_parse):
                                               context=ctx),
                     'date': det['date'],
                     'journal': det['diario'],
-                    'title': title.format(
-                        periodo=det['date'],
-                        date=det['periodo'],
-                        partner=det['partner'],
-                        asiento=det['asiento']),
+                    'title': title.format(dict([i for i in det.iteritems()])),
                     'partner_id': det['partner_id'],
                     'partner': det['partner'],
                     'name': det['name'],
