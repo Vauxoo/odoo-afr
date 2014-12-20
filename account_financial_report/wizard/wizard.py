@@ -45,8 +45,8 @@ class wizard_report(osv.osv_memory):
             help="Currency at which this report will be expressed. If not "
             "selected will be used the one set in the company"),
         'inf_type': fields.selection(
-            [('BS', 'Balance Sheet'), ('IS', 'Income Statement')], 'Type',
-            required=True),
+            [('BS', 'Ending Balance'),
+             ('IS', 'Variation on Periods')], 'Type', required=True),
         'columns': fields.selection([
             ('one', 'End. Balance'),
             ('two', 'Debit | Credit'),
