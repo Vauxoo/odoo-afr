@@ -469,11 +469,8 @@ class account_balance(report_sxw.rml_parse):
 
         level = '--'
         for (main_key, value) in all_res.iteritems():
-            print level*1, main_key
             for (currency_key, value2) in value.iteritems():
-                print level*2, currency_key
                 for (cval_key, value3) in value2.iteritems():
-                    print level*3, u'{0: <20}'.format(cval_key), isinstance(value3, list) and (len(value3) or '0') or cval_key != 'partner' and (value3 and u'\t\t{amount_company_currency}\t{amount_currency}\t{differential}'.format(**value3) or '') or ''
 
 
                     if cval_key in ['lines', 'xchange_lines', 'filter_lines']:
@@ -481,39 +478,29 @@ class account_balance(report_sxw.rml_parse):
                             for line in value3
                             if line
                             if line['currency'] != currency_key or value3.count(line) != 1]
-                        for line in value3:
-                            print ' '*25, u'\t\t{amount_company_currency}\t{amount_currency}\t{differential}'.format(**line)
                         if error:
-                            pprint.pprint(error)
                             raise osv.except_osv('error', 'lines with other currencys in ' + cval_key)
                     elif cval_key in ['real_total', 'init_balance', 'total', 'xchange_total']:
                         error = (
                             value3 and (value3['currency'] != currency_key  or value3['partner'])
                             and value3 or False)
                         if error:
-                            pprint.pprint(error)
                             raise osv.except_osv('error', 'lines with other currencys in ' + cval_key)
                     elif cval_key == 'partner':
                         for (partner_key, value4) in value3.iteritems():
-                            print level*4, (partner_key, )
                             for (pval_key, value5) in value4.iteritems():
-                                print level*5, u'{0: <15}'.format(pval_key), isinstance(value5, list) and (len(value5) or '0') or (value5 and u'\t\t{amount_company_currency}\t{amount_currency}\t{differential}'.format(**value5) or '')
                                 if pval_key in ['lines', 'xchange_lines', 'filter_lines']:
                                     error = [line
                                         for line in value5
                                         if line
                                         if line['currency'] != currency_key or line['partner'] != partner_key or value5.count(line) != 1]
-                                    for line in value5:
-                                        print ' '*25, u'\t\t{amount_company_currency}\t{amount_currency}\t{differential}'.format(**line)
                                     if error:
-                                        pprint.pprint(error)
                                         raise osv.except_osv('error', 'lines with other currencys in ' + pval_key)
                                 elif pval_key in ['real_total', 'init_balance', 'total', 'xchange_total']:
                                     error = (
                                         value5 and (value5['currency'] != currency_key or value5['partner'] != partner_key)
                                         and value5 or False)
                                     if error:
-                                        pprint.pprint(error)
                                         raise osv.except_osv('error', 'lines with other currencys in ' + pval_key)
                     else:
                             raise osv.except_osv('error', 'missing case ' + cval_key)
@@ -854,7 +841,6 @@ class account_balance(report_sxw.rml_parse):
     def _get_journal_ledger(self, account, ctx={}):
         res = []
         am_obj = self.pool.get('account.move')
-        print 'AM OBJ ', am_obj
         if account['type'] in ('other', 'liquidity', 'receivable', 'payable'):
             #~ TODO: CUANDO EL PERIODO ESTE VACIO LLENARLO CON LOS PERIODOS DEL EJERCICIO
             #~ FISCAL, SIN LOS PERIODOS ESPECIALES
@@ -888,7 +874,6 @@ class account_balance(report_sxw.rml_parse):
                     'period': det['periodo'],
                     'obj': am_obj.browse(self.cr, self.uid, det['am_id'])
                 })
-                print 'ACCOUNT NAME', am_obj.browse(self.cr, self.uid, det['am_id']).name
         return res
 
     def lines(self, form, level=0):
