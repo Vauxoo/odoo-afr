@@ -357,12 +357,12 @@ class account_balance(report_sxw.rml_parse):
             company_currency = self.pool.get('res.currency').browse(
                 self.cr, self.uid,
                 self.get_company_currency(ctx['company_id'])).name
-            title = u'''
-            \t\t{date:<15}
-            \t\t{periodo:<12}
-            \t\t{partner:<150}
-            \t\t{asiento:<20}
-            '''
+            # title = u'''
+            # \t\t{date:<15}
+            # \t\t{periodo:<12}
+            # \t\t{partner:<150}
+            # \t\t{asiento:<20}
+            # '''
             for det in resultat:
                 balance += det['debit'] - det['credit']
                 res.append({
@@ -373,7 +373,8 @@ class account_balance(report_sxw.rml_parse):
                                               context=ctx),
                     'date': det['date'],
                     'journal': det['diario'],
-                    'title': title.format(dict([i for i in det.iteritems()])),
+                    # 'title': title.format(dict([i for i in
+                    # det.iteritems()])),
                     'partner_id': det['partner_id'],
                     'partner': det['partner'],
                     'name': det['name'],
