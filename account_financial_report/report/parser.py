@@ -71,13 +71,13 @@ class account_balance(report_sxw.rml_parse):
                                    form['company_id'][0]).partner_id.vat or ''
         if string_vat:
             if country_code == 'MX':
-                return '%s' % (string_vat[2:])
+                return ['%s' % (string_vat[2:])]
             elif country_code == 'VE':
-                return '- %s-%s-%s' % (string_vat[2:3], string_vat[3:11], string_vat[11:12])
+                return ['- %s-%s-%s' % (string_vat[2:3], string_vat[3:11], string_vat[11:12])]
             else:
-                return string_vat
+                return [string_vat]
         else:
-            return _('\nVAT OF COMPANY NOT AVAILABLE')
+            return [_('VAT OF COMPANY NOT AVAILABLE')]
 
     def get_fiscalyear_text(self, form):
         """
@@ -1139,14 +1139,12 @@ class account_balance(report_sxw.rml_parse):
         # This could be done quickly with a sql sentence
         account_not_black = account_obj.browse(
             self.cr, self.uid, account_not_black_ids)
-        account_not_black.sort(key=lambda x: x.level)
-        account_not_black.reverse()
+        account_not_black.sorted(key=lambda x: x.level, reverse=True)
         account_not_black_ids = [i.id for i in account_not_black]
 
         c_account_not_black = account_obj.browse(
             self.cr, self.uid, c_account_not_black_ids)
-        c_account_not_black.sort(key=lambda x: x.level)
-        c_account_not_black.reverse()
+        c_account_not_black.sorted(key=lambda x: x.level, reverse=True)
         c_account_not_black_ids = [i.id for i in c_account_not_black]
 
         if delete_cons:
@@ -1156,8 +1154,7 @@ class account_balance(report_sxw.rml_parse):
         else:
             acc_cons_brw = account_obj.browse(
                 self.cr, self.uid, acc_cons_ids)
-            acc_cons_brw.sort(key=lambda x: x.level)
-            acc_cons_brw.reverse()
+            acc_cons_brw.sorted(key=lambda x: x.level, reverse=True)
             acc_cons_ids = [i.id for i in acc_cons_brw]
 
             account_not_black_ids = c_account_not_black_ids + \
@@ -1235,6 +1232,8 @@ class account_balance(report_sxw.rml_parse):
                     or dict_not_black.get(acc_id).get('obj').child_consol_ids
                 for child_id in acc_childs:
                     if child_id.type == 'consolidation' and delete_cons:
+                        continue
+                    if not all_account.get(child_id.id):
                         continue
                     dict_not_black.get(acc_id)['debit'] += all_account.get(
                         child_id.id).get('debit')

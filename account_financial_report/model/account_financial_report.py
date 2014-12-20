@@ -40,7 +40,7 @@ class account_financial_report(osv.osv):
         'currency_id': fields.many2one(
             'res.currency', 'Currency', help="Currency at which this report will be expressed. If not selected will be used the one set in the company"),
         'inf_type': fields.selection(
-            [('BS', 'Balance Sheet'), ('IS', 'Income Statement')], 'Type', required=True),
+            [('BS', 'Ending Balance'), ('IS', 'Variation on Periods')], 'Type', required=True),
         'columns': fields.selection([('one', 'End. Balance'), ('two', 'Debit | Credit'), ('four', 'Initial | Debit | Credit | YTD'),
                                     ('five', 'Initial | Debit | Credit | Period | YTD'), ('qtr', "4 QTR's | YTD"), ('thirteen', '12 Months | YTD')], 'Columns', required=True),
         'display_account': fields.selection([('all', 'All Accounts'), ('bal', 'With Balance'),
