@@ -1321,7 +1321,7 @@ class account_balance(report_sxw.rml_parse):
                 for child_id in acc_childs:
                     if child_id.type == 'consolidation' and delete_cons:
                         continue
-                    if not all_account[child_id.id]:
+                    if not all_account.get(child_id.id):
                         continue
                     dict_not_black[acc_id]['debit'] += \
                         all_account[child_id.id].get('debit')
