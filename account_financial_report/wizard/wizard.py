@@ -184,8 +184,9 @@ class wizard_report(osv.osv_memory):
         context = context or {}
         context['company_id'] = company_id
         res = {}
-        res['value'] = self.pool.get('res.company').browse(
-            cr, uid, company_id, context=context).currency_id.id
+        res['value'] = {
+            'currency_id': self.pool.get('res.company').browse(
+                cr, uid, company_id, context=context).currency_id.id}
         return res
 
     def onchange_company_id(self, cr, uid, ids, company_id, context=None):
