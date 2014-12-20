@@ -8,17 +8,21 @@
 
                 <image x="1.0cm" y="17.65cm" width="5.0cm">[[company.logo and company.logo or removeParentNode('image')]]</image>
 <!--
-                <drawString x="1.0cm" y="24.5cm">[[company.logo and removeParentNode('para') or company.name]]</drawString> 
+                <drawString x="1.0cm" y="24.5cm">[[company.logo and removeParentNode('para') or company.name]]</drawString>
 -->
 
-                <place x="-3.5cm" y="16.15cm" width="19cm"  height="5.0cm"> 
+                <place x="-3.5cm" y="16.15cm" width="19cm"  height="5.0cm">
                     <blockTable colWidths="9.6cm,9.4cm" style="TITLE">
                         <tr>
                             <td><para style="TOP_TITLE"></para></td>
-                            <td><para style="TITLE_CENTER_NAME">
-                                <font>[[ (company.name and company.name or 'NOMBRE DE COMPANIA NO DISPONIBLE')]]</font>
-                                <font>[[ company.partner_id.vat and ('- %s-%s-%s'%(company.partner_id.vat[2:3],company.partner_id.vat[3:11],company.partner_id.vat[11:12])) or '' ]]</font>
-                            </para></td>
+                            <td>
+                                <para style="TITLE_CENTER_NAME">
+                                    <font>[[ (company.name and company.name or 'NOMBRE DE COMPANIA NO DISPONIBLE')]]</font>
+                                </para>
+                                <para style="TITLE_CENTER_NAME">
+                                    <font>[[ get_vat_by_country(data['form']) ]]</font>
+                                </para>
+                            </td>
                         </tr>
                         <tr>
                             <td><para style="TOP_TITLE"></para></td>
@@ -33,8 +37,8 @@
                             <td><para style="TITLE_CENTER">[[data['form'] and get_month(data['form']) or '']]</para></td>
                         </tr>
                     </blockTable>
-                </place>                
-                <drawRightString x="270mm" y="5mm">Printing Date: [[ formatLang(time.strftime('%Y-%m-%d %H:%M:%S'),date_time=True) ]] [[ get_informe_text(data['form']) ]] /  Pág.: <pageNumber/>-<pageCount/></drawRightString> 
+                </place>
+                <drawRightString x="270mm" y="5mm">Printing Date: [[ formatLang(time.strftime('%Y-%m-%d %H:%M:%S'),date_time=True) ]] [[ get_informe_text(data['form']) ]] /  Pág.: <pageNumber/>-<pageCount/></drawRightString>
             </pageGraphics>
         </pageTemplate>
     </template>
@@ -56,7 +60,7 @@
         </blockTableStyle>
         <blockTableStyle id="TITLE">
             <blockValign value="TOP"/>
-        </blockTableStyle> 
+        </blockTableStyle>
         <blockTableStyle id="BODY">
             <blockValign value="TOP"/>
             <blockAlignment value="RIGHT"/>
@@ -80,62 +84,62 @@
         <initialize>
             <paraStyle name="all" alignment="justify"/>
         </initialize>
-        
-        <paraStyle 
-            name="TITLE_LEFT_ALIGN_NEW" 
+
+        <paraStyle
+            name="TITLE_LEFT_ALIGN_NEW"
             fontName="Courier"
             fontSize="7.0"
-            leading="10" 
-            alignment="RIGHT" 
-            spaceBefore="0.0" 
+            leading="10"
+            alignment="RIGHT"
+            spaceBefore="0.0"
             spaceAfter="0.0"/>
-        <paraStyle name="TITLES_NEW" 
+        <paraStyle name="TITLES_NEW"
             fontName="Courier"
-            fontSize="7.0" 
-            leading="10" 
-            alignment="LEFT" 
-            spaceBefore="0.0" 
+            fontSize="7.0"
+            leading="10"
+            alignment="LEFT"
+            spaceBefore="0.0"
             spaceAfter="0.0"/>
-        <paraStyle name="TITLES_NEW_P" 
+        <paraStyle name="TITLES_NEW_P"
             fontName="Helvetica-Bold"
-            fontSize="6.0" 
-            leading="10" 
-            alignment="LEFT" 
-            spaceBefore="0.0" 
+            fontSize="6.0"
+            leading="10"
+            alignment="LEFT"
+            spaceBefore="0.0"
             spaceAfter="0.0"/>
-        <paraStyle name="TITLES_NEW_RIGHT" 
+        <paraStyle name="TITLES_NEW_RIGHT"
             fontName="Courier"
-            fontSize="7.0" 
-            leading="10" 
-            alignment="RIGHT" 
-            spaceBefore="0.0" 
+            fontSize="7.0"
+            leading="10"
+            alignment="RIGHT"
+            spaceBefore="0.0"
             spaceAfter="0.0"/>
-        <paraStyle 
-            name="TITLE_LEFT_ALIGN" 
-            fontName="Helvetica-Bold" 
-            fontSize="7.0" 
-            leading="10" 
-            alignment="RIGHT" 
-            spaceBefore="0.0" 
+        <paraStyle
+            name="TITLE_LEFT_ALIGN"
+            fontName="Helvetica-Bold"
+            fontSize="7.0"
+            leading="10"
+            alignment="RIGHT"
+            spaceBefore="0.0"
             spaceAfter="0.0"/>
         <paraStyle name="TOP_TITLE" fontName="Helvetica-Bold" fontSize="7"  leftIndent="0.0" alignment="LEFT"/>
-        <paraStyle 
-            name="TITLES" 
-            fontName="Helvetica-Bold" 
-            fontSize="7.0" 
-            leading="10" 
-            alignment="LEFT"  
-            spaceBefore="0.0" 
+        <paraStyle
+            name="TITLES"
+            fontName="Helvetica-Bold"
+            fontSize="7.0"
+            leading="10"
+            alignment="LEFT"
+            spaceBefore="0.0"
             spaceAfter="0.0"/>
         <paraStyle name="TITLE_CENTER" fontName="Helvetica-Bold" fontSize="7" leading="10" leftIndent="0.0" alignment="CENTER"/>
         <paraStyle name="TITLE_CENTER_NAME" fontName="Helvetica-Bold" fontSize="12" leading="13" leftIndent="0.0" alignment="CENTER"/>
-        <paraStyle 
-            name="TITLE" 
-            alignment="CENTER" 
-            fontName="Helvetica" 
-            fontSize="18.0" 
-            leading="20" 
-            spaceBefore="-3.0" 
+        <paraStyle
+            name="TITLE"
+            alignment="CENTER"
+            fontName="Helvetica"
+            fontSize="18.0"
+            leading="20"
+            spaceBefore="-3.0"
             textColor="black"/>
     </stylesheet>
     <images/>
@@ -166,41 +170,28 @@
                 </td>
             </tr>
         </blockTable>
-                <blockTable colWidths="6.0cm,3.0cm,3.0cm,2.5cm,4.0cm,2.5cm,2.5cm,2.5cm" style="BODY_LINE" repeatRows="0">
-<!--
-                [[ (a['type'] &lt;&gt; 'view') or removeParentNode('blockTable') ]]
--->
-                    <tr noRowsplits="1">
-                        <td>
-                            <para style="TITLES_NEW">
-                                <font>DATE</font>
-                            </para>
-                        </td>
-                        <td>
-                            <para style="TITLES_NEW">
-                                <font>PERIOD</font>
-                            </para>
-                        </td>
-                        <td>
-                            <para style="TITLES_NEW">JOURNAL ENTRY</para>
-                        </td>
-                        <td>
-                            <para style="TITLE_LEFT_ALIGN"></para>
-                        </td>
-                        <td>
-                            <para style="TITLE_LEFT_ALIGN"></para>
-                        </td>
-                        <td>
-                            <para style="TITLE_LEFT_ALIGN"></para>
-                        </td>
-                        <td>
-                            <para style="TITLE_LEFT_ALIGN"></para>
-                        </td>
-                        <td>
-                            <para style="TITLE_LEFT_ALIGN"></para>
-                        </td>
-                    </tr>
-                </blockTable>
+    <blockTable colWidths="6.0cm,3.0cm,3.0cm,2.5cm,4.0cm,2.5cm,2.5cm,2.5cm" style="BODY_LINE" repeatRows="0">
+        <tr noRowsplits="1">
+            <td>
+                <para style="TITLES_NEW">
+                    <font>DATE</font>
+                </para>
+            </td>
+            <td>
+                <para style="TITLES_NEW">
+                    <font>PERIOD</font>
+                </para>
+            </td>
+            <td>
+                <para style="TITLES_NEW">JOURNAL ENTRY</para>
+            </td>
+            <td> </td>
+            <td> </td>
+            <td> </td>
+            <td> </td>
+            <td> </td>
+        </tr>
+    </blockTable>
     <section>
         <para>[[ repeatIn([x for x in lines(data['form']) if x['type'] != 'view'], 'a') ]]</para>
         <blockTable colWidths="2.5cm,13.5cm,2.5cm,2.5cm,2.5cm,2.5cm" style="BODY" repeatRows="0">
