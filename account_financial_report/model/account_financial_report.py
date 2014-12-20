@@ -127,26 +127,19 @@ class account_financial_report(osv.osv):
         'target_move': 'posted',
     }
 
-    def copy(self, cr, uid, id, defaults, context=None):
+    def copy(self, cr, uid, ids, default=None, context=None):
         if context is None:
             context = {}
-        previous_name = self.browse(cr, uid, id, context=context).name
+        previous_name = self.browse(cr, uid, ids, context=context).name
         new_name = _('Copy of %s') % previous_name
-        lst = self.search(cr, uid, [(
-            'name', 'like', new_name)], context=context)
+        lst = self.search(cr, uid, [('name', 'like', new_name)],
+                          context=context)
         if lst:
             new_name = '%s (%s)' % (new_name, len(lst) + 1)
-        defaults['name'] = new_name
-        return (
-            super(
-                account_financial_report,
-                self).copy(
-                cr,
-                uid,
-                id,
-                defaults,
-                context=context)
-        )
+        default['name'] = new_name
+        return super(account_financial_report, self).copy(cr, uid, ids,
+                                                          default=default,
+                                                          context=context)
 
     def onchange_inf_type(self, cr, uid, ids, inf_type, context=None):
         if context is None:
