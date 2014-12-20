@@ -54,7 +54,8 @@ class wizard_report(osv.osv_memory):
             ('five', 'Initial | Debit | Credit | Period | YTD'),
             ('qtr', "4 QTR's | YTD"),
             ('thirteen', '12 Months | YTD'),
-            ('currency', 'End. Balance Currency')], 'Columns', required=True),
+            # ('currency', 'End. Balance Currency'),
+            ], 'Columns', required=True),
         'display_account': fields.selection(
             [('all', 'All Accounts'), ('bal', 'With Balance'),
              ('mov', 'With movements'),
