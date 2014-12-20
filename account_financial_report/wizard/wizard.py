@@ -181,13 +181,12 @@ class wizard_report(osv.osv_memory):
 
     def onchange_analytic_ledger(self, cr, uid, ids, company_id,
                                  analytic_ledger, context=None):
-        if context is None:
-            context = {}
+        context = context or {}
         context['company_id'] = company_id
-        res = {'value': {}}
-        cur_id = self.pool.get('res.company').browse(
-            cr, uid, company_id, context=context).currency_id.id
-        res['value'].update({'currency_id': cur_id})
+        res = {}
+        res['value'] = {
+            'currency_id': self.pool.get('res.company').browse(
+                cr, uid, company_id, context=context).currency_id.id}
         return res
 
     def onchange_company_id(self, cr, uid, ids, company_id, context=None):

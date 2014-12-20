@@ -43,6 +43,8 @@ class account_balance(report_sxw.rml_parse):
         self.sum_debit_fy = 0.00
         self.sum_credit_fy = 0.00
         self.sum_balance_fy = 0.00
+        self.to_currency_id = None
+        self.from_currency_id = None
         self.date_lst = []
         self.date_lst_string = ''
         self.localcontext.update({
@@ -295,10 +297,14 @@ class account_balance(report_sxw.rml_parse):
                     unknown = data
                     continue
                 res.append(data)
-            unknown and res.append(unknown)
+            if unknown:
+                res.append(unknown)
         return res
 
     def _get_analytic_ledger(self, account, ctx=None):
+        """
+        TODO
+        """
         ctx = ctx or {}
         res = []
         aml_obj = self.pool.get('account.move.line')
@@ -367,7 +373,7 @@ class account_balance(report_sxw.rml_parse):
                                               context=ctx),
                     'date': det['date'],
                     'journal': det['diario'],
-                    'title': title.format(**det),
+                    'title': title.format(dict([i for i in det.iteritems()])),
                     'partner_id': det['partner_id'],
                     'partner': det['partner'],
                     'name': det['name'],
@@ -463,6 +469,7 @@ class account_balance(report_sxw.rml_parse):
 
     def get_group_by_partner(self, all_res):
         """
+        TODO
         """
         basic = dict(
             init_balance=[], total=[], lines=[], real_total=[],
@@ -470,18 +477,18 @@ class account_balance(report_sxw.rml_parse):
         )
 
         partner_keys = set()
-        for (currency, values) in all_res['currency'].iteritems():
+        for values in all_res['currency'].values():
             for (partner, values2) in values['partner'].iteritems():
                 partner_keys.add(partner)
 
         partner_keys = list(partner_keys)
         partner_data = {}.fromkeys(partner_keys)
-        for (key, value) in partner_data.iteritems():
+        for key in partner_data.keys():
             partner_data[key] = copy.deepcopy(basic)
 
         for (curr, values) in all_res['currency'].iteritems():
             for (rp, values2) in values['partner'].iteritems():
-                for (field, values3) in values2.iteritems():
+                for field in values2.keys():
                     aux_val = \
                         copy.deepcopy(
                             all_res['currency'][curr]['partner'][rp][field])
@@ -494,7 +501,7 @@ class account_balance(report_sxw.rml_parse):
         """
         check that the dictionary is ok
         """
-        for (main_key, value) in all_res.iteritems():
+        for value in all_res.values():
             for (currency_key, value2) in value.iteritems():
                 for (cval_key, value3) in value2.iteritems():
 
@@ -543,8 +550,8 @@ class account_balance(report_sxw.rml_parse):
                                             ('lines with other currencys in '
                                              + pval_key))
                     else:
-                            raise osv.except_osv(
-                                'error', 'missing case ' + cval_key)
+                        raise osv.except_osv(
+                            'error', 'missing case ' + cval_key)
 
         raise osv.except_osv('its', 'ok')
 
@@ -588,6 +595,7 @@ class account_balance(report_sxw.rml_parse):
 
     def update_init_balance(self, res, resInit, main_keys):
         """
+        TODO
         """
         for (key, values1) in resInit.iteritems():
             for (key_id, values2) in values1.iteritems():
@@ -595,7 +603,7 @@ class account_balance(report_sxw.rml_parse):
                 res = self.init_report_line_group(res, line, key, [])
                 for subkey_list in main_keys.values():
                     for sk in subkey_list:
-                        for (sk_id, values3) in values2[sk].iteritems():
+                        for sk_id in values2[sk].keys():
                             line = {key: key_id, sk: sk_id}
                             res = self.init_report_line_group(res, line, key,
                                                               [sk])
@@ -607,7 +615,7 @@ class account_balance(report_sxw.rml_parse):
                     resInit[key][key_id]['total'])
                 for subkey_list in main_keys.values():
                     for sk in subkey_list:
-                        for (sk_id, values3) in values2[sk].iteritems():
+                        for sk_id in values2[sk].keys():
                             resInit[key][key_id][sk][sk_id]['total'].pop(
                                 'title')
                             res[key][key_id][sk][sk_id]['init_balance'].update(
@@ -631,8 +639,7 @@ class account_balance(report_sxw.rml_parse):
             res['currency'][curr]['xchange_total'] = {}
             for subkey_list in main_keys.values():
                 for sk in subkey_list:
-                    for (sk_id, values) in \
-                            res['currency'][curr][sk].iteritems():
+                    for sk_id in res['currency'][curr][sk].keys():
                         # TODO: Ask to kathy@vauxoo.com why there are to
                         # assignment to same key with two different types
                         res['currency'][curr][sk][sk_id]['xchange_total'] = []
@@ -694,6 +701,7 @@ class account_balance(report_sxw.rml_parse):
 
     def fill_result(self, res, aml_list, main_keys, context=None):
         """
+        TODO
         """
         ctx = context or {}
         for line in aml_list:
@@ -767,8 +775,9 @@ class account_balance(report_sxw.rml_parse):
     def _update_report_line(self, res, line, key, subkey, line_field,
                             total_field):
         """
+        TODO
         """
-        update_fields_list, copy_fields_list = self.get_fields()
+        update_fields_list = self.get_fields()[0]
         res[key][line[key]][line_field] += [line]
         res[key][line[key]][subkey][line[subkey]][line_field] += [line]
         for field in update_fields_list:
@@ -820,6 +829,7 @@ class account_balance(report_sxw.rml_parse):
 
     def get_fields(self):
         """
+        TODO
         """
         update_fields_list = [
             'debit', 'credit', 'balance', 'amount_currency',
@@ -831,8 +841,9 @@ class account_balance(report_sxw.rml_parse):
 
     def _get_real_totals(self, res, overwrite_fields):
         """
+        TODO
         """
-        update_fields_list, copy_fields_list = self.get_fields()
+        update_fields_list = self.get_fields()[0]
         for field in update_fields_list:
             res['real_total'][field] = \
                 res['init_balance'][field] + \
@@ -902,7 +913,7 @@ class account_balance(report_sxw.rml_parse):
             aml_group += [res3]
         return total_group.values() if remove_lines else group_list
 
-    def _get_journal_ledger(self, account, ctx={}):
+    def _get_journal_ledger(self, account, ctx=None):
         res = []
         am_obj = self.pool.get('account.move')
         if account['type'] in ('other', 'liquidity', 'receivable', 'payable'):
@@ -1141,12 +1152,12 @@ class account_balance(report_sxw.rml_parse):
             for x in period_ids:
                 a += 1
                 if a < 3:
-                        l.append(x)
+                    l.append(x)
                 else:
-                        l.append(x)
-                        p.append(l)
-                        l = []
-                        a = 0
+                    l.append(x)
+                    p.append(l)
+                    l = []
+                    a = 0
             tot_bal1 = 0.0
             tot_bal2 = 0.0
             tot_bal3 = 0.0
@@ -1348,7 +1359,7 @@ class account_balance(report_sxw.rml_parse):
         ###############################################################
 
         for aa_id in account_ids:
-            id = aa_id[0]
+            idx = aa_id[0]
             if aa_id[3].type == 'consolidation' and delete_cons:
                 continue
             #
@@ -1357,7 +1368,7 @@ class account_balance(report_sxw.rml_parse):
             if not form['display_account_level'] or \
                     aa_id[3].level <= form['display_account_level']:
                 res = {
-                    'id': id,
+                    'id': idx,
                     'type': aa_id[3].type,
                     'code': aa_id[3].code,
                     'name': (aa_id[2] and not aa_id[1]) and 'TOTAL %s' %
@@ -1367,29 +1378,27 @@ class account_balance(report_sxw.rml_parse):
                     'label': aa_id[1],
                     'total': aa_id[2],
                     'change_sign': credit_account_ids and
-                    (id in credit_account_ids and -1 or 1) or 1
+                    (idx in credit_account_ids and -1 or 1) or 1
                 }
 
                 if form['columns'] == 'qtr':
                     for pn in range(1, 5):
 
                         if form['inf_type'] == 'IS':
-                            d, c, b = map(
-                                z,
-                                [all_ap[pn - 1][id].get('debit', 0.0),
-                                 all_ap[pn - 1][id].get('credit', 0.0),
-                                 all_ap[pn - 1][id].get('balance', 0.0)])
+                            d, c, b = [z(x) for x in (
+                                all_ap[pn - 1][idx].get('debit', 0.0),
+                                all_ap[pn - 1][idx].get('credit', 0.0),
+                                all_ap[pn - 1][idx].get('balance', 0.0))]
                             res.update({
                                 'dbr%s' % pn: self.exchange(d),
                                 'cdr%s' % pn: self.exchange(c),
                                 'bal%s' % pn: self.exchange(b),
                             })
                         else:
-                            i, d, c = map(
-                                z,
-                                [all_ap[pn - 1][id].get('balanceinit', 0.0),
-                                 all_ap[pn - 1][id].get('debit', 0.0),
-                                 all_ap[pn - 1][id].get('credit', 0.0)])
+                            i, d, c = [z(x) for x in (
+                                all_ap[pn - 1][idx].get('balanceinit', 0.0),
+                                all_ap[pn - 1][idx].get('debit', 0.0),
+                                all_ap[pn - 1][idx].get('credit', 0.0))]
                             b = z(i + d - c)
                             res.update({
                                 'dbr%s' % pn: self.exchange(d),
@@ -1398,22 +1407,20 @@ class account_balance(report_sxw.rml_parse):
                             })
 
                     if form['inf_type'] == 'IS':
-                        d, c, b = map(
-                            z,
-                            [all_ap['all'][id].get('debit', 0.0),
-                             all_ap['all'][id].get('credit', 0.0),
-                             all_ap['all'][id].get('balance')])
+                        d, c, b = [z(x) for x in (
+                            all_ap['all'][idx].get('debit', 0.0),
+                            all_ap['all'][idx].get('credit', 0.0),
+                            all_ap['all'][idx].get('balance', 0.0))]
                         res.update({
                             'dbr5': self.exchange(d),
                             'cdr5': self.exchange(c),
                             'bal5': self.exchange(b),
                         })
                     else:
-                        i, d, c = map(
-                            z,
-                            [all_ap['all'][id].get('balanceinit', 0.0),
-                             all_ap['all'][id].get('debit', 0.0),
-                             all_ap['all'][id].get('credit', 0.0)])
+                        i, d, c = [z(x) for x in (
+                            all_ap['all'][idx].get('balanceinit', 0.0),
+                            all_ap['all'][idx].get('debit', 0.0),
+                            all_ap['all'][idx].get('credit', 0.0))]
                         b = z(i + d - c)
                         res.update({
                             'dbr5': self.exchange(d),
@@ -1426,22 +1433,20 @@ class account_balance(report_sxw.rml_parse):
                     for p_num in range(12):
 
                         if form['inf_type'] == 'IS':
-                            d, c, b = map(
-                                z,
-                                [all_ap[p_num][id].get('debit', 0.0),
-                                 all_ap[p_num][id].get('credit', 0.0),
-                                 all_ap[p_num][id].get('balance', 0.0)])
+                            d, c, b = [z(x) for x in (
+                                all_ap[p_num][idx].get('debit', 0.0),
+                                all_ap[p_num][idx].get('credit', 0.0),
+                                all_ap[p_num][idx].get('balance', 0.0))]
                             res.update({
                                 'dbr%s' % pn: self.exchange(d),
                                 'cdr%s' % pn: self.exchange(c),
                                 'bal%s' % pn: self.exchange(b),
                             })
                         else:
-                            i, d, c = map(
-                                z,
-                                [all_ap[p_num][id].get('balanceinit', 0.0),
-                                 all_ap[p_num][id].get('debit', 0.0),
-                                 all_ap[p_num][id].get('credit', 0.0)])
+                            i, d, c = [z(x) for x in (
+                                all_ap[p_num][idx].get('balanceinit', 0.0),
+                                all_ap[p_num][idx].get('debit', 0.0),
+                                all_ap[p_num][idx].get('credit', 0.0))]
                             b = z(i + d - c)
                             res.update({
                                 'dbr%s' % pn: self.exchange(d),
@@ -1452,22 +1457,20 @@ class account_balance(report_sxw.rml_parse):
                         pn += 1
 
                     if form['inf_type'] == 'IS':
-                        d, c, b = map(
-                            z,
-                            [all_ap['all'][id].get('debit', 0.0),
-                             all_ap['all'][id].get('credit', 0.0),
-                             all_ap['all'][id].get('balance', 0.0)])
+                        d, c, b = [z(x) for x in (
+                            all_ap['all'][idx].get('debit', 0.0),
+                            all_ap['all'][idx].get('credit', 0.0),
+                            all_ap['all'][idx].get('balance', 0.0))]
                         res.update({
                             'dbr13': self.exchange(d),
                             'cdr13': self.exchange(c),
                             'bal13': self.exchange(b),
                         })
                     else:
-                        i, d, c = map(
-                            z,
-                            [all_ap['all'][id].get('balanceinit', 0.0),
-                             all_ap['all'][id].get('debit', 0.0),
-                             all_ap['all'][id].get('credit', 0.0)])
+                        i, d, c = [z(x) for x in (
+                            all_ap['all'][idx].get('balanceinit', 0.0),
+                            all_ap['all'][idx].get('debit', 0.0),
+                            all_ap['all'][idx].get('credit', 0.0))]
                         b = z(i + d - c)
                         res.update({
                             'dbr13': self.exchange(d),
@@ -1476,10 +1479,10 @@ class account_balance(report_sxw.rml_parse):
                         })
 
                 else:
-                    i, d, c = map(
-                        z, [all_ap['all'][id].get('balanceinit', 0.0),
-                            all_ap['all'][id].get('debit', 0.0),
-                            all_ap['all'][id].get('credit', 0.0)])
+                    i, d, c = [z(x) for x in (
+                        all_ap['all'][idx].get('balanceinit', 0.0),
+                        all_ap['all'][idx].get('debit', 0.0),
+                        all_ap['all'][idx].get('credit', 0.0))]
                     b = z(i + d - c)
                     res.update({
                         'balanceinit': self.exchange(i),
@@ -1538,7 +1541,7 @@ class account_balance(report_sxw.rml_parse):
                     else:
                         # Include all accounts
                         to_include = True
-                elif form['columns'] in ('currency'):
+                elif form['columns'] in ('currency',):
                     to_include = True
                 else:
 
@@ -1649,27 +1652,29 @@ class account_balance(report_sxw.rml_parse):
                 'total': True,
             }
             if form['columns'] == 'qtr':
-                res2.update(dict(
-                            bal1=z(tot_bal1),
-                            bal2=z(tot_bal2),
-                            bal3=z(tot_bal3),
-                            bal4=z(tot_bal4),
-                            bal5=z(tot_bal5),))
+                res2.update(
+                    dict(
+                        bal1=z(tot_bal1),
+                        bal2=z(tot_bal2),
+                        bal3=z(tot_bal3),
+                        bal4=z(tot_bal4),
+                        bal5=z(tot_bal5),))
             elif form['columns'] == 'thirteen':
-                res2.update(dict(
-                            bal1=z(tot_bal1),
-                            bal2=z(tot_bal2),
-                            bal3=z(tot_bal3),
-                            bal4=z(tot_bal4),
-                            bal5=z(tot_bal5),
-                            bal6=z(tot_bal6),
-                            bal7=z(tot_bal7),
-                            bal8=z(tot_bal8),
-                            bal9=z(tot_bal9),
-                            bal10=z(tot_bal10),
-                            bal11=z(tot_bal11),
-                            bal12=z(tot_bal12),
-                            bal13=z(tot_bal13),))
+                res2.update(
+                    dict(
+                        bal1=z(tot_bal1),
+                        bal2=z(tot_bal2),
+                        bal3=z(tot_bal3),
+                        bal4=z(tot_bal4),
+                        bal5=z(tot_bal5),
+                        bal6=z(tot_bal6),
+                        bal7=z(tot_bal7),
+                        bal8=z(tot_bal8),
+                        bal9=z(tot_bal9),
+                        bal10=z(tot_bal10),
+                        bal11=z(tot_bal11),
+                        bal12=z(tot_bal12),
+                        bal13=z(tot_bal13),))
 
             else:
                 res2.update({
