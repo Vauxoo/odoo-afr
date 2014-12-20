@@ -4,7 +4,7 @@
 #    Copyright (C) OpenERP Venezuela (<http://openerp.com.ve>).
 #    All Rights Reserved
 # Credits######################################################
-#    Coded by:   Humberto Arocha humberto@openerp.com.ve
+#    Coded by:   Humberto Arocha <hbto@vauxoo.com>
 #                Angelica Barrios angelicaisabelb@gmail.com
 #               Jordi Esteve <jesteve@zikzakmedia.com>
 #               Javier Duran <javieredm@gmail.com>
@@ -26,18 +26,14 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ##############################################################################
 
-import xml
 import copy
-from operator import itemgetter
 import time
 import datetime
-from report import report_sxw
-from tools import config
-from tools.translate import _
-from osv import osv
+from openerp.report import report_sxw
+from openerp.tools import config
+from openerp.tools.translate import _
+from openerp.osv import osv
 from openerp.tools.safe_eval import safe_eval as eval
-import pdb, pprint
-import copy
 
 
 class account_balance(report_sxw.rml_parse):
@@ -75,13 +71,13 @@ class account_balance(report_sxw.rml_parse):
                                    form['company_id'][0]).partner_id.vat or ''
         if string_vat:
             if country_code == 'MX':
-                return '%s' % (string_vat[2:])
+                return ['%s' % (string_vat[2:])]
             elif country_code == 'VE':
-                return '- %s-%s-%s' % (string_vat[2:3], string_vat[3:11], string_vat[11:12])
+                return ['- %s-%s-%s' % (string_vat[2:3], string_vat[3:11], string_vat[11:12])]
             else:
-                return string_vat
+                return [string_vat]
         else:
-            return _('\nVAT OF COMPANY NOT AVAILABLE')
+            return [_('VAT OF COMPANY NOT AVAILABLE')]
 
     def get_fiscalyear_text(self, form):
         """
@@ -473,11 +469,8 @@ class account_balance(report_sxw.rml_parse):
 
         level = '--'
         for (main_key, value) in all_res.iteritems():
-            print level*1, main_key
             for (currency_key, value2) in value.iteritems():
-                print level*2, currency_key
                 for (cval_key, value3) in value2.iteritems():
-                    print level*3, u'{0: <20}'.format(cval_key), isinstance(value3, list) and (len(value3) or '0') or cval_key != 'partner' and (value3 and u'\t\t{amount_company_currency}\t{amount_currency}\t{differential}'.format(**value3) or '') or ''
 
 
                     if cval_key in ['lines', 'xchange_lines', 'filter_lines']:
@@ -485,39 +478,29 @@ class account_balance(report_sxw.rml_parse):
                             for line in value3
                             if line
                             if line['currency'] != currency_key or value3.count(line) != 1]
-                        for line in value3:
-                            print ' '*25, u'\t\t{amount_company_currency}\t{amount_currency}\t{differential}'.format(**line)
                         if error:
-                            pprint.pprint(error)
                             raise osv.except_osv('error', 'lines with other currencys in ' + cval_key)
                     elif cval_key in ['real_total', 'init_balance', 'total', 'xchange_total']:
                         error = (
                             value3 and (value3['currency'] != currency_key  or value3['partner'])
                             and value3 or False)
                         if error:
-                            pprint.pprint(error)
                             raise osv.except_osv('error', 'lines with other currencys in ' + cval_key)
                     elif cval_key == 'partner':
                         for (partner_key, value4) in value3.iteritems():
-                            print level*4, (partner_key, )
                             for (pval_key, value5) in value4.iteritems():
-                                print level*5, u'{0: <15}'.format(pval_key), isinstance(value5, list) and (len(value5) or '0') or (value5 and u'\t\t{amount_company_currency}\t{amount_currency}\t{differential}'.format(**value5) or '')
                                 if pval_key in ['lines', 'xchange_lines', 'filter_lines']:
                                     error = [line
                                         for line in value5
                                         if line
                                         if line['currency'] != currency_key or line['partner'] != partner_key or value5.count(line) != 1]
-                                    for line in value5:
-                                        print ' '*25, u'\t\t{amount_company_currency}\t{amount_currency}\t{differential}'.format(**line)
                                     if error:
-                                        pprint.pprint(error)
                                         raise osv.except_osv('error', 'lines with other currencys in ' + pval_key)
                                 elif pval_key in ['real_total', 'init_balance', 'total', 'xchange_total']:
                                     error = (
                                         value5 and (value5['currency'] != currency_key or value5['partner'] != partner_key)
                                         and value5 or False)
                                     if error:
-                                        pprint.pprint(error)
                                         raise osv.except_osv('error', 'lines with other currencys in ' + pval_key)
                     else:
                             raise osv.except_osv('error', 'missing case ' + cval_key)
@@ -858,7 +841,6 @@ class account_balance(report_sxw.rml_parse):
     def _get_journal_ledger(self, account, ctx={}):
         res = []
         am_obj = self.pool.get('account.move')
-        print 'AM OBJ ', am_obj
         if account['type'] in ('other', 'liquidity', 'receivable', 'payable'):
             #~ TODO: CUANDO EL PERIODO ESTE VACIO LLENARLO CON LOS PERIODOS DEL EJERCICIO
             #~ FISCAL, SIN LOS PERIODOS ESPECIALES
@@ -892,7 +874,6 @@ class account_balance(report_sxw.rml_parse):
                     'period': det['periodo'],
                     'obj': am_obj.browse(self.cr, self.uid, det['am_id'])
                 })
-                print 'ACCOUNT NAME', am_obj.browse(self.cr, self.uid, det['am_id']).name
         return res
 
     def lines(self, form, level=0):
@@ -1143,14 +1124,12 @@ class account_balance(report_sxw.rml_parse):
         # This could be done quickly with a sql sentence
         account_not_black = account_obj.browse(
             self.cr, self.uid, account_not_black_ids)
-        account_not_black.sort(key=lambda x: x.level)
-        account_not_black.reverse()
+        account_not_black.sorted(key=lambda x: x.level, reverse=True)
         account_not_black_ids = [i.id for i in account_not_black]
 
         c_account_not_black = account_obj.browse(
             self.cr, self.uid, c_account_not_black_ids)
-        c_account_not_black.sort(key=lambda x: x.level)
-        c_account_not_black.reverse()
+        c_account_not_black.sorted(key=lambda x: x.level, reverse=True)
         c_account_not_black_ids = [i.id for i in c_account_not_black]
 
         if delete_cons:
@@ -1160,8 +1139,7 @@ class account_balance(report_sxw.rml_parse):
         else:
             acc_cons_brw = account_obj.browse(
                 self.cr, self.uid, acc_cons_ids)
-            acc_cons_brw.sort(key=lambda x: x.level)
-            acc_cons_brw.reverse()
+            acc_cons_brw.sorted(key=lambda x: x.level, reverse=True)
             acc_cons_ids = [i.id for i in acc_cons_brw]
 
             account_not_black_ids = c_account_not_black_ids + \
@@ -1239,6 +1217,8 @@ class account_balance(report_sxw.rml_parse):
                     or dict_not_black.get(acc_id).get('obj').child_consol_ids
                 for child_id in acc_childs:
                     if child_id.type == 'consolidation' and delete_cons:
+                        continue
+                    if not all_account.get(child_id.id):
                         continue
                     dict_not_black.get(acc_id)['debit'] += all_account.get(
                         child_id.id).get('debit')

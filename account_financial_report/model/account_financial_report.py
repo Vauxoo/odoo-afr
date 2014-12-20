@@ -26,10 +26,9 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ##############################################################################
 
-from osv import osv, fields
-import pooler
+from openerp.osv import osv, fields
 import time
-from tools.translate import _
+from openerp.tools.translate import _
 
 
 class account_financial_report(osv.osv):
@@ -41,7 +40,7 @@ class account_financial_report(osv.osv):
         'currency_id': fields.many2one(
             'res.currency', 'Currency', help="Currency at which this report will be expressed. If not selected will be used the one set in the company"),
         'inf_type': fields.selection(
-            [('BS', 'Balance Sheet'), ('IS', 'Income Statement')], 'Type', required=True),
+            [('BS', 'Ending Balance'), ('IS', 'Variation on Periods')], 'Type', required=True),
         'columns': fields.selection([('one', 'End. Balance'), ('two', 'Debit | Credit'), ('four', 'Initial | Debit | Credit | YTD'),
                                     ('five', 'Initial | Debit | Credit | Period | YTD'), ('qtr', "4 QTR's | YTD"), ('thirteen', '12 Months | YTD')], 'Columns', required=True),
         'display_account': fields.selection([('all', 'All Accounts'), ('bal', 'With Balance'),
@@ -94,7 +93,7 @@ class account_financial_report(osv.osv):
         'fiscalyear_id': lambda self, cr, uid, c:
         self.pool.get('account.fiscalyear').find(cr, uid),
         'display_account': lambda *a: 'bal_mov',
-        'columns': lambda *a: 'five',
+        'columns': lambda *a: 'four',
 
         'date_from': lambda *a: time.strftime('%Y-%m-%d'),
         'date_to': lambda *a: time.strftime('%Y-%m-%d'),
@@ -181,6 +180,3 @@ class account_financial_report(osv.osv):
         res['value'].update({'account_ids': []})
         res['value'].update({'period_ids': []})
         return res
-
-
-account_financial_report()

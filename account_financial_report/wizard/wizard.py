@@ -26,10 +26,10 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ##############################################################################
 
-from osv import osv, fields
-import pooler
+from openerp.osv import osv, fields
+from openerp import pooler
 import time
-from tools.translate import _
+from openerp.tools.translate import _
 
 
 class wizard_report(osv.osv_memory):
@@ -45,7 +45,7 @@ class wizard_report(osv.osv_memory):
             ('two', 'Debit | Credit'),
             ('four', 'Initial | Debit | Credit | YTD'),
             ('five', 'Initial | Debit | Credit | Period | YTD'),
-            ('qtr', "4 QTR's | YTD"), 
+            ('qtr', "4 QTR's | YTD"),
             ('thirteen', '12 Months | YTD'),
             ('currency', 'End. Balance Currency')], 'Columns', required=True),
         'display_account': fields.selection([('all', 'All Accounts'), ('bal', 'With Balance'), ('mov', 'With movements'), ('bal_mov', 'With Balance / Movements')], 'Display accounts'),
@@ -96,7 +96,7 @@ class wizard_report(osv.osv_memory):
         'company_id': lambda self, cr, uid, c: self.pool.get('res.company')._company_default_get(cr, uid, 'account.invoice', context=c),
         'fiscalyear': lambda self, cr, uid, c: self.pool.get('account.fiscalyear').find(cr, uid),
         'display_account': lambda *a: 'bal_mov',
-        'columns': lambda *a: 'five',
+        'columns': lambda *a: 'four',
         'target_move': 'posted',
         'group_by': 'currency',
         'lines_detail': 'total',

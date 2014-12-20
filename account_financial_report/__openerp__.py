@@ -24,7 +24,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ##############################################################################
 {
-    "name": "Common financial reports",
+    "name": "Account Financial Reports",
     "version": "2.0",
     "author": "Vauxoo",
     "website": "http://www.vauxoo.com",
@@ -32,9 +32,10 @@
                 "account"
                 ],
     "category": "Accounting",
-    "description": """
-Multiporpuse Accounting report generator.
-=========================================
+    "description":
+    """
+Account Financial Reports.
+==========================
 
 From the wizard you will be asked to provide information needed to create your
 report.
@@ -51,7 +52,8 @@ company.
 In the [ Account's Sign on Reports ] Section in the Company will be able to
 set the sign conventions for the Accounts, so that you will be able to see in
 positives Values in your reports for those accounts with Accreditable nature
-where appropriate""",
+where appropriate
+    """,
     "data": [
         "security/security.xml",
         "security/ir.model.access.csv",
