@@ -96,7 +96,7 @@ class wizard_report(osv.osv_memory):
         'company_id': lambda self, cr, uid, c: self.pool.get('res.company')._company_default_get(cr, uid, 'account.invoice', context=c),
         'fiscalyear': lambda self, cr, uid, c: self.pool.get('account.fiscalyear').find(cr, uid),
         'display_account': lambda *a: 'bal_mov',
-        'columns': lambda *a: 'five',
+        'columns': lambda *a: 'four',
         'target_move': 'posted',
         'group_by': 'currency',
         'lines_detail': 'total',

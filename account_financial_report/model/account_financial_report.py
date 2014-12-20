@@ -93,7 +93,7 @@ class account_financial_report(osv.osv):
         'fiscalyear_id': lambda self, cr, uid, c:
         self.pool.get('account.fiscalyear').find(cr, uid),
         'display_account': lambda *a: 'bal_mov',
-        'columns': lambda *a: 'five',
+        'columns': lambda *a: 'four',
 
         'date_from': lambda *a: time.strftime('%Y-%m-%d'),
         'date_to': lambda *a: time.strftime('%Y-%m-%d'),
