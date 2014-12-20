@@ -26,10 +26,9 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ##############################################################################
 
-from osv import osv, fields
-import pooler
+from openerp.osv import osv, fields
 import time
-from tools.translate import _
+from openerp.tools.translate import _
 
 
 class account_financial_report(osv.osv):
@@ -181,6 +180,3 @@ class account_financial_report(osv.osv):
         res['value'].update({'account_ids': []})
         res['value'].update({'period_ids': []})
         return res
-
-
-account_financial_report()

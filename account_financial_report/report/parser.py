@@ -4,7 +4,7 @@
 #    Copyright (C) OpenERP Venezuela (<http://openerp.com.ve>).
 #    All Rights Reserved
 # Credits######################################################
-#    Coded by:   Humberto Arocha humberto@openerp.com.ve
+#    Coded by:   Humberto Arocha <hbto@vauxoo.com>
 #                Angelica Barrios angelicaisabelb@gmail.com
 #               Jordi Esteve <jesteve@zikzakmedia.com>
 #               Javier Duran <javieredm@gmail.com>
@@ -26,18 +26,14 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ##############################################################################
 
-import xml
 import copy
-from operator import itemgetter
 import time
 import datetime
-from report import report_sxw
-from tools import config
-from tools.translate import _
-from osv import osv
+from openerp.report import report_sxw
+from openerp.tools import config
+from openerp.tools.translate import _
+from openerp.osv import osv
 from openerp.tools.safe_eval import safe_eval as eval
-import pdb, pprint
-import copy
 
 
 class account_balance(report_sxw.rml_parse):
