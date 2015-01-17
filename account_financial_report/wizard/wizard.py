@@ -164,9 +164,9 @@ class wizard_report(osv.osv_memory):
         all_periods = p_obj.search(cr, uid, [
             ('fiscalyear_id', '=', fiscalyear), ('special', '=', False)],
             context=context)
-        s = set(periods[0][2])
-        t = set(all_periods)
-        go = periods[0][2] and s.issubset(t) or False
+        sval = set(periods[0][2])
+        tval = set(all_periods)
+        go = periods[0][2] and sval.issubset(tval) or False
 
         if columns != 'four':
             res['value'].update({'analytic_ledger': False})

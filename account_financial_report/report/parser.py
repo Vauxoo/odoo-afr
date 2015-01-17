@@ -229,14 +229,14 @@ class account_balance(report_sxw.rml_parse):
                 GROUP BY p_idx, partner_name
                 """
 
-            WHERE_POSTED = ''
+            where_posted = ''
             if ctx.get('state', 'posted') == 'posted':
-                WHERE_POSTED = "AND am.state = 'posted'"
+                where_posted = "AND am.state = 'posted'"
 
             cur_periods = ', '.join([str(i) for i in ctx['periods']])
             init_periods = ', '.join([str(i) for i in init_period])
 
-            WHERE = """
+            where = """
                 WHERE aml.period_id IN (%s)
                     AND aa.id = %s
                     AND aml.state <> 'draft'
@@ -245,9 +245,9 @@ class account_balance(report_sxw.rml_parse):
                                       'SUM(aml.credit) AS init_cr',
                                       '0.0 AS bal_dr',
                                       '0.0 AS bal_cr',
-                                      WHERE + WHERE_POSTED)
+                                      where + where_posted)
 
-            WHERE = """
+            where = """
                 WHERE aml.period_id IN (%s)
                     AND aa.id = %s
                     AND aml.state <> 'draft'
@@ -257,7 +257,7 @@ class account_balance(report_sxw.rml_parse):
                                      '0.0 AS init_cr',
                                      'SUM(aml.debit) AS bal_dr',
                                      'SUM(aml.credit) AS bal_cr',
-                                     WHERE + WHERE_POSTED)
+                                     where + where_posted)
 
             query = '''
                 SELECT
@@ -282,16 +282,16 @@ class account_balance(report_sxw.rml_parse):
             res_dict = self.cr.dictfetchall()
             unknown = False
             for det in res_dict:
-                i, d, c, b = det['balanceinit'], det[
+                inicial, debit, credit, balance = det['balanceinit'], det[
                     'debit'], det['credit'], det['balance'],
-                if not any([i, d, c, b]):
+                if not any([inicial, debit, credit, balance]):
                     continue
                 data = {
                     'partner_name': det['partner_name'],
-                    'balanceinit': i,
-                    'debit': d,
-                    'credit': c,
-                    'balance': b,
+                    'balanceinit': inicial,
+                    'debit': debit,
+                    'credit': credit,
+                    'balance': balance,
                 }
                 if not det['p_idx']:
                     unknown = data
@@ -585,20 +585,20 @@ class account_balance(report_sxw.rml_parse):
         for key in main_keys.keys():
             res[key] = {}
 
-        resInit = copy.deepcopy(res)
-        resInit = self.get_initial_balance(resInit, account, main_keys,
-                                           ctx=ctx.copy())
+        res_init = copy.deepcopy(res)
+        res_init = self.get_initial_balance(
+            res_init, account, main_keys, ctx=ctx.copy())
 
         res = self.fill_result(res, aml_list, main_keys, context=ctx)
-        res = self.update_init_balance(res, resInit, main_keys)
+        res = self.update_init_balance(res, res_init, main_keys)
 
         return res
 
-    def update_init_balance(self, res, resInit, main_keys):
+    def update_init_balance(self, res, res_init, main_keys):
         """
         TODO
         """
-        for (key, values1) in resInit.iteritems():
+        for (key, values1) in res_init.iteritems():
             for (key_id, values2) in values1.iteritems():
                 line = {key: key_id}
                 res = self.init_report_line_group(res, line, key, [])
@@ -609,18 +609,18 @@ class account_balance(report_sxw.rml_parse):
                             res = self.init_report_line_group(res, line, key,
                                                               [sk])
 
-        for (key, values1) in resInit.iteritems():
+        for (key, values1) in res_init.iteritems():
             for (key_id, values2) in values1.iteritems():
-                resInit[key][key_id]['total'].pop('title')
+                res_init[key][key_id]['total'].pop('title')
                 res[key][key_id]['init_balance'].update(
-                    resInit[key][key_id]['total'])
+                    res_init[key][key_id]['total'])
                 for subkey_list in main_keys.values():
                     for sk in subkey_list:
                         for sk_id in values2[sk].keys():
-                            resInit[key][key_id][sk][sk_id]['total'].pop(
+                            res_init[key][key_id][sk][sk_id]['total'].pop(
                                 'title')
                             res[key][key_id][sk][sk_id]['init_balance'].update(
-                                resInit[key][key_id][sk][sk_id]['total'])
+                                res_init[key][key_id][sk][sk_id]['total'])
 
         return res
 
@@ -1071,8 +1071,8 @@ class account_balance(report_sxw.rml_parse):
 
             return ctx_init.copy()
 
-        def z(n):
-            return abs(n) < 0.005 and 0.0 or n
+        def zfunction(nval):
+            return abs(nval) < 0.005 and 0.0 or nval
 
         self.context['state'] = form['target_move'] or 'posted'
 
@@ -1147,18 +1147,18 @@ class account_balance(report_sxw.rml_parse):
                 self.cr, self.uid, [('fiscalyear_id', '=', fiscalyear.id),
                                     ('special', '=', False)],
                 order='date_start asc')
-            a = 0
-            l = []
-            p = []
-            for x in period_ids:
-                a += 1
-                if a < 3:
-                    l.append(x)
+            aval = 0
+            lval = []
+            pval = []
+            for xval in period_ids:
+                aval += 1
+                if aval < 3:
+                    lval.append(xval)
                 else:
-                    l.append(x)
-                    p.append(l)
-                    l = []
-                    a = 0
+                    lval.append(xval)
+                    pval.append(lval)
+                    lval = []
+                    aval = 0
             tot_bal1 = 0.0
             tot_bal2 = 0.0
             tot_bal3 = 0.0
@@ -1280,7 +1280,7 @@ class account_balance(report_sxw.rml_parse):
                     if form['columns'] == 'thirteen':
                         form['periods'] = [period_ids[p_act]]
                     elif form['columns'] == 'qtr':
-                        form['periods'] = p[p_act]
+                        form['periods'] = pval[p_act]
 
             if form['inf_type'] == 'IS':
                 ctx_to_use = _ctx_end(self.context.copy())
@@ -1298,13 +1298,13 @@ class account_balance(report_sxw.rml_parse):
             # Black
             dict_black = {}
             for i in account_black:
-                d = i.debit
-                c = i.credit
+                debit = i.debit
+                credit = i.credit
                 dict_black[i.id] = {
                     'obj': i,
-                    'debit': d,
-                    'credit': c,
-                    'balance': d - c
+                    'debit': debit,
+                    'credit': credit,
+                    'balance': debit - credit
                 }
                 if form['inf_type'] == 'BS':
                     dict_black[i.id]['balanceinit'] = 0.0
@@ -1386,47 +1386,47 @@ class account_balance(report_sxw.rml_parse):
                     for pn in range(1, 5):
 
                         if form['inf_type'] == 'IS':
-                            d, c, b = [z(x) for x in (
+                            debit, credit, balance = [zfunction(x) for x in (
                                 all_ap[pn - 1][idx].get('debit', 0.0),
                                 all_ap[pn - 1][idx].get('credit', 0.0),
                                 all_ap[pn - 1][idx].get('balance', 0.0))]
                             res.update({
-                                'dbr%s' % pn: self.exchange(d),
-                                'cdr%s' % pn: self.exchange(c),
-                                'bal%s' % pn: self.exchange(b),
+                                'dbr%s' % pn: self.exchange(debit),
+                                'cdr%s' % pn: self.exchange(credit),
+                                'bal%s' % pn: self.exchange(balance),
                             })
                         else:
-                            i, d, c = [z(x) for x in (
+                            i, debit, credit = [zfunction(x) for x in (
                                 all_ap[pn - 1][idx].get('balanceinit', 0.0),
                                 all_ap[pn - 1][idx].get('debit', 0.0),
                                 all_ap[pn - 1][idx].get('credit', 0.0))]
-                            b = z(i + d - c)
+                            balance = zfunction(i + debit - credit)
                             res.update({
-                                'dbr%s' % pn: self.exchange(d),
-                                'cdr%s' % pn: self.exchange(c),
-                                'bal%s' % pn: self.exchange(b),
+                                'dbr%s' % pn: self.exchange(debit),
+                                'cdr%s' % pn: self.exchange(credit),
+                                'bal%s' % pn: self.exchange(balance),
                             })
 
                     if form['inf_type'] == 'IS':
-                        d, c, b = [z(x) for x in (
+                        debit, credit, balance = [zfunction(x) for x in (
                             all_ap['all'][idx].get('debit', 0.0),
                             all_ap['all'][idx].get('credit', 0.0),
                             all_ap['all'][idx].get('balance', 0.0))]
                         res.update({
-                            'dbr5': self.exchange(d),
-                            'cdr5': self.exchange(c),
-                            'bal5': self.exchange(b),
+                            'dbr5': self.exchange(debit),
+                            'cdr5': self.exchange(credit),
+                            'bal5': self.exchange(balance),
                         })
                     else:
-                        i, d, c = [z(x) for x in (
+                        i, debit, credit = [zfunction(x) for x in (
                             all_ap['all'][idx].get('balanceinit', 0.0),
                             all_ap['all'][idx].get('debit', 0.0),
                             all_ap['all'][idx].get('credit', 0.0))]
-                        b = z(i + d - c)
+                        balance = zfunction(i + debit - credit)
                         res.update({
-                            'dbr5': self.exchange(d),
-                            'cdr5': self.exchange(c),
-                            'bal5': self.exchange(b),
+                            'dbr5': self.exchange(debit),
+                            'cdr5': self.exchange(credit),
+                            'bal5': self.exchange(balance),
                         })
 
                 elif form['columns'] == 'thirteen':
@@ -1434,71 +1434,71 @@ class account_balance(report_sxw.rml_parse):
                     for p_num in range(12):
 
                         if form['inf_type'] == 'IS':
-                            d, c, b = [z(x) for x in (
+                            debit, credit, balance = [zfunction(x) for x in (
                                 all_ap[p_num][idx].get('debit', 0.0),
                                 all_ap[p_num][idx].get('credit', 0.0),
                                 all_ap[p_num][idx].get('balance', 0.0))]
                             res.update({
-                                'dbr%s' % pn: self.exchange(d),
-                                'cdr%s' % pn: self.exchange(c),
-                                'bal%s' % pn: self.exchange(b),
+                                'dbr%s' % pn: self.exchange(debit),
+                                'cdr%s' % pn: self.exchange(credit),
+                                'bal%s' % pn: self.exchange(balance),
                             })
                         else:
-                            i, d, c = [z(x) for x in (
+                            i, debit, credit = [zfunction(x) for x in (
                                 all_ap[p_num][idx].get('balanceinit', 0.0),
                                 all_ap[p_num][idx].get('debit', 0.0),
                                 all_ap[p_num][idx].get('credit', 0.0))]
-                            b = z(i + d - c)
+                            balance = zfunction(i + debit - credit)
                             res.update({
-                                'dbr%s' % pn: self.exchange(d),
-                                'cdr%s' % pn: self.exchange(c),
-                                'bal%s' % pn: self.exchange(b),
+                                'dbr%s' % pn: self.exchange(debit),
+                                'cdr%s' % pn: self.exchange(credit),
+                                'bal%s' % pn: self.exchange(balance),
                             })
 
                         pn += 1
 
                     if form['inf_type'] == 'IS':
-                        d, c, b = [z(x) for x in (
+                        debit, credit, balance = [zfunction(x) for x in (
                             all_ap['all'][idx].get('debit', 0.0),
                             all_ap['all'][idx].get('credit', 0.0),
                             all_ap['all'][idx].get('balance', 0.0))]
                         res.update({
-                            'dbr13': self.exchange(d),
-                            'cdr13': self.exchange(c),
-                            'bal13': self.exchange(b),
+                            'dbr13': self.exchange(debit),
+                            'cdr13': self.exchange(credit),
+                            'bal13': self.exchange(balance),
                         })
                     else:
-                        i, d, c = [z(x) for x in (
+                        i, debit, credit = [zfunction(x) for x in (
                             all_ap['all'][idx].get('balanceinit', 0.0),
                             all_ap['all'][idx].get('debit', 0.0),
                             all_ap['all'][idx].get('credit', 0.0))]
-                        b = z(i + d - c)
+                        balance = zfunction(i + debit - credit)
                         res.update({
-                            'dbr13': self.exchange(d),
-                            'cdr13': self.exchange(c),
-                            'bal13': self.exchange(b),
+                            'dbr13': self.exchange(debit),
+                            'cdr13': self.exchange(credit),
+                            'bal13': self.exchange(balance),
                         })
 
                 else:
-                    i, d, c = [z(x) for x in (
+                    i, debit, credit = [zfunction(x) for x in (
                         all_ap['all'][idx].get('balanceinit', 0.0),
                         all_ap['all'][idx].get('debit', 0.0),
                         all_ap['all'][idx].get('credit', 0.0))]
-                    b = z(i + d - c)
+                    balance = zfunction(i + debit - credit)
                     res.update({
                         'balanceinit': self.exchange(i),
-                        'debit': self.exchange(d),
-                        'credit': self.exchange(c),
-                        'ytd': self.exchange(d - c),
+                        'debit': self.exchange(debit),
+                        'credit': self.exchange(credit),
+                        'ytd': self.exchange(debit - credit),
                     })
 
                     if form['inf_type'] == 'IS' and form['columns'] == 'one':
                         res.update({
-                            'balance': self.exchange(d - c),
+                            'balance': self.exchange(debit - credit),
                         })
                     else:
                         res.update({
-                            'balance': self.exchange(b),
+                            'balance': self.exchange(balance),
                         })
 
                 #
@@ -1510,33 +1510,39 @@ class account_balance(report_sxw.rml_parse):
                     to_test = [False]
                     if form['display_account'] == 'mov' and aa_id[3].parent_id:
                         # Include accounts with movements
-                        for x in range(pn - 1):
+                        for xval in range(pn - 1):
                             to_test.append(res.get(
-                                'dbr%s' % x, 0.0) >= 0.005 and True or False)
+                                'dbr%s' % xval, 0.0) >= 0.005 and
+                                True or False)
                             to_test.append(res.get(
-                                'cdr%s' % x, 0.0) >= 0.005 and True or False)
+                                'cdr%s' % xval, 0.0) >= 0.005 and
+                                True or False)
                         if any(to_test):
                             to_include = True
 
                     elif form['display_account'] == 'bal' and \
                             aa_id[3].parent_id:
                         # Include accounts with balance
-                        for x in range(pn - 1):
+                        for xval in range(pn - 1):
                             to_test.append(res.get(
-                                'bal%s' % x, 0.0) >= 0.005 and True or False)
+                                'bal%s' % xval, 0.0) >= 0.005 and
+                                True or False)
                         if any(to_test):
                             to_include = True
 
                     elif form['display_account'] == 'bal_mov' and \
                             aa_id[3].parent_id:
                         # Include accounts with balance or movements
-                        for x in range(pn - 1):
+                        for xval in range(pn - 1):
                             to_test.append(res.get(
-                                'bal%s' % x, 0.0) >= 0.005 and True or False)
+                                'bal%s' % xval, 0.0) >= 0.005 and
+                                True or False)
                             to_test.append(res.get(
-                                'dbr%s' % x, 0.0) >= 0.005 and True or False)
+                                'dbr%s' % xval, 0.0) >= 0.005 and
+                                True or False)
                             to_test.append(res.get(
-                                'cdr%s' % x, 0.0) >= 0.005 and True or False)
+                                'cdr%s' % xval, 0.0) >= 0.005 and
+                                True or False)
                         if any(to_test):
                             to_include = True
                     else:
@@ -1548,18 +1554,18 @@ class account_balance(report_sxw.rml_parse):
 
                     if form['display_account'] == 'mov' and aa_id[3].parent_id:
                         # Include accounts with movements
-                        if abs(d) >= 0.005 or abs(c) >= 0.005:
+                        if abs(debit) >= 0.005 or abs(credit) >= 0.005:
                             to_include = True
                     elif form['display_account'] == 'bal' and \
                             aa_id[3].parent_id:
                         # Include accounts with balance
-                        if abs(b) >= 0.005:
+                        if abs(balance) >= 0.005:
                             to_include = True
                     elif form['display_account'] == 'bal_mov' and \
                             aa_id[3].parent_id:
                         # Include accounts with balance or movements
-                        if abs(b) >= 0.005 or abs(d) >= 0.005 or \
-                                abs(c) >= 0.005:
+                        if abs(balance) >= 0.005 or abs(debit) >= 0.005 or \
+                                abs(credit) >= 0.005:
                             to_include = True
                     else:
                         # Include all accounts
@@ -1655,27 +1661,27 @@ class account_balance(report_sxw.rml_parse):
             if form['columns'] == 'qtr':
                 res2.update(
                     dict(
-                        bal1=z(tot_bal1),
-                        bal2=z(tot_bal2),
-                        bal3=z(tot_bal3),
-                        bal4=z(tot_bal4),
-                        bal5=z(tot_bal5),))
+                        bal1=zfunction(tot_bal1),
+                        bal2=zfunction(tot_bal2),
+                        bal3=zfunction(tot_bal3),
+                        bal4=zfunction(tot_bal4),
+                        bal5=zfunction(tot_bal5),))
             elif form['columns'] == 'thirteen':
                 res2.update(
                     dict(
-                        bal1=z(tot_bal1),
-                        bal2=z(tot_bal2),
-                        bal3=z(tot_bal3),
-                        bal4=z(tot_bal4),
-                        bal5=z(tot_bal5),
-                        bal6=z(tot_bal6),
-                        bal7=z(tot_bal7),
-                        bal8=z(tot_bal8),
-                        bal9=z(tot_bal9),
-                        bal10=z(tot_bal10),
-                        bal11=z(tot_bal11),
-                        bal12=z(tot_bal12),
-                        bal13=z(tot_bal13),))
+                        bal1=zfunction(tot_bal1),
+                        bal2=zfunction(tot_bal2),
+                        bal3=zfunction(tot_bal3),
+                        bal4=zfunction(tot_bal4),
+                        bal5=zfunction(tot_bal5),
+                        bal6=zfunction(tot_bal6),
+                        bal7=zfunction(tot_bal7),
+                        bal8=zfunction(tot_bal8),
+                        bal9=zfunction(tot_bal9),
+                        bal10=zfunction(tot_bal10),
+                        bal11=zfunction(tot_bal11),
+                        bal12=zfunction(tot_bal12),
+                        bal13=zfunction(tot_bal13),))
 
             else:
                 res2.update({
