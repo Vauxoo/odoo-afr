@@ -1073,7 +1073,7 @@ class account_balance(report_sxw.rml_parse):
 
         def zfunction(nval):
             return abs(nval) < 0.005 and 0.0 or nval
-
+        self.context = dict(self.context)
         self.context['state'] = form['target_move'] or 'posted'
 
         self.from_currency_id = self.get_company_currency(
