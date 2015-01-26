@@ -5,6 +5,7 @@
             <t t-call="account_financial_report.external_layout">
                 <div t-foreach="objects" t-as="o">
                     <!--VARIABLES TO BE USED LATER-->
+                    <t t-set="col" t-value="o.columns"/>
 
                     <!-- CALLING HEADER and FOOTER -->
                     <t t-call="account_financial_report.external_layout_header"/>
@@ -13,6 +14,7 @@
                     <!-- DEVELOPING PAGE/BODY -->
                     <div class="page">
                         <table class="basic_table"  width="100%" id='table_body'>
+                            <t t-if="col == 'four'">
                             <tbody>
                                 <tr>
                                     <th class="celdaTituloTabla" width="10%" style="text-align:right;">CODE</th>
@@ -61,6 +63,7 @@
                                     </td>
                                 </tr>
                             </tbody>
+                            </t>
                         </table>
                     </div>
                 </div>
