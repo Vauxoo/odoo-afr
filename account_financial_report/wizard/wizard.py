@@ -334,9 +334,10 @@ class wizard_report(osv.osv_memory):
             self._check_date(cr, uid, data)
             lis2 = str(data['form']['periods']).replace(
                 "[", "(").replace("]", ")")
-            sqlmm = """select min(p.date_start) as inicio, max(p.date_stop) as fin
-            from account_period p
-            where p.id in %s""" % lis2
+            sqlmm = """
+            SELECT MIN(p.date_start) AS inicio, MAX(p.date_stop) AS fin
+            FROM account_period p
+            WHERE p.id IN %s""" % lis2
             cr.execute(sqlmm)
             minmax = cr.dictfetchall()
             if minmax:
