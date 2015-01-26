@@ -1697,12 +1697,17 @@ class account_balance(report_sxw.rml_parse):
             result_acc.append(res2)
         return result_acc
 
-report_sxw.report_sxw(
-    'report.afr.1cols',
-    'wizard.report',
-    'account_financial_report/report/balance_full.rml',
-    parser=account_balance,
-    header=False)
+
+class report_afr_1_cols(osv.AbstractModel):
+
+    # _name = `report.` + `report_name`
+    # report_name="afr.1cols"
+    _name = 'report.afr.1cols'
+
+    # this inheritance will allow to render this particular report
+    _inherit = 'report.abstract_report'
+    _template = 'account_financial_report.afr_template'
+    _wrapped_report_class = account_balance
 
 
 class report_afr_2_cols(osv.AbstractModel):

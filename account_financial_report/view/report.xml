@@ -3,14 +3,17 @@
     <data>
 
         <report
-            auto="False"
+            auto = "False"
             id="1_col_report"
-            menu="True"
+            menu="False"
             model="wizard.report"
             name="afr.1cols"
-            rml="account_financial_report/report/balance_full.rml"
-            string="Balance 1 Columna"
-            header="False"
+            file="afr_template"
+            string="AFR 1 Columns"
+            report_type="qweb-pdf"
+            multi="True"
+            attachment_use="0"
+            attachment=""
         />
 
         <report
