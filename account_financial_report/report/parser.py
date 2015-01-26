@@ -34,6 +34,7 @@ from openerp.osv import osv
 
 
 class account_balance(report_sxw.rml_parse):
+    _name = 'afr.parser'
 
     def __init__(self, cr, uid, name, context):
         super(account_balance, self).__init__(cr, uid, name, context)

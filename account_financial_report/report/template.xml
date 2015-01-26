@@ -14,6 +14,52 @@
                     <div class="page">
                         <table class="basic_table"  width="100%" id='table_body'>
                             <tbody>
+                                <tr>
+                                    <th class="celdaTituloTabla" width="10%" style="text-align:right;">CODE</th>
+                                    <th class="celdaTituloTabla" width="42%">ACCOUNT</th>
+                                    <th class="celdaTituloTabla" width="12%" style="text-align:center;">INIT. BAL.</th>
+                                    <th class="celdaTituloTabla" width="12%" style="text-align:center;">DEBIT</th>
+                                    <th class="celdaTituloTabla" width="12%" style="text-align:center;">CREDIT</th>
+                                    <th class="celdaTituloTabla" width="12%" style="text-align:center;">BALANCE</th>
+                                </tr>
+                                <t t-set="lines" t-value="lines(data['form'])"/>
+                                <tr class="prueba" t-foreach="lines" t-as="line">
+                                    <i>
+                                    <td class="celdaLineData" style="text-align:right;font-style:italic;" width="10%">
+                                        <t t-if="line['label']">
+                                            <span t-esc="line['code']"/>
+                                        </t>
+                                    </td>
+                                    </i>
+                                    <td class="celdaLineData" style="text-align:right;font-style:italic;" width="10%">
+                                        <t t-if="line['type'] == 'view'">
+                                            <span t-esc="line['name'].upper()"/>
+                                        </t>
+                                        <t t-if="line['type'] != 'view'">
+                                            <span t-esc="line['name'].title()"/>
+                                        </t>
+                                    </td>
+                                    <td class="celdaLineData" style="text-align:right;font-style:italic;" width="10%">
+                                        <t t-if="line['total']">
+                                            <span t-esc="formatLang(line.get('balanceinit', 0) * line.get('change_sign',1.0), digits=2, grouping=True)"/>
+                                        </t>
+                                    </td>
+                                    <td class="celdaLineData" style="text-align:right;font-style:italic;" width="10%">
+                                        <t t-if="line['total']">
+                                            <span t-esc="formatLang(line.get('debit', 0) * line.get('change_sign',1.0), digits=2, grouping=True)"/>
+                                        </t>
+                                    </td>
+                                    <td class="celdaLineData" style="text-align:right;font-style:italic;" width="10%">
+                                        <t t-if="line['total']">
+                                            <span t-esc="formatLang(line.get('credit', 0) * line.get('change_sign',1.0), digits=2, grouping=True)"/>
+                                        </t>
+                                    </td>
+                                    <td class="celdaLineData" style="text-align:right;font-style:italic;" width="10%">
+                                        <t t-if="line['total']">
+                                            <span t-esc="formatLang(line.get('balance', 0) * line.get('change_sign',1.0), digits=2, grouping=True)"/>
+                                        </t>
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
