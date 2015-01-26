@@ -82,14 +82,17 @@
         />
 
         <report
-            auto="False"
+            auto = "False"
             id="5_col_report"
-            menu="True"
+            menu="False"
             model="wizard.report"
             name="afr.5cols"
-            rml="account_financial_report/report/balance_full_5_cols.rml"
-            string="Balance 5 Columnas"
-            header="False"
+            file="afr_template"
+            string="AFR 5 Columns"
+            report_type="qweb-pdf"
+            multi="True"
+            attachment_use="0"
+            attachment=""
         />
 
         <report
