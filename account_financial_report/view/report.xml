@@ -14,14 +14,17 @@
         />
 
         <report
-            auto="False"
+            auto = "False"
             id="2_col_report"
-            menu="True"
+            menu="False"
             model="wizard.report"
             name="afr.2cols"
-            rml="account_financial_report/report/balance_full_2_cols.rml"
-            string="Balance 2 Columnas"
-            header="False"
+            file="afr_template"
+            string="AFR 2 Columns"
+            report_type="qweb-pdf"
+            multi="True"
+            attachment_use="0"
+            attachment=""
         />
 
         <report
