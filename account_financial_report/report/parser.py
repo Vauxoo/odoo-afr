@@ -1710,12 +1710,17 @@ report_sxw.report_sxw(
     parser=account_balance,
     header=False)
 
-report_sxw.report_sxw(
-    'report.afr.4cols',
-    'wizard.report',
-    'account_financial_report/report/balance_full_4_cols.rml',
-    parser=account_balance,
-    header=False)
+
+class ifrs_portrait_pdf_report(osv.AbstractModel):
+
+    # _name = `report.` + `report_name`
+    # report_name="afr.4cols"
+    _name = 'report.afr.4cols'
+
+    # this inheritance will allow to render this particular report
+    _inherit = 'report.abstract_report'
+    _template = 'account_financial_report.afr_template'
+    _wrapped_report_class = account_balance
 
 report_sxw.report_sxw(
     'report.afr.analytic.ledger',
@@ -1723,6 +1728,7 @@ report_sxw.report_sxw(
     'account_financial_report/report/balance_full_4_cols_analytic_ledger.rml',
     parser=account_balance,
     header=False)
+
 report_sxw.report_sxw(
     'report.afr.multicurrency',
     'wizard.report',
