@@ -96,14 +96,17 @@
         />
 
         <report
-            auto="False"
+            auto = "False"
             id="qtr_col_report"
-            menu="True"
+            menu="False"
             model="wizard.report"
             name="afr.qtrcols"
-            rml="account_financial_report/report/balance_full_qtr_cols.rml"
-            string="Balance QTRs Columnas"
-            header="False"
+            file="afr_template"
+            string="AFR QTRs Columns"
+            report_type="qweb-pdf"
+            multi="True"
+            attachment_use="0"
+            attachment=""
         />
 
         <report

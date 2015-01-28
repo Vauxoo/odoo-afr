@@ -1761,6 +1761,7 @@ report_sxw.report_sxw(
     parser=account_balance,
     header=False)
 
+
 class report_afr_5_cols(osv.AbstractModel):
 
     # _name = `report.` + `report_name`
@@ -1772,12 +1773,17 @@ class report_afr_5_cols(osv.AbstractModel):
     _template = 'account_financial_report.afr_template'
     _wrapped_report_class = account_balance
 
-report_sxw.report_sxw(
-    'report.afr.qtrcols',
-    'wizard.report',
-    'account_financial_report/report/balance_full_qtr_cols.rml',
-    parser=account_balance,
-    header=False)
+
+class report_afr_qtrs_cols(osv.AbstractModel):
+
+    # _name = `report.` + `report_name`
+    # report_name="afr.qtrcols"
+    _name = 'report.afr.qtrcols'
+
+    # this inheritance will allow to render this particular report
+    _inherit = 'report.abstract_report'
+    _template = 'account_financial_report.afr_template'
+    _wrapped_report_class = account_balance
 
 report_sxw.report_sxw(
     'report.afr.13cols',
