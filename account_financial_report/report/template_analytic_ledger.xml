@@ -141,6 +141,41 @@
                                                 <span t-esc="formatLang(m['balance'], digits=2, grouping=True)"/>
                                             </td>
                                         </tr>
+                                        <t t-foreach="[z for z in m['aml_brw'].analytic_lines if data['form']['print_analytic_lines']]" t-as="y">
+                                            <tr>
+                                                <td>
+                                                </td>
+                                                <td>
+                                                </td>
+                                                <td style="font-style:italic;">
+                                                    <span t-esc="y.account_id. complete_name "/>
+                                                </td>
+                                                <td>
+                                                    <!--
+                                                    THIS ONLY AVAILABLE WITH ANALYTIC DISTRIBUTION
+                                                    <t t-if="getattr(y,'percentage')">
+                                                        <span t-esc="y.percentage"/>
+                                                    </t>
+                                                    -->
+                                                </td>
+                                                <td>
+                                                </td>
+                                                <td>
+                                                </td>
+                                                <td style="text-align:right;font-style:italic;">
+                                                    <t t-if="y.amount &lt; 0.0">
+                                                        <span t-esc="formatLang(y.amount * -1, digits=2, grouping=True)"/>
+                                                    </t>
+                                                </td>
+                                                <td style="text-align:right;font-style:italic;">
+                                                    <t t-if="y.amount &gt;= 0.0">
+                                                        <span t-esc="formatLang(y.amount, digits=2, grouping=True)"/>
+                                                    </t>
+                                                </td>
+                                                <td>
+                                                </td>
+                                            </tr>
+                                        </t>
                                     </t>
                                 </t>
                             </tbody>

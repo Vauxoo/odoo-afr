@@ -49,6 +49,7 @@ class account_balance(report_sxw.rml_parse):
         self.date_lst = []
         self.date_lst_string = ''
         self.localcontext.update({
+            'getattr': getattr,
             'time': time,
             'lines': self.lines,
             'get_fiscalyear_text': self.get_fiscalyear_text,
