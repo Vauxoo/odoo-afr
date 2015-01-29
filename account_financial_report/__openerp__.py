@@ -57,6 +57,7 @@ where appropriate
     "data": [
         "security/security.xml",
         "security/ir.model.access.csv",
+        "data/report_paperformat.xml",
         "report/layouts.xml",
         "report/template.xml",
         "view/report.xml",
