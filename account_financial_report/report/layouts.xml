@@ -144,15 +144,13 @@ table {
                   </div>
               </td>
               <td width="70%">
-                  <table style="width: 100%; text-align:center;" id='table_header'>
-                      <tr><td><div class="td_company_title"><span t-field="o.company_id.name"/></div></td></tr>
-                      <tr>
-                          <td>
-                              <div class="td_company">
-                              </div>
-                          </td>
-                      </tr>
-                      <tr><td><div class="td_company"></div></td></tr>
+                  <table style="width: 100%; text-align:center;" id="table_header">
+                      <tr><td><h4><strong><span t-field="o.company_id.name"/></strong></h4></td></tr>
+                      <tr><td>
+                        <strong>VAT:</strong>: <span t-esc="get_vat_by_country(data['form'])"/>
+                      </td></tr>
+                      <tr><td>(Expressed in <span t-esc="exchange_name(data['form'])"/>)</td></tr>
+                      <tr><td><span t-esc="get_month(data['form'])"/></td></tr>
                   </table>
               </td>
           </tr>
