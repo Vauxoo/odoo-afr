@@ -57,15 +57,8 @@ class account_balance(report_sxw.rml_parse):
             'get_month': self.get_month,
             'exchange_name': self.exchange_name,
             'get_vat_by_country': self.get_vat_by_country,
-            'get_titles': self._get_titles,
         })
         self.context = context
-
-    def _get_titles(self, form):
-        res = []
-        if form.get('columns') == 'one':
-            res.append({'balance': _('BALANCE')})
-        return res
 
     def get_vat_by_country(self, form):
         """
