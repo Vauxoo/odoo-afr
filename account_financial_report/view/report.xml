@@ -9,42 +9,14 @@
             model="wizard.report"
             name="afr.1cols"
             file="afr_template"
-            string="AFR 1 Columns"
+            string="AFR Common Report"
             report_type="qweb-pdf"
             multi="True"
             attachment_use="0"
             attachment=""
         />
 
-        <report
-            auto = "False"
-            id="2_col_report"
-            menu="False"
-            model="wizard.report"
-            name="afr.2cols"
-            file="afr_template"
-            string="AFR 2 Columns"
-            report_type="qweb-pdf"
-            multi="True"
-            attachment_use="0"
-            attachment=""
-        />
-
-        <report
-            auto = "False"
-            id="4_col_report"
-            menu="False"
-            model="wizard.report"
-            name="afr.4cols"
-            file="afr_template"
-            string="AFR 4 Columns"
-            report_type="qweb-pdf"
-            multi="True"
-            attachment_use="0"
-            attachment=""
-        />
-
-        <record id="4_col_report" model="ir.actions.report.xml">
+        <record id="1_col_report" model="ir.actions.report.xml">
             <field name="paperformat_id" ref="report.paperformat_us"/>
         </record>
 
@@ -83,34 +55,6 @@
 
         <report
             auto = "False"
-            id="5_col_report"
-            menu="False"
-            model="wizard.report"
-            name="afr.5cols"
-            file="afr_template"
-            string="AFR 5 Columns"
-            report_type="qweb-pdf"
-            multi="True"
-            attachment_use="0"
-            attachment=""
-        />
-
-        <report
-            auto = "False"
-            id="qtr_col_report"
-            menu="False"
-            model="wizard.report"
-            name="afr.qtrcols"
-            file="afr_template"
-            string="AFR QTRs Columns"
-            report_type="qweb-pdf"
-            multi="True"
-            attachment_use="0"
-            attachment=""
-        />
-
-        <report
-            auto = "False"
             id="13_col_report"
             menu="False"
             model="wizard.report"
@@ -126,7 +70,6 @@
         <record id="13_col_report" model="ir.actions.report.xml">
             <field name="paperformat_id" ref="account_financial_report.paperformat_us_double_letter"/>
         </record>
-
 
          <report
             id="balance_multicurrency"

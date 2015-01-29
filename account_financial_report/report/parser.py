@@ -1709,30 +1709,6 @@ class report_afr_1_cols(osv.AbstractModel):
     _template = 'account_financial_report.afr_template'
     _wrapped_report_class = account_balance
 
-
-class report_afr_2_cols(osv.AbstractModel):
-
-    # _name = `report.` + `report_name`
-    # report_name="afr.2cols"
-    _name = 'report.afr.2cols'
-
-    # this inheritance will allow to render this particular report
-    _inherit = 'report.abstract_report'
-    _template = 'account_financial_report.afr_template'
-    _wrapped_report_class = account_balance
-
-
-class report_afr_4_cols(osv.AbstractModel):
-
-    # _name = `report.` + `report_name`
-    # report_name="afr.4cols"
-    _name = 'report.afr.4cols'
-
-    # this inheritance will allow to render this particular report
-    _inherit = 'report.abstract_report'
-    _template = 'account_financial_report.afr_template'
-    _wrapped_report_class = account_balance
-
 report_sxw.report_sxw(
     'report.afr.analytic.ledger',
     'wizard.report',
@@ -1760,30 +1736,6 @@ report_sxw.report_sxw(
     'account_financial_report/report/balance_full_4_cols_journal_ledger.rml',
     parser=account_balance,
     header=False)
-
-
-class report_afr_5_cols(osv.AbstractModel):
-
-    # _name = `report.` + `report_name`
-    # report_name="afr.5cols"
-    _name = 'report.afr.5cols'
-
-    # this inheritance will allow to render this particular report
-    _inherit = 'report.abstract_report'
-    _template = 'account_financial_report.afr_template'
-    _wrapped_report_class = account_balance
-
-
-class report_afr_qtrs_cols(osv.AbstractModel):
-
-    # _name = `report.` + `report_name`
-    # report_name="afr.qtrcols"
-    _name = 'report.afr.qtrcols'
-
-    # this inheritance will allow to render this particular report
-    _inherit = 'report.abstract_report'
-    _template = 'account_financial_report.afr_template'
-    _wrapped_report_class = account_balance
 
 
 class report_afr_13_cols(osv.AbstractModel):

@@ -348,10 +348,8 @@ class wizard_report(osv.osv_memory):
 
         if data['form']['columns'] == 'currency':
             name = 'afr.multicurrency'
-        if data['form']['columns'] == 'one':
+        if data['form']['columns'] in ('one', 'two', 'five', 'qtr'):
             name = 'afr.1cols'
-        if data['form']['columns'] == 'two':
-            name = 'afr.2cols'
         if data['form']['columns'] == 'four':
             if data['form']['analytic_ledger'] and \
                     data['form']['inf_type'] == 'BS':
@@ -363,11 +361,7 @@ class wizard_report(osv.osv_memory):
                     data['form']['inf_type'] == 'BS':
                 name = 'afr.partner.balance'
             else:
-                name = 'afr.4cols'
-        if data['form']['columns'] == 'five':
-            name = 'afr.5cols'
-        if data['form']['columns'] == 'qtr':
-            name = 'afr.qtrcols'
+                name = 'afr.1cols'
         if data['form']['columns'] == 'thirteen':
             name = 'afr.13cols'
 
