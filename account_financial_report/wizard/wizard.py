@@ -34,6 +34,7 @@ from openerp.tools.translate import _
 
 class wizard_report(osv.osv_memory):
     _name = "wizard.report"
+    _rec_name = 'afr_id'
 
     _columns = {
         'afr_id': fields.many2one(
@@ -122,7 +123,12 @@ class wizard_report(osv.osv_memory):
             'With Analytic Lines',
             help="If this checkbox is active will print the analytic lines in"
             " the analytic ledger four columns report. This option only"
-            " applies when the analytic ledger is selected.")
+            " applies when the analytic ledger is selected."),
+        'report_format': fields.selection([
+            ('pdf', 'PDF'),
+            # TODO: enable print on controller to HTML
+            # ('html', 'HTML'),
+            ('xls', 'Spreadsheet')], 'Report Format'),
     }
 
     _defaults = {
@@ -142,6 +148,7 @@ class wizard_report(osv.osv_memory):
         'target_move': 'posted',
         'group_by': 'currency',
         'lines_detail': 'total',
+        'report_format': lambda *args: 'pdf',
     }
 
     def onchange_inf_type(self, cr, uid, ids, inf_type, context=None):
@@ -345,7 +352,7 @@ class wizard_report(osv.osv_memory):
                         (data['form']['date_from'] > minmax[0]['fin']):
                     raise osv.except_osv(_('Error !'), _(
                         'La interseccion entre el periodo y fecha es vacio'))
-
+        ported = True
         if data['form']['columns'] == 'currency':
             name = 'afr.multicurrency'
         if data['form']['columns'] in ('one', 'two', 'five', 'qtr'):
@@ -357,14 +364,22 @@ class wizard_report(osv.osv_memory):
             elif data['form']['journal_ledger'] and \
                     data['form']['inf_type'] == 'BS':
                 name = 'afr.journal.ledger'
+                ported = False
             elif data['form']['partner_balance'] and \
                     data['form']['inf_type'] == 'BS':
                 name = 'afr.partner.balance'
+                ported = False
             else:
                 name = 'afr.1cols'
         if data['form']['columns'] == 'thirteen':
             name = 'afr.13cols'
 
+        context['xls_report'] = data['form'].get('report_format') == 'xls'
+
+        if ported:
+            return self.pool['report'].get_action(
+                cr, uid, [], name, data=data,
+                context=context)
         return {
             'type': 'ir.actions.report.xml',
             'report_name': name,
