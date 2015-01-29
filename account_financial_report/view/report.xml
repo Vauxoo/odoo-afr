@@ -21,15 +21,22 @@
         </record>
 
         <report
-            auto="False"
+            auto = "False"
             id="analytic_ledger_report"
-            menu="True"
+            menu="False"
             model="wizard.report"
             name="afr.analytic.ledger"
-            rml="account_financial_report/report/balance_full_4_cols_analytic_ledger.rml"
+            file="afr_template_analytic_ledger"
             string="Analytic Ledger"
-            header="False"
+            report_type="qweb-pdf"
+            multi="True"
+            attachment_use="0"
+            attachment=""
         />
+
+        <record id="analytic_ledger_report" model="ir.actions.report.xml">
+            <field name="paperformat_id" ref="account_financial_report.paperformat_us_double_letter"/>
+        </record>
 
         <report
             auto="False"

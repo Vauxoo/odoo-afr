@@ -1709,12 +1709,17 @@ class report_afr_1_cols(osv.AbstractModel):
     _template = 'account_financial_report.afr_template'
     _wrapped_report_class = account_balance
 
-report_sxw.report_sxw(
-    'report.afr.analytic.ledger',
-    'wizard.report',
-    'account_financial_report/report/balance_full_4_cols_analytic_ledger.rml',
-    parser=account_balance,
-    header=False)
+
+class report_afr_analytic_ledger(osv.AbstractModel):
+
+    # _name = `report.` + `report_name`
+    # report_name="afr.analytic.ledger"
+    _name = 'report.afr.analytic.ledger'
+
+    # this inheritance will allow to render this particular report
+    _inherit = 'report.abstract_report'
+    _template = 'account_financial_report.afr_template_analytic_ledger'
+    _wrapped_report_class = account_balance
 
 report_sxw.report_sxw(
     'report.afr.multicurrency',

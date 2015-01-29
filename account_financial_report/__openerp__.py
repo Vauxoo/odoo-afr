@@ -60,6 +60,7 @@ where appropriate
         "data/report_paperformat.xml",
         "report/layouts.xml",
         "report/template.xml",
+        "report/template_analytic_ledger.xml",
         "view/report.xml",
         "view/wizard.xml",
         "view/company_view.xml",
