@@ -28,9 +28,11 @@
     "version": "2.0",
     "author": "Vauxoo",
     "website": "http://www.vauxoo.com",
-    "depends": ["base",
-                "account"
-                ],
+    "depends": [
+        "base",
+        "account",
+        "controller_report_xls",
+    ],
     "category": "Accounting",
     "description":
     """
