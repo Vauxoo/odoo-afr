@@ -34,6 +34,7 @@ from openerp.osv import osv
 
 
 class account_balance(report_sxw.rml_parse):
+    _name = 'afr.parser'
 
     def __init__(self, cr, uid, name, context):
         super(account_balance, self).__init__(cr, uid, name, context)
@@ -48,6 +49,7 @@ class account_balance(report_sxw.rml_parse):
         self.date_lst = []
         self.date_lst_string = ''
         self.localcontext.update({
+            'getattr': getattr,
             'time': time,
             'lines': self.lines,
             'get_fiscalyear_text': self.get_fiscalyear_text,
@@ -1696,33 +1698,30 @@ class account_balance(report_sxw.rml_parse):
             result_acc.append(res2)
         return result_acc
 
-report_sxw.report_sxw(
-    'report.afr.1cols',
-    'wizard.report',
-    'account_financial_report/report/balance_full.rml',
-    parser=account_balance,
-    header=False)
 
-report_sxw.report_sxw(
-    'report.afr.2cols',
-    'wizard.report',
-    'account_financial_report/report/balance_full_2_cols.rml',
-    parser=account_balance,
-    header=False)
+class report_afr_1_cols(osv.AbstractModel):
 
-report_sxw.report_sxw(
-    'report.afr.4cols',
-    'wizard.report',
-    'account_financial_report/report/balance_full_4_cols.rml',
-    parser=account_balance,
-    header=False)
+    # _name = `report.` + `report_name`
+    # report_name="afr.1cols"
+    _name = 'report.afr.1cols'
 
-report_sxw.report_sxw(
-    'report.afr.analytic.ledger',
-    'wizard.report',
-    'account_financial_report/report/balance_full_4_cols_analytic_ledger.rml',
-    parser=account_balance,
-    header=False)
+    # this inheritance will allow to render this particular report
+    _inherit = 'report.abstract_report'
+    _template = 'account_financial_report.afr_template'
+    _wrapped_report_class = account_balance
+
+
+class report_afr_analytic_ledger(osv.AbstractModel):
+
+    # _name = `report.` + `report_name`
+    # report_name="afr.analytic.ledger"
+    _name = 'report.afr.analytic.ledger'
+
+    # this inheritance will allow to render this particular report
+    _inherit = 'report.abstract_report'
+    _template = 'account_financial_report.afr_template_analytic_ledger'
+    _wrapped_report_class = account_balance
+
 report_sxw.report_sxw(
     'report.afr.multicurrency',
     'wizard.report',
@@ -1744,23 +1743,14 @@ report_sxw.report_sxw(
     parser=account_balance,
     header=False)
 
-report_sxw.report_sxw(
-    'report.afr.5cols',
-    'wizard.report',
-    'account_financial_report/report/balance_full_5_cols.rml',
-    parser=account_balance,
-    header=False)
 
-report_sxw.report_sxw(
-    'report.afr.qtrcols',
-    'wizard.report',
-    'account_financial_report/report/balance_full_qtr_cols.rml',
-    parser=account_balance,
-    header=False)
+class report_afr_13_cols(osv.AbstractModel):
 
-report_sxw.report_sxw(
-    'report.afr.13cols',
-    'wizard.report',
-    'account_financial_report/report/balance_full_13_cols.rml',
-    parser=account_balance,
-    header=False)
+    # _name = `report.` + `report_name`
+    # report_name="afr.13cols'"
+    _name = 'report.afr.13cols'
+
+    # this inheritance will allow to render this particular report
+    _inherit = 'report.abstract_report'
+    _template = 'account_financial_report.afr_template'
+    _wrapped_report_class = account_balance

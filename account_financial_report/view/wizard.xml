@@ -29,6 +29,9 @@
                         <field name="currency_id"
                         domain="[('company_id','=',company_id)]"
                         attrs="{'readonly':[('analytic_ledger','=',True)]}"/>
+                        <group string="Output Format" colspan='2'>
+                            <field name="report_format" widget="selection" required='1'/>
+                        </group>
                     </group>
                     <group string="Report Info">
                         <field

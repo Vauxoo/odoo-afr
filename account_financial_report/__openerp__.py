@@ -28,9 +28,11 @@
     "version": "2.0",
     "author": "Vauxoo",
     "website": "http://www.vauxoo.com",
-    "depends": ["base",
-                "account"
-                ],
+    "depends": [
+        "base",
+        "account",
+        "controller_report_xls",
+    ],
     "category": "Accounting",
     "description":
     """
@@ -57,6 +59,10 @@ where appropriate
     "data": [
         "security/security.xml",
         "security/ir.model.access.csv",
+        "data/report_paperformat.xml",
+        "report/layouts.xml",
+        "report/template.xml",
+        "report/template_analytic_ledger.xml",
         "view/report.xml",
         "view/wizard.xml",
         "view/company_view.xml",
