@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
-        <template id="afr_document_analytic_ledger">
+        <template id="afr_document_journal_ledger">
             <t t-call="account_financial_report.external_layout">
                 <div t-foreach="objects" t-as="o">
                     <!--VARIABLES TO BE USED LATER-->
@@ -107,72 +107,93 @@
                                             </t>
                                         </td>
                                     </tr>
-                                    <t t-foreach="line.get('mayor')" t-as="m">
+                                    <t t-foreach="line.get('journal')" t-as="j">
                                         <tr>
                                             <td>
-                                                <span t-esc="formatLang(m['date'], date=True)"/>
+                                                <span t-esc="formatLang(j['date'], date=True)"/>
                                             </td>
                                             <td>
-                                                <span t-esc="m['period']"/>
+                                                <span t-esc="j['period']"/>
                                             </td>
                                             <td>
-                                                <t t-if="m['ref']">
-                                                    <span t-esc="m['name']"/> - Ref: <span t-esc="m['ref']"/>
-                                                </t>
-                                                <t t-if="not m['ref']">
-                                                    <span t-esc="m['name']"/>
-                                                </t>
+                                                <span t-esc="j['name']"/>
                                             </td>
-                                            <td>
-                                                <span t-esc="m['entry']"/>
-                                            </td>
-                                            <td>
-                                                <span t-esc="m['partner']"/>
-                                            </td>
-                                            <td>
-                                            </td>
-                                            <td style="text-align:right;">
-                                                <span t-esc="formatLang(m['debit'], digits=2, grouping=True)"/>
-                                            </td>
-                                            <td style="text-align:right;">
-                                                <span t-esc="formatLang(m['credit'], digits=2, grouping=True)"/>
-                                            </td>
-                                            <td style="text-align:right;">
-                                                <span t-esc="formatLang(m['balance'], digits=2, grouping=True)"/>
-                                            </td>
+                                            <td> </td>
+                                            <td> </td>
+                                            <td> </td>
+                                            <td> </td>
+                                            <td> </td>
+                                            <td> </td>
                                         </tr>
-                                        <t t-foreach="[z for z in m['aml_brw'].analytic_lines if data['form']['print_analytic_lines']]" t-as="y">
-                                            <tr>
+                                        <t t-foreach="j.get('obj').line_id" t-as="k">
+                                            <tr t-if="k.account_id.code == line['code']">
                                                 <td>
+                                                    <span t-esc="k.name"/>
                                                 </td>
                                                 <td>
-                                                </td>
-                                                <td style="font-style:italic;">
-                                                    <span t-esc="y.account_id.complete_name"/>
+                                                    <span t-esc="k.ref"/>
                                                 </td>
                                                 <td>
-                                                    <!--
-                                                    THIS ONLY AVAILABLE WITH ANALYTIC DISTRIBUTION
-                                                    <t t-if="getattr(y,'percentage')">
-                                                        <span t-esc="y.percentage"/>
+                                                    <t t-if="k.partner_id">
+                                                        <span t-esc="k.partner_id.name"/>
                                                     </t>
-                                                    -->
                                                 </td>
                                                 <td>
+                                                    <span t-esc="k.account_id.code"/>
+                                                </td>
+                                                <td>
+                                                    <span t-esc="k.account_id.name"/>
                                                 </td>
                                                 <td>
                                                 </td>
                                                 <td style="text-align:right;font-style:italic;">
-                                                    <t t-if="y.amount &lt; 0.0">
-                                                        <span t-esc="formatLang(y.amount * -1, digits=2, grouping=True)"/>
-                                                    </t>
+                                                    <span t-esc="formatLang(k.credit, digits=2, grouping=True)"/>
                                                 </td>
                                                 <td style="text-align:right;font-style:italic;">
-                                                    <t t-if="y.amount &gt;= 0.0">
-                                                        <span t-esc="formatLang(y.amount, digits=2, grouping=True)"/>
+                                                    <span t-esc="formatLang(k.debit, digits=2, grouping=True)"/>
+                                                </td>
+                                                <td style="text-align:right;font-style:italic;">
+                                                    <t t-if="k.reconcile_id">
+                                                        <span t-esc="k.reconcile_id.name"/>
+                                                    </t>
+                                                    <t t-if="k.reconcile_partial_id">
+                                                        <span t-esc="k.reconcile_partial_id.name"/>
+                                                    </t>
+                                                </td>
+                                            </tr>
+                                            <tr class="prueba" t-if="k.account_id.code != line['code']">
+                                                <td>
+                                                    <span t-esc="k.name"/>
+                                                </td>
+                                                <td>
+                                                    <span t-esc="k.ref"/>
+                                                </td>
+                                                <td>
+                                                    <t t-if="k.partner_id">
+                                                        <span t-esc="k.partner_id.name"/>
                                                     </t>
                                                 </td>
                                                 <td>
+                                                    <span t-esc="k.account_id.code"/>
+                                                </td>
+                                                <td>
+                                                    <span t-esc="k.account_id.name"/>
+                                                </td>
+                                                <td>
+                                                </td>
+                                                <td style="text-align:right;font-style:italic;">
+                                                    <span t-esc="formatLang(k.credit, digits=2, grouping=True)"/>
+                                                </td>
+                                                <td style="text-align:right;font-style:italic;">
+                                                    <span t-esc="formatLang(k.debit, digits=2, grouping=True)"/>
+                                                </td>
+                                                <td style="text-align:right;font-style:italic;">
+                                                    <t t-if="k.reconcile_id">
+                                                        <span t-esc="k.reconcile_id.name"/>
+                                                    </t>
+                                                    <t t-if="k.reconcile_partial_id">
+                                                        <span t-esc="k.reconcile_partial_id.name"/>
+                                                    </t>
                                                 </td>
                                             </tr>
                                         </t>
@@ -185,10 +206,10 @@
             </t>
         </template>
 
-        <template id="afr_template_analytic_ledger">
+        <template id="afr_template_journal_ledger">
             <t t-call="account_financial_report.html_container">
                 <t t-foreach="doc_ids" t-as="doc_id">
-                    <t t-raw="translate_doc(doc_id, doc_model, 'company_id.partner_id.lang', 'account_financial_report.afr_document_analytic_ledger')"/>
+                    <t t-raw="translate_doc(doc_id, doc_model, 'company_id.partner_id.lang', 'account_financial_report.afr_document_journal_ledger')"/>
                 </t>
             </t>
         </template>

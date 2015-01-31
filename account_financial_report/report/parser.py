@@ -1729,19 +1729,29 @@ report_sxw.report_sxw(
     parser=account_balance,
     header=False)
 
-report_sxw.report_sxw(
-    'report.afr.partner.balance',
-    'wizard.report',
-    'account_financial_report/report/balance_full_4_cols_partner_balance.rml',
-    parser=account_balance,
-    header=False)
 
-report_sxw.report_sxw(
-    'report.afr.journal.ledger',
-    'wizard.report',
-    'account_financial_report/report/balance_full_4_cols_journal_ledger.rml',
-    parser=account_balance,
-    header=False)
+class report_afr_partner_balance(osv.AbstractModel):
+
+    # _name = `report.` + `report_name`
+    # report_name="afr.partner.balance"
+    _name = 'report.afr.partner.balance'
+
+    # this inheritance will allow to render this particular report
+    _inherit = 'report.abstract_report'
+    _template = 'account_financial_report.afr_template_partner_balance'
+    _wrapped_report_class = account_balance
+
+
+class report_afr_journal_ledger(osv.AbstractModel):
+
+    # _name = `report.` + `report_name`
+    # report_name="afr.journal.ledger"
+    _name = 'report.afr.journal.ledger'
+
+    # this inheritance will allow to render this particular report
+    _inherit = 'report.abstract_report'
+    _template = 'account_financial_report.afr_template_journal_ledger'
+    _wrapped_report_class = account_balance
 
 
 class report_afr_13_cols(osv.AbstractModel):

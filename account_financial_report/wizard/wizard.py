@@ -352,7 +352,7 @@ class wizard_report(osv.osv_memory):
                         (data['form']['date_from'] > minmax[0]['fin']):
                     raise osv.except_osv(_('Error !'), _(
                         'La interseccion entre el periodo y fecha es vacio'))
-        ported = True
+
         if data['form']['columns'] == 'currency':
             name = 'afr.multicurrency'
         if data['form']['columns'] in ('one', 'two', 'five', 'qtr'):
@@ -364,11 +364,9 @@ class wizard_report(osv.osv_memory):
             elif data['form']['journal_ledger'] and \
                     data['form']['inf_type'] == 'BS':
                 name = 'afr.journal.ledger'
-                ported = False
             elif data['form']['partner_balance'] and \
                     data['form']['inf_type'] == 'BS':
                 name = 'afr.partner.balance'
-                ported = False
             else:
                 name = 'afr.1cols'
         if data['form']['columns'] == 'thirteen':
@@ -376,14 +374,8 @@ class wizard_report(osv.osv_memory):
 
         context['xls_report'] = data['form'].get('report_format') == 'xls'
 
-        if ported:
-            return self.pool['report'].get_action(
-                cr, uid, [], name, data=data,
-                context=context)
-        return {
-            'type': 'ir.actions.report.xml',
-            'report_name': name,
-            'datas': data,
-        }
+        return self.pool['report'].get_action(
+            cr, uid, [], name, data=data,
+            context=context)
 
 wizard_report()
