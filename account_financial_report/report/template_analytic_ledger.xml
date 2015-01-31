@@ -148,7 +148,7 @@
                                                 <td>
                                                 </td>
                                                 <td style="font-style:italic;">
-                                                    <span t-esc="y.account_id. complete_name "/>
+                                                    <span t-esc="y.account_id.complete_name"/>
                                                 </td>
                                                 <td>
                                                     <!--
