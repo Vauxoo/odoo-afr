@@ -63,6 +63,7 @@ where appropriate
         "report/layouts.xml",
         "report/template.xml",
         "report/template_analytic_ledger.xml",
+        "report/template_journal_ledger.xml",
         "view/report.xml",
         "view/wizard.xml",
         "view/company_view.xml",

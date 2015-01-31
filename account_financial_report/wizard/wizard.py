@@ -364,7 +364,6 @@ class wizard_report(osv.osv_memory):
             elif data['form']['journal_ledger'] and \
                     data['form']['inf_type'] == 'BS':
                 name = 'afr.journal.ledger'
-                ported = False
             elif data['form']['partner_balance'] and \
                     data['form']['inf_type'] == 'BS':
                 name = 'afr.partner.balance'

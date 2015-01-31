@@ -1744,6 +1744,18 @@ report_sxw.report_sxw(
     header=False)
 
 
+class report_afr_journal_ledger(osv.AbstractModel):
+
+    # _name = `report.` + `report_name`
+    # report_name="afr.journal.ledger"
+    _name = 'report.afr.journal.ledger'
+
+    # this inheritance will allow to render this particular report
+    _inherit = 'report.abstract_report'
+    _template = 'account_financial_report.afr_template_journal_ledger'
+    _wrapped_report_class = account_balance
+
+
 class report_afr_13_cols(osv.AbstractModel):
 
     # _name = `report.` + `report_name`
