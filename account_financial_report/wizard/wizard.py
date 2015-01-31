@@ -367,7 +367,6 @@ class wizard_report(osv.osv_memory):
             elif data['form']['partner_balance'] and \
                     data['form']['inf_type'] == 'BS':
                 name = 'afr.partner.balance'
-                ported = False
             else:
                 name = 'afr.1cols'
         if data['form']['columns'] == 'thirteen':
@@ -375,14 +374,8 @@ class wizard_report(osv.osv_memory):
 
         context['xls_report'] = data['form'].get('report_format') == 'xls'
 
-        if ported:
-            return self.pool['report'].get_action(
-                cr, uid, [], name, data=data,
-                context=context)
-        return {
-            'type': 'ir.actions.report.xml',
-            'report_name': name,
-            'datas': data,
-        }
+        return self.pool['report'].get_action(
+            cr, uid, [], name, data=data,
+            context=context)
 
 wizard_report()

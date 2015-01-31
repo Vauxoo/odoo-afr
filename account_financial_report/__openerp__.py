@@ -64,6 +64,7 @@ where appropriate
         "report/template.xml",
         "report/template_analytic_ledger.xml",
         "report/template_journal_ledger.xml",
+        "report/template_partner_balance.xml",
         "view/report.xml",
         "view/wizard.xml",
         "view/company_view.xml",
