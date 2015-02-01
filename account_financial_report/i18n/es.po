@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: Odoo Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-01-31 16:54+0000\n"
-"PO-Revision-Date: 2015-02-01 02:44+0000\n"
+"PO-Revision-Date: 2015-02-01 03:08+0000\n"
 "Last-Translator: Humberto Arocha <hbto@vauxoo.com>\n"
 "Language-Team: Spanish <http://example.com/projects/odoo-"
 "afr/account_financial_report/es/>\n"
@@ -60,7 +60,6 @@ msgstr "4 TRM's | YTD"
 
 #. module: account_financial_report
 #: view:website:account_financial_report.minimal_layout
-#, fuzzy
 msgid "<!DOCTYPE html>"
 msgstr "<!DOCTYPE html>"
 
@@ -205,6 +204,8 @@ msgstr ""
 #: help:afr,journal_ledger:0
 msgid "Allows to Generate an journal Ledger for accounts with moves. Available when Balance Sheet and 'Initial | Debit | Credit | YTD' are selected"
 msgstr ""
+"Permite Generar un Libro Diario para las cuentas con movimientos. Disponible "
+"cuando Saldo Acumulado e 'Inicial | Débito | Crédito | YTD' se seleccionan"
 
 #. module: account_financial_report
 #: view:res.company:account_financial_report.view_company_credit_account_form
@@ -535,7 +536,6 @@ msgstr "Agrupado por"
 #: field:report.afr.journal.ledger,id:0
 #: field:report.afr.partner.balance,id:0
 #: field:wizard.report,id:0
-#, fuzzy
 msgid "ID"
 msgstr "ID"
 
@@ -551,6 +551,9 @@ msgstr "BAL. INIC."
 #: help:wizard.report,print_analytic_lines:0
 msgid "If this checkbox is active will print the analytic lines in the analytic ledger four columns report. This option only applies when the analytic ledger is selected."
 msgstr ""
+"Si esta casilla está activa se imprimirán los asientos analíticos en el "
+"report de cuatro columnas del Mayor Analítico. Esta opción solo aplica "
+"cuando Mayor Analítico está seleccionado."
 
 #. module: account_financial_report
 #: help:wizard.report,afr_id:0
@@ -650,7 +653,6 @@ msgstr "PARTNER"
 
 #. module: account_financial_report
 #: selection:wizard.report,report_format:0
-#, fuzzy
 msgid "PDF"
 msgstr "PDF"
 
@@ -861,25 +863,21 @@ msgstr "_Cancelar"
 
 #. module: account_financial_report
 #: view:website:account_financial_report.layout
-#, fuzzy
 msgid "account_financial_report.layout"
 msgstr "account_financial_report.layout"
 
 #. module: account_financial_report
 #: view:website:account_financial_report.layout
-#, fuzzy
 msgid "data_report_dpi if data_report_dpi else None"
 msgstr "data_report_dpi if data_report_dpi else None"
 
 #. module: account_financial_report
 #: view:website:account_financial_report.layout
-#, fuzzy
 msgid "data_report_header_spacing if data_report_header_spacing else None"
 msgstr "data_report_header_spacing if data_report_header_spacing else None"
 
 #. module: account_financial_report
 #: view:website:account_financial_report.layout
-#, fuzzy
 msgid "data_report_margin_top if data_report_margin_top else None"
 msgstr "data_report_margin_top if data_report_margin_top else None"
 
