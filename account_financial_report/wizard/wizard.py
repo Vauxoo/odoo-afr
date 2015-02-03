@@ -353,29 +353,47 @@ class wizard_report(osv.osv_memory):
                     raise osv.except_osv(_('Error !'), _(
                         'La interseccion entre el periodo y fecha es vacio'))
 
+        xls = data['form'].get('report_format') == 'xls'
+
         if data['form']['columns'] == 'currency':
-            name = 'afr.multicurrency'
-        if data['form']['columns'] in ('one', 'two', 'five', 'qtr'):
-            name = 'afr.1cols'
+            name = xls and 'afr.multicurrency' or 'afr.rml.multicurrency'
+        if data['form']['columns'] == 'one':
+            name = xls and 'afr.1cols' or 'afr.rml.1cols'
+        if data['form']['columns'] == 'two':
+            name = xls and 'afr.1cols' or 'afr.rml.2cols'
         if data['form']['columns'] == 'four':
             if data['form']['analytic_ledger'] and \
                     data['form']['inf_type'] == 'BS':
-                name = 'afr.analytic.ledger'
+                name = (xls and 'afr.analytic.ledger' or
+                        'afr.rml.analytic.ledger')
             elif data['form']['journal_ledger'] and \
                     data['form']['inf_type'] == 'BS':
-                name = 'afr.journal.ledger'
+                name = xls and 'afr.journal.ledger' or 'afr.rml.journal.ledger'
             elif data['form']['partner_balance'] and \
                     data['form']['inf_type'] == 'BS':
-                name = 'afr.partner.balance'
+                name = (xls and 'afr.partner.balance' or
+                        'afr.rml.partner.balance')
             else:
-                name = 'afr.1cols'
+                name = xls and 'afr.1cols' or 'afr.rml.4cols'
+        if data['form']['columns'] == 'five':
+            name = xls and 'afr.1cols' or 'afr.rml.5cols'
+        if data['form']['columns'] == 'qtr':
+            name = xls and 'afr.1cols' or 'afr.rml.qtrcols'
         if data['form']['columns'] == 'thirteen':
-            name = 'afr.13cols'
+            name = xls and 'afr.13cols' or 'afr.rml.13cols'
 
-        context['xls_report'] = data['form'].get('report_format') == 'xls'
+        if xls:
+            context['xls_report'] = xls
 
-        return self.pool['report'].get_action(
-            cr, uid, [], name, data=data,
-            context=context)
+            return self.pool['report'].get_action(
+                cr, uid, [], name, data=data,
+                context=context)
+
+        return {
+            'type': 'ir.actions.report.xml',
+            'report_name': name,
+            'datas': data,
+        }
+
 
 wizard_report()

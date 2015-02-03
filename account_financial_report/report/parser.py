@@ -1723,9 +1723,72 @@ class report_afr_analytic_ledger(osv.AbstractModel):
     _wrapped_report_class = account_balance
 
 report_sxw.report_sxw(
-    'report.afr.multicurrency',
+    'report.afr.rml.1cols',
+    'wizard.report',
+    'account_financial_report/report/balance_full.rml',
+    parser=account_balance,
+    header=False)
+
+report_sxw.report_sxw(
+    'report.afr.rml.2cols',
+    'wizard.report',
+    'account_financial_report/report/balance_full_2_cols.rml',
+    parser=account_balance,
+    header=False)
+
+report_sxw.report_sxw(
+    'report.afr.rml.4cols',
+    'wizard.report',
+    'account_financial_report/report/balance_full_4_cols.rml',
+    parser=account_balance,
+    header=False)
+
+report_sxw.report_sxw(
+    'report.afr.rml.analytic.ledger',
+    'wizard.report',
+    'account_financial_report/report/balance_full_4_cols_analytic_ledger.rml',
+    parser=account_balance,
+    header=False)
+
+report_sxw.report_sxw(
+    'report.afr.rml.multicurrency',
     'wizard.report',
     'account_financial_report/report/balance_multicurrency.rml',
+    parser=account_balance,
+    header=False)
+
+report_sxw.report_sxw(
+    'report.afr.rml.partner.balance',
+    'wizard.report',
+    'account_financial_report/report/balance_full_4_cols_partner_balance.rml',
+    parser=account_balance,
+    header=False)
+
+report_sxw.report_sxw(
+    'report.afr.rml.journal.ledger',
+    'wizard.report',
+    'account_financial_report/report/balance_full_4_cols_journal_ledger.rml',
+    parser=account_balance,
+    header=False)
+
+report_sxw.report_sxw(
+    'report.afr.rml.5cols',
+    'wizard.report',
+    'account_financial_report/report/balance_full_5_cols.rml',
+    parser=account_balance,
+    header=False)
+
+report_sxw.report_sxw(
+    'report.afr.rml.qtrcols',
+    'wizard.report',
+    'account_financial_report/report/balance_full_qtr_cols.rml',
+    parser=account_balance,
+    header=False)
+
+report_sxw.report_sxw(
+    'report.afr.rml.13cols',
+    'wizard.report',
+    'account_financial_report/report/balance_full_13_cols.rml',
     parser=account_balance,
     header=False)
 
