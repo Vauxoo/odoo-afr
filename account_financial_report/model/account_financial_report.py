@@ -96,6 +96,29 @@ class account_financial_report(osv.osv):
             'Entries to Include', required=True,
             help='Print All Accounting Entries or just Posted Accounting '
             'Entries'),
+        'group_by': fields.selection(
+            [('currency', 'Currency'), ('partner', 'Partner')],
+            'Group by',
+            help='Only applies in the way of the end'
+            ' balance multicurrency report is show.'),
+        'lines_detail': fields.selection(
+            [
+                ('detail', 'Detail'),
+                ('full', 'Full Detail'),
+                ('total', 'Totals')],
+            'Line Details',
+            help='Only applies in the way of the end balance multicurrency'
+            ' report is show.'),
+        'print_analytic_lines': fields.boolean(
+            'With Analytic Lines',
+            help="If this checkbox is active will print the analytic lines in"
+            " the analytic ledger four columns report. This option only"
+            " applies when the analytic ledger is selected."),
+        'report_format': fields.selection([
+            ('pdf', 'PDF'),
+            # TODO: enable print on controller to HTML
+            # ('html', 'HTML'),
+            ('xls', 'Spreadsheet')], 'Report Format'),
 
         # Deprecated fields
         'filter': fields.selection(
