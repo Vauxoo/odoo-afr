@@ -243,6 +243,11 @@ class wizard_report(osv.osv_memory):
         res['value'].update({'tot_check': afr_brw.tot_check or False})
         res['value'].update({'lab_str': afr_brw.lab_str or _(
             'Write a Description for your Summary Total')})
+        res['value'].update({'report_format': afr_brw.report_format or False})
+        res['value'].update(
+            {'partner_balance': afr_brw.partner_balance or False})
+        res['value'].update(
+            {'print_analytic_lines': afr_brw.print_analytic_lines or False})
         return res
 
     def _get_defaults(self, cr, uid, data, context=None):

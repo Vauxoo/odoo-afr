@@ -350,8 +350,8 @@ class account_balance(report_sxw.rml_parse):
                 inner join account_journal aj on aj.id = aml.journal_id
                 inner join account_account aa on aa.id = aml.account_id
                 inner join account_period ap on ap.id = aml.period_id
-                inner join account_move am on am.id = aml.move_id """ + where +\
-                """ order by date, am.name"""
+                inner join account_move am on am.id = aml.move_id """ \
+                + where + """ order by date, am.name"""
 
             self.cr.execute(sql_detalle)
             resultat = self.cr.dictfetchall()
@@ -1021,7 +1021,9 @@ class account_balance(report_sxw.rml_parse):
 
         def missing_period(ctx_init):
 
-            ctx_init['fiscalyear'] = fiscalyear_obj.search(self.cr, self.uid, [('date_stop', '<', fiscalyear.date_start)], order='date_stop') and \
+            ctx_init['fiscalyear'] = fiscalyear_obj.search(
+                self.cr, self.uid, [('date_stop', '<', fiscalyear.date_start)],
+                order='date_stop') and \
                 fiscalyear_obj.search(
                     self.cr, self.uid,
                     [('date_stop', '<', fiscalyear.date_start)],
