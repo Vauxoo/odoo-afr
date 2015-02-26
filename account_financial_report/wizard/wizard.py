@@ -152,8 +152,7 @@ class wizard_report(osv.osv_memory):
     }
 
     def onchange_inf_type(self, cr, uid, ids, inf_type, context=None):
-        if context is None:
-            context = {}
+        context = context and dict(context) or {}
         res = {'value': {}}
 
         if inf_type != 'BS':
@@ -163,8 +162,7 @@ class wizard_report(osv.osv_memory):
 
     def onchange_columns(self, cr, uid, ids, columns, fiscalyear, periods,
                          context=None):
-        if context is None:
-            context = {}
+        context = context and dict(context) or {}
         res = {'value': {}}
 
         p_obj = self.pool.get("account.period")
@@ -189,7 +187,7 @@ class wizard_report(osv.osv_memory):
 
     def onchange_analytic_ledger(self, cr, uid, ids, company_id,
                                  analytic_ledger, context=None):
-        context = context or {}
+        context = context and dict(context) or {}
         context['company_id'] = company_id
         res = {}
         res['value'] = {
@@ -217,8 +215,7 @@ class wizard_report(osv.osv_memory):
         return res
 
     def onchange_afr_id(self, cr, uid, ids, afr_id, context=None):
-        if context is None:
-            context = {}
+        context = context and dict(context) or {}
         res = {'value': {}}
         if not afr_id:
             return res
@@ -250,8 +247,7 @@ class wizard_report(osv.osv_memory):
         return res
 
     def _get_defaults(self, cr, uid, data, context=None):
-        if context is None:
-            context = {}
+        context = context and dict(context) or {}
         user = pooler.get_pool(cr.dbname).get(
             'res.users').browse(cr, uid, uid, context=context)
         if user.company_id:
@@ -266,15 +262,13 @@ class wizard_report(osv.osv_memory):
         return data['form']
 
     def _check_state(self, cr, uid, data, context=None):
-        if context is None:
-            context = {}
+        context = context and dict(context) or {}
         if data['form']['filter'] == 'bydate':
             self._check_date(cr, uid, data, context)
         return data['form']
 
     def _check_date(self, cr, uid, data, context=None):
-        if context is None:
-            context = {}
+        context = context and dict(context) or {}
 
         if data['form']['date_from'] > data['form']['date_to']:
             raise osv.except_osv(_('Error !'), (
@@ -298,8 +292,7 @@ class wizard_report(osv.osv_memory):
             raise osv.except_osv(_('UserError'), 'No existe periodo fiscal')
 
     def period_span(self, cr, uid, ids, fy_id, context=None):
-        if context is None:
-            context = {}
+        context = context and dict(context) or {}
         ap_obj = self.pool.get('account.period')
         fy_id = fy_id and type(fy_id) in (list, tuple) and fy_id[0] or fy_id
         if not ids:
@@ -318,8 +311,7 @@ class wizard_report(osv.osv_memory):
                              order='date_start asc')
 
     def print_report(self, cr, uid, ids, data, context=None):
-        if context is None:
-            context = {}
+        context = context and dict(context) or {}
 
         data = {}
         data['ids'] = context.get('active_ids', [])

@@ -151,8 +151,7 @@ class account_financial_report(osv.osv):
     }
 
     def copy(self, cr, uid, ids, default=None, context=None):
-        if context is None:
-            context = {}
+        context = context and dict(context) or {}
         previous_name = self.browse(cr, uid, ids, context=context).name
         new_name = _('Copy of %s') % previous_name
         lst = self.search(cr, uid, [('name', 'like', new_name)],
@@ -165,8 +164,7 @@ class account_financial_report(osv.osv):
                                                           context=context)
 
     def onchange_inf_type(self, cr, uid, ids, inf_type, context=None):
-        if context is None:
-            context = {}
+        context = context and dict(context) or {}
         res = {'value': {}}
 
         if inf_type != 'BS':
@@ -176,8 +174,7 @@ class account_financial_report(osv.osv):
 
     def onchange_columns(self, cr, uid, ids, columns,
                          fiscalyear_id, period_ids, context=None):
-        if context is None:
-            context = {}
+        context = context and dict(context) or {}
         res = {'value': {}}
 
         if columns != 'four':
@@ -197,8 +194,7 @@ class account_financial_report(osv.osv):
 
     def onchange_analytic_ledger(
             self, cr, uid, ids, company_id, analytic_ledger, context=None):
-        if context is None:
-            context = {}
+        context = context and dict(context) or {}
         context['company_id'] = company_id
         res = {'value': {}}
         cur_id = self.pool.get('res.company').browse(
@@ -207,8 +203,7 @@ class account_financial_report(osv.osv):
         return res
 
     def onchange_company_id(self, cr, uid, ids, company_id, context=None):
-        if context is None:
-            context = {}
+        context = context and dict(context) or {}
         context['company_id'] = company_id
         res = {'value': {}}
 
