@@ -168,10 +168,10 @@ class account_balance(report_sxw.rml_parse):
 
     def exchange_name(self, form):
         self.from_currency_id = \
-            self.get_company_currency(form['company_id'] and
-                                      type(form['company_id']) in (list, tuple)
-                                      and form['company_id'][0] or
-                                      form['company_id'])
+            self.get_company_currency(
+                form['company_id'] and
+                type(form['company_id']) in (list, tuple) and
+                form['company_id'][0] or form['company_id'])
         if not form['currency_id']:
             self.to_currency_id = self.from_currency_id
         else:
@@ -545,13 +545,13 @@ class account_balance(report_sxw.rml_parse):
                                     error = (
                                         value5 and
                                         (value5['currency'] != currency_key or
-                                         value5['partner'] != partner_key)
-                                        and value5 or False)
+                                         value5['partner'] != partner_key) and
+                                         value5 or False)
                                     if error:
                                         raise osv.except_osv(
                                             'error',
                                             ('lines with other currencys in '
-                                             + pval_key))
+                                             '%s' % pval_key))
                     else:
                         raise osv.except_osv(
                             'error', 'missing case ' + cval_key)
@@ -1082,8 +1082,9 @@ class account_balance(report_sxw.rml_parse):
         self.context['state'] = form['target_move'] or 'posted'
 
         self.from_currency_id = self.get_company_currency(
-            form['company_id'] and type(form['company_id']) in (list, tuple)
-            and form['company_id'][0] or form['company_id'])
+            form['company_id'] and
+            type(form['company_id']) in (list, tuple) and
+            form['company_id'][0] or form['company_id'])
         if not form['currency_id']:
             self.to_currency_id = self.from_currency_id
         else:
@@ -1097,12 +1098,14 @@ class account_balance(report_sxw.rml_parse):
             del form['account_list']
 
         credit_account_ids = self.get_company_accounts(
-            form['company_id'] and type(form['company_id']) in (list, tuple)
-            and form['company_id'][0] or form['company_id'], 'credit')
+            form['company_id'] and
+            type(form['company_id']) in (list, tuple) and
+            form['company_id'][0] or form['company_id'], 'credit')
 
         debit_account_ids = self.get_company_accounts(
-            form['company_id'] and type(form['company_id']) in (list, tuple)
-            and form['company_id'][0] or form['company_id'], 'debit')
+            form['company_id'] and
+            type(form['company_id']) in (list, tuple) and
+            form['company_id'][0] or form['company_id'], 'debit')
 
         if form.get('fiscalyear'):
             if type(form.get('fiscalyear')) in (list, tuple):
@@ -1119,8 +1122,8 @@ class account_balance(report_sxw.rml_parse):
 
         account_ids = _get_children_and_consol(
             self.cr, self.uid, account_ids,
-            form['display_account_level'] and form['display_account_level']
-            or 100, self.context)
+            form['display_account_level'] and
+            form['display_account_level'] or 100, self.context)
 
         credit_account_ids = _get_children_and_consol(
             self.cr, self.uid, credit_account_ids, 100, self.context,
@@ -1578,9 +1581,10 @@ class account_balance(report_sxw.rml_parse):
 
                 # ANALYTIC LEDGER
                 if (to_include and form['analytic_ledger'] and
-                        form['columns'] == 'four' and form['inf_type'] == 'BS'
-                        and res['type'] in ('other', 'liquidity', 'receivable',
-                                            'payable')):
+                        form['columns'] == 'four' and
+                        form['inf_type'] == 'BS' and
+                        res['type'] in ('other', 'liquidity', 'receivable',
+                                        'payable')):
                     ctx_end.update(company_id=(form['company_id'] and
                                                type(form['company_id']) in
                                                (list, tuple) and
@@ -1591,8 +1595,8 @@ class account_balance(report_sxw.rml_parse):
                 elif form['columns'] == 'currency':
                     ctx_end.update(
                         company_id=(form['company_id'] and
-                                    type(form['company_id']) in (list, tuple)
-                                    and form['company_id'][0] or
+                                    type(form['company_id']) in
+                                    (list, tuple) and form['company_id'][0] or
                                     form['company_id']),
                         group_by=form['group_by'],
                         lines_detail=form['lines_detail'],
