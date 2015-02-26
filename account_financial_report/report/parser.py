@@ -505,12 +505,12 @@ class account_balance(report_sxw.rml_parse):
         check that the dictionary is ok
         """
         for value in all_res.values():
-            for (currency_key, value2) in value.iteritems():
+            for (curr_key, value2) in value.iteritems():
                 for (cval_key, value3) in value2.iteritems():
 
                     if cval_key in ['lines', 'xchange_lines', 'filter_lines']:
                         error = [line for line in value3 if line if
-                                 line['currency'] != currency_key or
+                                 line['currency'] != curr_key or
                                  value3.count(line) != 1]
                         if error:
                             raise osv.except_osv(
@@ -519,7 +519,7 @@ class account_balance(report_sxw.rml_parse):
                     elif cval_key in ['real_total', 'init_balance', 'total',
                                       'xchange_total']:
                         error = (
-                            value3 and (value3['currency'] != currency_key or
+                            value3 and (value3['currency'] != curr_key or
                                         value3['partner']) and value3 or False)
                         if error:
                             raise osv.except_osv(
@@ -527,14 +527,14 @@ class account_balance(report_sxw.rml_parse):
                                 'lines with other currencys in ' + cval_key)
                     elif cval_key == 'partner':
                         for (partner_key, value4) in value3.iteritems():
-                            for (pval_key, value5) in value4.iteritems():
+                            for (pval_key, val5) in value4.iteritems():
                                 if pval_key in ['lines', 'xchange_lines',
                                                 'filter_lines']:
                                     error = [
-                                        line for line in value5 if line
-                                        if line['currency'] != currency_key or
+                                        line for line in val5 if line
+                                        if line['currency'] != curr_key or
                                         line['partner'] != partner_key or
-                                        value5.count(line) != 1]
+                                        val5.count(line) != 1]
                                     if error:
                                         raise osv.except_osv(
                                             'error',
@@ -543,10 +543,10 @@ class account_balance(report_sxw.rml_parse):
                                 elif pval_key in ['real_total', 'init_balance',
                                                   'total', 'xchange_total']:
                                     error = (
-                                        value5 and
-                                        (value5['currency'] != currency_key or
-                                         value5['partner'] != partner_key) and
-                                         value5 or False)
+                                        val5 and (
+                                            val5['currency'] != curr_key or
+                                            val5['partner'] != partner_key) and
+                                        val5 or False)
                                     if error:
                                         raise osv.except_osv(
                                             'error',
