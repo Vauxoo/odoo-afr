@@ -2,7 +2,11 @@
 <openerp>
     <data>
         <record model="res.groups" id="group_afreport">
-            <field name="name">Account Financial Report</field>
+            <field name="name">AFR Manager</field>
+        </record>
+
+        <record model="res.groups" id="group_afreport_user">
+            <field name="name">AFR User</field>
         </record>
 
         <record id="ir_rule_same_company" model="ir.rule">
@@ -14,7 +18,7 @@
             <field name="perm_unlink" eval="True"/>
             <field eval="False" name="global"/>
             <field name="domain_force">[('company_id','=',user.company_id.id)]</field>
-            <field name="groups" eval="[(4,ref('account_financial_report.group_afreport'))]"/>
+            <field name="groups" eval="[(4,ref('account_financial_report.group_afreport')),(4,ref('account_financial_report.group_afreport_user'))]"/>
         </record>
     </data>
 </openerp>

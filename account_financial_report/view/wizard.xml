@@ -121,7 +121,7 @@
             name="Account Financial Reports"
             parent="account.menu_finance_reports"
             sequence="100"
-            groups="account_financial_report.group_afreport"
+            groups="account_financial_report.group_afreport,account_financial_report.group_afreport_user"
             />
 
         <menuitem
@@ -129,7 +129,7 @@
             name="AFR Reports"
             parent="menu_afr_root"
             sequence="99"
-            groups="account_financial_report.group_afreport"
+            groups="account_financial_report.group_afreport,account_financial_report.group_afreport_user"
             action="action_wizard_report"/>
 
 
