@@ -119,7 +119,7 @@
             name="AFR Templates"
             parent="menu_afr_root"
             sequence="100"
-            groups="account_financial_report.group_afreport"
+            groups="account_financial_report.group_afreport,account_financial_report.group_afreport_user"
             action="account_financial_report_action"/>
 
     </data>
