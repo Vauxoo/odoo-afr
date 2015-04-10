@@ -35,7 +35,7 @@
         "base",
         "account",
         "account_financial_report",
-        "account_user_audit",
+        "account_group_auditory",
     ],
     "demo": [],
     "data": [
