@@ -21,7 +21,7 @@
 ###############################################################################
 {
     "name": "Grand read permissios to Auditor (Read-Only) group"
-            "over account_financial_report.afr",
+            " over account_financial_report.afr",
     "version": "1.0",
     "author": "Vauxoo",
     "category": "Accounting",
