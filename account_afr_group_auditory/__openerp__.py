@@ -20,14 +20,14 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ###############################################################################
 {
-    "name": "Grand read permissios to Auditor (Read-Only) group"
+    "name": "Grand read permissions to Auditor (Read-Only) group"
             " over account_financial_report.afr",
     "version": "1.0",
     "author": "Vauxoo",
     "category": "Accounting",
     "description": """
     This module add menus_acces to Auditor (Read-Only) group
-    and grand permissios over afr model
+    and grand permissions over afr model
     """,
     "website": "http://www.vauxoo.com/",
     "license": "AGPL-3",
@@ -40,6 +40,7 @@
     "demo": [],
     "data": [
         "security/ir.model.access.csv",
+        "security/account_user_group.xml",
     ],
     "test": [],
     "js": [],
