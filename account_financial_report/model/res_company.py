@@ -26,7 +26,7 @@
 from openerp.osv import osv, fields
 
 
-class res_company(osv.osv):
+class ResCompany(osv.osv):
     _inherit = 'res.company'
     _columns = {
         'credit_account_ids': fields.many2many('account.account',

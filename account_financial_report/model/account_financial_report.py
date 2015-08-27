@@ -31,7 +31,7 @@ import time
 from openerp.tools.translate import _
 
 
-class account_financial_report(osv.osv):
+class AccountFinancialReport(osv.osv):
     _name = "afr"
 
     _columns = {
@@ -159,9 +159,9 @@ class account_financial_report(osv.osv):
         if lst:
             new_name = '%s (%s)' % (new_name, len(lst) + 1)
         default['name'] = new_name
-        return super(account_financial_report, self).copy(cr, uid, ids,
-                                                          default=default,
-                                                          context=context)
+        return super(AccountFinancialReport, self).copy(cr, uid, ids,
+                                                        default=default,
+                                                        context=context)
 
     def onchange_inf_type(self, cr, uid, ids, inf_type, context=None):
         context = context and dict(context) or {}

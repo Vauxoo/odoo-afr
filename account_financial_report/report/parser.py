@@ -33,11 +33,11 @@ from openerp.tools.translate import _
 from openerp.osv import osv
 
 
-class account_balance(report_sxw.rml_parse):
+class AccountBalance(report_sxw.rml_parse):
     _name = 'afr.parser'
 
     def __init__(self, cr, uid, name, context):
-        super(account_balance, self).__init__(cr, uid, name, context)
+        super(AccountBalance, self).__init__(cr, uid, name, context)
         self.sum_debit = 0.00
         self.sum_credit = 0.00
         self.sum_balance = 0.00
@@ -101,8 +101,8 @@ class account_balance(report_sxw.rml_parse):
         """
         Returns the header text used on the report.
         """
-        afr_id = form['afr_id'] and type(form['afr_id']) in (
-            list, tuple) and form['afr_id'][0] or form['afr_id']
+        afr_id = form['afr_id'] and isinstance(form['afr_id'], (list, tuple)) \
+            and form['afr_id'][0] or form['afr_id']
         if afr_id:
             name = self.pool.get('afr').browse(self.cr, self.uid, afr_id).name
         elif form['analytic_ledger'] and form['columns'] == 'four' and \
@@ -170,13 +170,13 @@ class account_balance(report_sxw.rml_parse):
         self.from_currency_id = \
             self.get_company_currency(
                 form['company_id'] and
-                type(form['company_id']) in (list, tuple) and
+                isinstance(form['company_id'], (list, tuple)) and
                 form['company_id'][0] or form['company_id'])
         if not form['currency_id']:
             self.to_currency_id = self.from_currency_id
         else:
             self.to_currency_id = form['currency_id'] and \
-                type(form['currency_id']) in (list, tuple) and \
+                isinstance(form['currency_id'], (list, tuple)) and \
                 form['currency_id'][0] or form['currency_id']
         return self.pool.get('res.currency').browse(self.cr, self.uid,
                                                     self.to_currency_id).name
@@ -684,7 +684,7 @@ class account_balance(report_sxw.rml_parse):
                 for (row, title_str) in rows.iteritems():
                     res[key][line[key]][subkey][line[subkey]][row] = \
                         self.create_report_line(
-                            title_str.format(line[subkey])+u' in {0}'.
+                            title_str.format(line[subkey]) + u' in {0}'.
                             format(line[key]),
                             {key: line[key], subkey: line[subkey]})
         return res
@@ -1083,13 +1083,13 @@ class account_balance(report_sxw.rml_parse):
 
         self.from_currency_id = self.get_company_currency(
             form['company_id'] and
-            type(form['company_id']) in (list, tuple) and
+            isinstance(form['company_id'], (list, tuple)) and
             form['company_id'][0] or form['company_id'])
         if not form['currency_id']:
             self.to_currency_id = self.from_currency_id
         else:
             self.to_currency_id = form['currency_id'] and \
-                type(form['currency_id']) in (list, tuple) and \
+                isinstance(form['currency_id'], (list, tuple)) and \
                 form['currency_id'][0] or form['currency_id']
 
         if 'account_list' in form and form['account_list']:
@@ -1099,18 +1099,18 @@ class account_balance(report_sxw.rml_parse):
 
         credit_account_ids = self.get_company_accounts(
             form['company_id'] and
-            type(form['company_id']) in (list, tuple) and
+            isinstance(form['company_id'], (list, tuple)) and
             form['company_id'][0] or form['company_id'], 'credit')
 
         debit_account_ids = self.get_company_accounts(
             form['company_id'] and
-            type(form['company_id']) in (list, tuple) and
+            isinstance(form['company_id'], (list, tuple)) and
             form['company_id'][0] or form['company_id'], 'debit')
 
         if form.get('fiscalyear'):
-            if type(form.get('fiscalyear')) in (list, tuple):
+            if isinstance(form.get('fiscalyear'), (list, tuple)):
                 fiscalyear = form['fiscalyear'] and form['fiscalyear'][0]
-            elif type(form.get('fiscalyear')) in (int,):
+            elif isinstance(form.get('fiscalyear'), (int,)):
                 fiscalyear = form['fiscalyear']
         fiscalyear = fiscalyear_obj.browse(self.cr, self.uid, fiscalyear)
 
@@ -1586,8 +1586,8 @@ class account_balance(report_sxw.rml_parse):
                         res['type'] in ('other', 'liquidity', 'receivable',
                                         'payable')):
                     ctx_end.update(company_id=(form['company_id'] and
-                                               type(form['company_id']) in
-                                               (list, tuple) and
+                                               isinstance(form['company_id'],
+                                               (list, tuple)) and
                                                form['company_id'][0] or
                                                form['company_id']),
                                    report=form['columns'])
@@ -1595,12 +1595,12 @@ class account_balance(report_sxw.rml_parse):
                 elif form['columns'] == 'currency':
                     ctx_end.update(
                         company_id=(form['company_id'] and
-                                    type(form['company_id']) in
-                                    (list, tuple) and form['company_id'][0] or
+                                    isinstance(form['company_id'],
+                                    (list, tuple)) and form['company_id'][0] or  # noqa
                                     form['company_id']),
                         group_by=form['group_by'],
                         lines_detail=form['lines_detail'],
-                        )
+                    )
                     res['mayor'] = self._get_balance_multicurrency(res,
                                                                    ctx=ctx_end)
                 elif to_include and form['journal_ledger'] and \
@@ -1705,7 +1705,7 @@ class account_balance(report_sxw.rml_parse):
         return result_acc
 
 
-class report_afr_1_cols(osv.AbstractModel):
+class ReportAfr1Cols(osv.AbstractModel):
 
     # _name = `report.` + `report_name`
     # report_name="afr.1cols"
@@ -1714,10 +1714,10 @@ class report_afr_1_cols(osv.AbstractModel):
     # this inheritance will allow to render this particular report
     _inherit = 'report.abstract_report'
     _template = 'account_financial_report.afr_template'
-    _wrapped_report_class = account_balance
+    _wrapped_report_class = AccountBalance
 
 
-class report_afr_analytic_ledger(osv.AbstractModel):
+class ReportAfrAnalyticLedger(osv.AbstractModel):
 
     # _name = `report.` + `report_name`
     # report_name="afr.analytic.ledger"
@@ -1726,80 +1726,80 @@ class report_afr_analytic_ledger(osv.AbstractModel):
     # this inheritance will allow to render this particular report
     _inherit = 'report.abstract_report'
     _template = 'account_financial_report.afr_template_analytic_ledger'
-    _wrapped_report_class = account_balance
+    _wrapped_report_class = AccountBalance
 
 report_sxw.report_sxw(
     'report.afr.rml.1cols',
     'wizard.report',
     'account_financial_report/report/balance_full.rml',
-    parser=account_balance,
+    parser=AccountBalance,
     header=False)
 
 report_sxw.report_sxw(
     'report.afr.rml.2cols',
     'wizard.report',
     'account_financial_report/report/balance_full_2_cols.rml',
-    parser=account_balance,
+    parser=AccountBalance,
     header=False)
 
 report_sxw.report_sxw(
     'report.afr.rml.4cols',
     'wizard.report',
     'account_financial_report/report/balance_full_4_cols.rml',
-    parser=account_balance,
+    parser=AccountBalance,
     header=False)
 
 report_sxw.report_sxw(
     'report.afr.rml.analytic.ledger',
     'wizard.report',
     'account_financial_report/report/balance_full_4_cols_analytic_ledger.rml',
-    parser=account_balance,
+    parser=AccountBalance,
     header=False)
 
 report_sxw.report_sxw(
     'report.afr.rml.multicurrency',
     'wizard.report',
     'account_financial_report/report/balance_multicurrency.rml',
-    parser=account_balance,
+    parser=AccountBalance,
     header=False)
 
 report_sxw.report_sxw(
     'report.afr.rml.partner.balance',
     'wizard.report',
     'account_financial_report/report/balance_full_4_cols_partner_balance.rml',
-    parser=account_balance,
+    parser=AccountBalance,
     header=False)
 
 report_sxw.report_sxw(
     'report.afr.rml.journal.ledger',
     'wizard.report',
     'account_financial_report/report/balance_full_4_cols_journal_ledger.rml',
-    parser=account_balance,
+    parser=AccountBalance,
     header=False)
 
 report_sxw.report_sxw(
     'report.afr.rml.5cols',
     'wizard.report',
     'account_financial_report/report/balance_full_5_cols.rml',
-    parser=account_balance,
+    parser=AccountBalance,
     header=False)
 
 report_sxw.report_sxw(
     'report.afr.rml.qtrcols',
     'wizard.report',
     'account_financial_report/report/balance_full_qtr_cols.rml',
-    parser=account_balance,
+    parser=AccountBalance,
     header=False)
 
 report_sxw.report_sxw(
     'report.afr.rml.13cols',
     'wizard.report',
     'account_financial_report/report/balance_full_13_cols.rml',
-    parser=account_balance,
+    parser=AccountBalance,
     header=False)
 
 
-class report_afr_partner_balance(osv.AbstractModel):
+class ReportAfrPartnerBalance(osv.AbstractModel):
 
     # _name = `report.` + `report_name`
     # report_name="afr.partner.balance"
@@ -1808,10 +1808,10 @@ class report_afr_partner_balance(osv.AbstractModel):
     # this inheritance will allow to render this particular report
     _inherit = 'report.abstract_report'
     _template = 'account_financial_report.afr_template_partner_balance'
-    _wrapped_report_class = account_balance
+    _wrapped_report_class = AccountBalance
 
 
-class report_afr_journal_ledger(osv.AbstractModel):
+class ReportAfrJournalLedger(osv.AbstractModel):
 
     # _name = `report.` + `report_name`
     # report_name="afr.journal.ledger"
@@ -1820,10 +1820,10 @@ class report_afr_journal_ledger(osv.AbstractModel):
     # this inheritance will allow to render this particular report
     _inherit = 'report.abstract_report'
     _template = 'account_financial_report.afr_template_journal_ledger'
-    _wrapped_report_class = account_balance
+    _wrapped_report_class = AccountBalance
 
 
-class report_afr_13_cols(osv.AbstractModel):
+class ReportAfr13Cols(osv.AbstractModel):
 
     # _name = `report.` + `report_name`
     # report_name="afr.13cols'"
@@ -1832,4 +1832,4 @@ class report_afr_13_cols(osv.AbstractModel):
     # this inheritance will allow to render this particular report
     _inherit = 'report.abstract_report'
     _template = 'account_financial_report.afr_template'
-    _wrapped_report_class = account_balance
+    _wrapped_report_class = AccountBalance
