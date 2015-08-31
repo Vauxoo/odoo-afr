@@ -32,7 +32,7 @@ import time
 from openerp.tools.translate import _
 
 
-class wizard_report(osv.osv_memory):
+class WizardReport(osv.osv_memory):
     _name = "wizard.report"
     _rec_name = 'afr_id'
 
@@ -56,7 +56,7 @@ class wizard_report(osv.osv_memory):
             ('qtr', "4 QTR's | YTD"),
             ('thirteen', '12 Months | YTD'),
             # ('currency', 'End. Balance Currency'),
-            ], 'Columns', required=True),
+        ], 'Columns', required=True),
         'display_account': fields.selection(
             [('all', 'All Accounts'), ('bal', 'With Balance'),
              ('mov', 'With movements'),
@@ -294,7 +294,7 @@ class wizard_report(osv.osv_memory):
     def period_span(self, cr, uid, ids, fy_id, context=None):
         context = context and dict(context) or {}
         ap_obj = self.pool.get('account.period')
-        fy_id = fy_id and type(fy_id) in (list, tuple) and fy_id[0] or fy_id
+        fy_id = fy_id and isinstance(fy_id, (list, tuple)) and fy_id[0] or fy_id  # noqa
         if not ids:
             return ap_obj.search(cr, uid, [('fiscalyear_id', '=', fy_id),
                                            ('special', '=', False)],
@@ -392,4 +392,4 @@ class wizard_report(osv.osv_memory):
         }
 
 
-wizard_report()
+WizardReport()
