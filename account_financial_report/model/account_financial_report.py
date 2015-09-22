@@ -1,4 +1,4 @@
-# -*- encoding: utf-8 -*-
+# coding: utf-8
 ###########################################################################
 #    Module Writen to OpenERP, Open Source Management Solution
 #    Copyright (C) OpenERP Venezuela (<http://openerp.com.ve>).
@@ -150,6 +150,7 @@ class AccountFinancialReport(osv.osv):
         'target_move': 'posted',
     }
 
+    @api.one
     def copy(self, cr, uid, ids, default=None, context=None):
         context = context and dict(context) or {}
         previous_name = self.browse(cr, uid, ids, context=context).name

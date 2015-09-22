@@ -1,4 +1,4 @@
-# -*- encoding: utf-8 -*-
+# coding: utf-8
 ###########################################################################
 #    Module Writen to OpenERP, Open Source Management Solution
 #    Copyright (C) 2013 Vauxoo (<http://vauxoo.com>).
@@ -25,10 +25,6 @@
     "version": "1.0",
     "author": "Vauxoo",
     "category": "Accounting",
-    "description": """
-    This module add menus_acces to Auditor (Read-Only) group
-    and grand permissions over afr model
-    """,
     "website": "http://www.vauxoo.com/",
     "license": "AGPL-3",
     "depends": [
@@ -49,5 +45,3 @@
     "installable": True,
     "auto_install": False
 }
-
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
