@@ -29,6 +29,7 @@
 from openerp.osv import osv, fields
 import time
 from openerp.tools.translate import _
+from openerp import api
 
 
 class AccountFinancialReport(osv.osv):
