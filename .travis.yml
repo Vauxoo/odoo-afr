@@ -23,10 +23,12 @@ virtualenv:
 env:
   global:
   - TEST_OTHER_PROJECTS=${HOME}/addons-vauxoo LINT_CHECK=0 TESTS="0" VERSION="8.0" ODOO_REPO="vauxoo/odoo"
+  - secure: "S46yHEhBgGef0Y3aR18yH4tzp97xgZ+pChsa+R+sgpV3o58YB99SbBPau+2cmssSWA4OlcsCam8nvb6lmQGWjys0kiu+j627ugVwvWuLGXq4Nt216VGz48kweb8/Y9qpHxFXuWBp2cw/QhpJaasnhRNSfNaCZg/LdelZAzEj3MU="
 
   matrix:
   - LINT_CHECK=1
   - TESTS="1"
+  - TRANSIFEX="1" INCLUDE=""
 
 install:
   - git clone --single-branch --depth=1 https://github.com/vauxoo/maintainer-quality-tools.git -b master ${HOME}/maintainer-quality-tools
