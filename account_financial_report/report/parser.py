@@ -1078,6 +1078,7 @@ class AccountBalance(report_sxw.rml_parse):
         def zfunction(nval):
             return abs(nval) < 0.005 and 0.0 or nval
         self.context = dict(self.context)
+        self.context['periods_special'] = True
         account_ids = []
         self.context['state'] = form['target_move'] or 'posted'
 
@@ -1300,7 +1301,6 @@ class AccountBalance(report_sxw.rml_parse):
                 self.cr, self.uid, account_black_ids, ctx_to_use)
 
             if form['inf_type'] == 'BS':
-                ctx_i['periods_special'] = True
                 account_black_init = account_obj.browse(
                     self.cr, self.uid, account_black_ids, ctx_i)
 
