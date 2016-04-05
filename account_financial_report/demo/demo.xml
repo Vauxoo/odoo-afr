@@ -34,5 +34,32 @@
             <field name="type">other</field>
             <field name="user_type" ref="account.data_account_type_income"/>
         </record>
+
+        <record id="account_move_00" model="account.move">
+            <field name="journal_id" ref="account.opening_journal"/>
+            <field name="period_id" ref="account.period_0"/>
+            <field name="date" eval="time.strftime('%Y')+'-01-01'"/>
+        </record>
+        <record id="account_move_line_rec" model="account.move.line">
+            <field name="name">Receivable</field>
+            <field name="move_id" ref="account_financial_report.account_move_00"/>
+            <field name="journal_id" ref="account.opening_journal"/>
+            <field name="period_id" ref="account.period_0"/>
+            <field name="account_id" ref="account_financial_report.a_recv"/>
+            <field name="debit">1000.0</field>
+            <field name="credit">0.0</field>
+        </record>
+        <record id="account_move_line_pay" model="account.move.line">
+            <field name="name">Payable</field>
+            <field name="move_id" ref="account_financial_report.account_move_00"/>
+            <field name="journal_id" ref="account.opening_journal"/>
+            <field name="period_id" ref="account.period_0"/>
+            <field name="account_id" ref="account_financial_report.a_pay"/>
+            <field name="debit">0.0</field>
+            <field name="credit">500.0</field>
+        </record>
+        <function model="account.move" name="button_validate">
+            <value eval="[ref('account_financial_report.account_move_00')]"/>
+        </function>
     </data>
 </openerp>
