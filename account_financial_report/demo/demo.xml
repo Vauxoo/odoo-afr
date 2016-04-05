@@ -81,12 +81,39 @@
             <field name="move_id" ref="account_financial_report.account_move_03"/>
             <field name="journal_id" ref="account.miscellaneous_journal"/>
             <field name="period_id" ref="account.period_3"/>
-            <field name="account_id" ref="account.a_expense"/>
+            <field name="account_id" ref="account_financial_report.srv"/>
             <field name="debit">300.0</field>
             <field name="credit">0.0</field>
         </record>
         <function model="account.move" name="button_validate">
             <value eval="[ref('account_financial_report.account_move_03')]"/>
+        </function>
+
+        <record id="account_move_05" model="account.move">
+            <field name="journal_id" ref="account.miscellaneous_journal"/>
+            <field name="period_id" ref="account.period_5"/>
+            <field name="date" eval="time.strftime('%Y')+'-01-01'"/>
+        </record>
+        <record id="account_move_line_rec_05" model="account.move.line">
+            <field name="name">Receivable on Period 05</field>
+            <field name="move_id" ref="account_financial_report.account_move_05"/>
+            <field name="journal_id" ref="account.miscellaneous_journal"/>
+            <field name="period_id" ref="account.period_5"/>
+            <field name="account_id" ref="account_financial_report.a_recv"/>
+            <field name="debit">200.0</field>
+            <field name="credit">0.0</field>
+        </record>
+        <record id="account_move_line_sale_05" model="account.move.line">
+            <field name="name">Sale on Period 05</field>
+            <field name="move_id" ref="account_financial_report.account_move_05"/>
+            <field name="journal_id" ref="account.miscellaneous_journal"/>
+            <field name="period_id" ref="account.period_5"/>
+            <field name="account_id" ref="account_financial_report.rev"/>
+            <field name="debit">0.0</field>
+            <field name="credit">200.0</field>
+        </record>
+        <function model="account.move" name="button_validate">
+            <value eval="[ref('account_financial_report.account_move_05')]"/>
         </function>
     </data>
 </openerp>
