@@ -39,6 +39,7 @@
         "security/security.xml",
         "security/ir.model.access.csv",
         "data/report_paperformat.xml",
+        "demo/demo.xml",
         "report/layouts.xml",
         "report/template.xml",
         "report/template_analytic_ledger.xml",
