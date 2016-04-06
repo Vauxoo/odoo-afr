@@ -23,5 +23,5 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-# from . import test_print_afr
+from . import test_print_afr
 from . import test_values_afr
