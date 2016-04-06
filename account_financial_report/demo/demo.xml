@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <openerp>
-    <data noupdate="0">
+    <data noupdate="1">
         <record id="a_recv" model="account.account">
             <field name="code">X11002-vx_afr</field>
             <field name="name">Debtors - (vx_afr)</field>
@@ -65,7 +65,7 @@
         <record id="account_move_03" model="account.move">
             <field name="journal_id" ref="account.miscellaneous_journal"/>
             <field name="period_id" ref="account.period_3"/>
-            <field name="date" eval="time.strftime('%Y')+'-01-01'"/>
+            <field name="date" eval="time.strftime('%Y')+'-03-01'"/>
         </record>
         <record id="account_move_line_pay_03" model="account.move.line">
             <field name="name">Payable on Period 03</field>
@@ -92,7 +92,7 @@
         <record id="account_move_05" model="account.move">
             <field name="journal_id" ref="account.miscellaneous_journal"/>
             <field name="period_id" ref="account.period_5"/>
-            <field name="date" eval="time.strftime('%Y')+'-01-01'"/>
+            <field name="date" eval="time.strftime('%Y')+'-05-01'"/>
         </record>
         <record id="account_move_line_rec_05" model="account.move.line">
             <field name="name">Receivable on Period 05</field>
