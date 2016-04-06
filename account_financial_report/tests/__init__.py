@@ -24,3 +24,4 @@
 #
 ##############################################################################
 # from . import test_print_afr
+from . import test_values_afr
