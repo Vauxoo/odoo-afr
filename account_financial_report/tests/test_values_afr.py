@@ -121,19 +121,30 @@ class TestReportAFR(TransactionCase):
         values = dict(
             self.values,
             inf_type='IS',
+            tot_check=True,
             periods=[(4, period_id, 0)],
             account_list=[(4, account_id, 0)]
         )
         lines = self._generate_afr(values)
         if lines and lines[0]:
-            lines = lines[0]
-            self.assertEqual(lines.get('id'), account_id, 'Wrong Account')
-            self.assertEqual(lines.get('balanceinit'), 0)
-            self.assertEqual(lines.get('debit'), 200)
-            self.assertEqual(lines.get('credit'), 0)
-            self.assertEqual(lines.get('balance'), 200)
-            self.assertEqual(lines.get('ytd'), 200)
-        else:
+            res = lines[0]
+            self.assertEqual(res.get('type'), 'receivable')
+            self.assertEqual(res.get('id'), account_id, 'Wrong Account')
+            self.assertEqual(res.get('balanceinit'), 0)
+            self.assertEqual(res.get('debit'), 200)
+            self.assertEqual(res.get('credit'), 0)
+            self.assertEqual(res.get('balance'), 200)
+            self.assertEqual(res.get('ytd'), 200)
+        if lines and lines[1]:
+            res = lines[1]
+            self.assertEqual(res.get('type'), 'view')
+            self.assertEqual(res.get('balanceinit'), 0)
+            self.assertEqual(res.get('debit'), 200)
+            self.assertEqual(res.get('credit'), 0)
+            self.assertEqual(res.get('balance'), 200)
+            self.assertEqual(res.get('ytd'), 200)
+            pass
+        if not lines or lines and (not lines[0] or not lines[1]):
             self.assertTrue(False, 'Something went wrong with Test')
         return True
 
