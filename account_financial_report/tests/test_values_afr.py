@@ -81,10 +81,10 @@ class TestReportAFR(TransactionCase):
         else:
             self.assertTrue(False, 'Something went wrong with Test')
 
-    def _generate_afr(self, account_id, period_id):
+    def _generate_afr(self, account_id, period_id, inf_type='BS'):
         wiz_id = self.wiz_rep_obj.create({
             'company_id': self.company_id,
-            'inf_type': 'BS',
+            'inf_type': inf_type,
             'columns': 'four',
             'currency_id': self.currency_id,
             'report_format': 'xls',
