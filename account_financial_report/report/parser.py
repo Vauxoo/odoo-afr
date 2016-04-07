@@ -74,6 +74,25 @@ class AccountBalance(report_sxw.rml_parse):
         else:
             return [_('VAT OF COMPANY NOT AVAILABLE')]
 
+    def get_informe_text(self, form):
+        """
+        Returns the header text used on the report.
+        """
+        afr_id = form['afr_id'] and isinstance(form['afr_id'], (list, tuple)) \
+            and form['afr_id'][0] or form['afr_id']
+        if afr_id:
+            name = self.pool.get('afr').browse(self.cr, self.uid, afr_id).name
+        elif form['analytic_ledger'] and form['columns'] == 'four' and \
+                form['inf_type'] == 'BS':
+            name = _('Analytic Ledger')
+        elif form['inf_type'] == 'BS':
+            name = _('Balance Sheet')
+        elif form['inf_type'] == 'IS':
+            name = _('Income Statement')
+        if form['columns'] == 'currency':
+            name = _('End Balance Multicurrency')
+        return name
+
     def get_month(self, form):
         '''
         return day, year and month
