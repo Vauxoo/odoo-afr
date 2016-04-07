@@ -99,7 +99,7 @@ class TestReportAFR(TransactionCase):
             self.assertTrue(False, 'Something went wrong with Test')
         return True
 
-    def _generate_afr(self, account_id, period_id, inf_type='BS'):
+    def _get_data(self, account_id, period_id, inf_type='BS'):
         wiz_id = self.wiz_rep_obj.create({
             'company_id': self.company_id,
             'inf_type': inf_type,
@@ -119,6 +119,9 @@ class TestReportAFR(TransactionCase):
             'active_ids': [wiz_id.id],
             'active_id': wiz_id.id,
         }
-        data = wiz_id.with_context(context).print_report({})
+        return wiz_id.with_context(context).print_report({})
+
+    def _generate_afr(self, account_id, period_id, inf_type='BS'):
+        data = self._get_data(account_id, period_id, inf_type)
         return AccountBalance(
             self.cr, self.uid, '', {}).lines(data['data']['form'])
