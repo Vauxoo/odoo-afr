@@ -97,6 +97,7 @@ class TestReportAFR(TransactionCase):
             self.assertEqual(lines.get('ytd'), 200)
         else:
             self.assertTrue(False, 'Something went wrong with Test')
+        return True
 
     def _generate_afr(self, account_id, period_id, inf_type='BS'):
         wiz_id = self.wiz_rep_obj.create({
