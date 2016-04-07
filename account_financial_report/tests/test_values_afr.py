@@ -150,6 +150,28 @@ class TestReportAFR(TransactionCase):
                 )
         if not lines or lines and not lines[0]:
             self.assertTrue(False, 'Something went wrong with Test')
+        values = dict(
+            values,
+            tot_check=True,
+        )
+        lines = self._generate_afr(values)
+        if lines and lines[0]:
+            res = lines[0]
+            for col in BS_13:
+                self.assertEqual(
+                    res.get(col), BS_13[col],
+                    'Something went wrong for %s' % col
+                )
+        if lines and lines[1]:
+            res = lines[1]
+            self.assertEqual(res.get('type'), 'view')
+            for col in BS_13:
+                self.assertEqual(
+                    res.get(col), BS_13[col],
+                    'Something went wrong for %s' % col
+                )
+        if not lines or lines and (not lines[0] or not lines[1]):
+            self.assertTrue(False, 'Something went wrong with Test')
         return True
 
     def test_rec_period_05_is(self):
@@ -181,7 +203,6 @@ class TestReportAFR(TransactionCase):
             self.assertEqual(res.get('credit'), 0)
             self.assertEqual(res.get('balance'), 200)
             self.assertEqual(res.get('ytd'), 200)
-            pass
         if not lines or lines and (not lines[0] or not lines[1]):
             self.assertTrue(False, 'Something went wrong with Test')
         return True
