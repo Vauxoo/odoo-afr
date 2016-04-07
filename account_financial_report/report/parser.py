@@ -44,8 +44,6 @@ class AccountBalance(report_sxw.rml_parse):
             'getattr': getattr,
             'time': time,
             'lines': self.lines,
-            'get_fiscalyear_text': self.get_fiscalyear_text,
-            'get_periods_and_date_text': self.get_periods_and_date_text,
             'get_informe_text': self.get_informe_text,
             'get_month': self.get_month,
             'exchange_name': self.exchange_name,
