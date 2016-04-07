@@ -82,7 +82,7 @@ class TestReportAFR(TransactionCase):
             self.assertTrue(False, 'Something went wrong with Test')
 
     def test_rec_period_05_is(self):
-        _logger.info('Testing Payables All Periods')
+        _logger.info('Testing Receivables at Period 05')
         account_id = self.ref('account_financial_report.a_recv')
         period_id = self.ref('account.period_5')
         period_id = [(4, period_id, 0)]
