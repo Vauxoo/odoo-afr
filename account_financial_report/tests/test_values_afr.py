@@ -99,6 +99,46 @@ class TestReportAFR(TransactionCase):
             self.assertTrue(False, 'Something went wrong with Test')
         return True
 
+    def test_get_vat_by_country(self):
+        _logger.info('Testing Country VAT')
+        account_id = self.ref('account_financial_report.a_recv')
+        period_id = self.ref('account.period_5')
+        period_id = [(4, period_id, 0)]
+        data = self._get_data(account_id, period_id, 'BS')
+        res = AccountBalance(
+            self.cr, self.uid, '', {}).get_vat_by_country(
+                data['data']['form'])
+        if res and res[0]:
+            res = res[0]
+            self.assertEqual(res, 'VAT OF COMPANY NOT AVAILABLE')
+        else:
+            self.assertTrue(False, 'Something went wrong with Test')
+        return True
+
+    def test_get_informe_text(self):
+        _logger.info('Testing Inform Text')
+        account_id = self.ref('account_financial_report.a_recv')
+        period_id = self.ref('account.period_5')
+        period_id = [(4, period_id, 0)]
+        data = self._get_data(account_id, period_id, 'BS')
+        res = AccountBalance(
+            self.cr, self.uid, '', {}).get_informe_text(
+                data['data']['form'])
+        self.assertEqual(res, 'Balance Sheet')
+        return True
+
+    def get_month(self):
+        _logger.info('Testing Month')
+        account_id = self.ref('account_financial_report.a_recv')
+        period_id = self.ref('account.period_5')
+        period_id = [(4, period_id, 0)]
+        data = self._get_data(account_id, period_id, 'BS')
+        res = AccountBalance(
+            self.cr, self.uid, '', {}).get_month(
+                data['data']['form'])
+        self.assertEqual(res, 'From 05/01/2016 to 05/31/2016')
+        return True
+
     def _get_data(self, account_id, period_id, inf_type='BS'):
         wiz_id = self.wiz_rep_obj.create({
             'company_id': self.company_id,
