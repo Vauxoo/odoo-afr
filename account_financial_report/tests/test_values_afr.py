@@ -36,7 +36,12 @@ class TestReportAFR(TransactionCase):
         _logger.info('Testing Payables at Period 01')
         account_id = self.ref('account_financial_report.a_pay')
         period_id = self.ref('account.period_1')
-        lines = self._generate_afr(account_id, [(4, period_id, 0)])
+        values = dict(
+            self.values,
+            periods=[(4, period_id, 0)],
+            account_list=[(4, account_id, 0)]
+        )
+        lines = self._generate_afr(values)
         if lines and lines[0]:
             lines = lines[0]
             self.assertEqual(lines.get('id'), account_id, 'Wrong Account')
@@ -52,7 +57,12 @@ class TestReportAFR(TransactionCase):
         _logger.info('Testing Payables at Period 03')
         account_id = self.ref('account_financial_report.a_pay')
         period_id = self.ref('account.period_3')
-        lines = self._generate_afr(account_id, [(4, period_id, 0)])
+        values = dict(
+            self.values,
+            periods=[(4, period_id, 0)],
+            account_list=[(4, account_id, 0)]
+        )
+        lines = self._generate_afr(values)
         if lines and lines[0]:
             lines = lines[0]
             self.assertEqual(lines.get('id'), account_id, 'Wrong Account')
@@ -68,7 +78,12 @@ class TestReportAFR(TransactionCase):
         _logger.info('Testing Payables at Period 05')
         account_id = self.ref('account_financial_report.a_pay')
         period_id = self.ref('account.period_5')
-        lines = self._generate_afr(account_id, [(4, period_id, 0)])
+        values = dict(
+            self.values,
+            periods=[(4, period_id, 0)],
+            account_list=[(4, account_id, 0)]
+        )
+        lines = self._generate_afr(values)
         if lines and lines[0]:
             lines = lines[0]
             self.assertEqual(lines.get('id'), account_id, 'Wrong Account')
@@ -83,7 +98,11 @@ class TestReportAFR(TransactionCase):
     def test_lines_report_afr_pay_period_all(self):
         _logger.info('Testing Payables All Periods')
         account_id = self.ref('account_financial_report.a_pay')
-        lines = self._generate_afr(account_id, [])
+        values = dict(
+            self.values,
+            account_list=[(4, account_id, 0)]
+        )
+        lines = self._generate_afr(values)
         if lines and lines[0]:
             lines = lines[0]
             self.assertEqual(lines.get('id'), account_id, 'Wrong Account')
@@ -99,8 +118,13 @@ class TestReportAFR(TransactionCase):
         _logger.info('Testing Receivables at Period 05')
         account_id = self.ref('account_financial_report.a_recv')
         period_id = self.ref('account.period_5')
-        period_id = [(4, period_id, 0)]
-        lines = self._generate_afr(account_id, period_id, 'IS')
+        values = dict(
+            self.values,
+            inf_type='IS',
+            periods=[(4, period_id, 0)],
+            account_list=[(4, account_id, 0)]
+        )
+        lines = self._generate_afr(values)
         if lines and lines[0]:
             lines = lines[0]
             self.assertEqual(lines.get('id'), account_id, 'Wrong Account')
@@ -118,7 +142,12 @@ class TestReportAFR(TransactionCase):
         account_id = self.ref('account_financial_report.a_recv')
         period_id = self.ref('account.period_5')
         period_id = [(4, period_id, 0)]
-        data = self._get_data(account_id, period_id, 'BS')
+        values = dict(
+            self.values,
+            periods=period_id,
+            account_list=[(4, account_id, 0)]
+        )
+        data = self._get_data(values)
         res = AccountBalance(
             self.cr, self.uid, '', {}).get_vat_by_country(
                 data['data']['form'])
@@ -133,8 +162,12 @@ class TestReportAFR(TransactionCase):
         _logger.info('Testing Inform Text')
         account_id = self.ref('account_financial_report.a_recv')
         period_id = self.ref('account.period_5')
-        period_id = [(4, period_id, 0)]
-        data = self._get_data(account_id, period_id, 'BS')
+        values = dict(
+            self.values,
+            periods=[(4, period_id, 0)],
+            account_list=[(4, account_id, 0)]
+        )
+        data = self._get_data(values)
         res = AccountBalance(
             self.cr, self.uid, '', {}).get_informe_text(
                 data['data']['form'])
@@ -145,21 +178,19 @@ class TestReportAFR(TransactionCase):
         _logger.info('Testing Month')
         account_id = self.ref('account_financial_report.a_recv')
         period_id = self.ref('account.period_5')
-        period_id = [(4, period_id, 0)]
-        data = self._get_data(account_id, period_id, 'BS')
+        values = dict(
+            self.values,
+            periods=[(4, period_id, 0)],
+            account_list=[(4, account_id, 0)]
+        )
+        data = self._get_data(values)
         res = AccountBalance(
             self.cr, self.uid, '', {}).get_month(
                 data['data']['form'])
         self.assertEqual(res, 'From 05/01/2016 to 05/31/2016')
         return True
 
-    def _get_data(self, account_id, period_id, inf_type='BS'):
-        values = dict(
-            self.values,
-            periods=period_id,
-            inf_type=inf_type,
-            account_list=[(4, account_id, 0)]
-        )
+    def _get_data(self, values):
 
         wiz_id = self.wiz_rep_obj.create(values)
 
@@ -171,7 +202,7 @@ class TestReportAFR(TransactionCase):
         }
         return wiz_id.with_context(context).print_report({})
 
-    def _generate_afr(self, account_id, period_id, inf_type='BS'):
-        data = self._get_data(account_id, period_id, inf_type)
+    def _generate_afr(self, values):
+        data = self._get_data(values)
         return AccountBalance(
             self.cr, self.uid, '', {}).lines(data['data']['form'])
