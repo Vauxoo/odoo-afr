@@ -81,6 +81,23 @@ class TestReportAFR(TransactionCase):
         else:
             self.assertTrue(False, 'Something went wrong with Test')
 
+    def test_rec_period_05_is(self):
+        _logger.info('Testing Payables All Periods')
+        account_id = self.ref('account_financial_report.a_recv')
+        period_id = self.ref('account.period_5')
+        period_id = [(4, period_id, 0)]
+        lines = self._generate_afr(account_id, period_id, 'IS')
+        if lines and lines[0]:
+            lines = lines[0]
+            self.assertEqual(lines.get('id'), account_id, 'Wrong Account')
+            self.assertEqual(lines.get('balanceinit'), 0)
+            self.assertEqual(lines.get('debit'), 200)
+            self.assertEqual(lines.get('credit'), 0)
+            self.assertEqual(lines.get('balance'), 200)
+            self.assertEqual(lines.get('ytd'), 200)
+        else:
+            self.assertTrue(False, 'Something went wrong with Test')
+
     def _generate_afr(self, account_id, period_id, inf_type='BS'):
         wiz_id = self.wiz_rep_obj.create({
             'company_id': self.company_id,
