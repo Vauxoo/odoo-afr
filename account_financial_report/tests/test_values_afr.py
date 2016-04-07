@@ -7,6 +7,22 @@ import logging
 
 _logger = logging.getLogger(__name__)
 
+BS_13 = {
+    'bal1': 1000.0,
+    'bal2': 1000.0,
+    'bal3': 1000.0,
+    'bal4': 1000.0,
+    'bal5': 1200.0,
+    'bal6': 1200.0,
+    'bal7': 1200.0,
+    'bal8': 1200.0,
+    'bal9': 1200.0,
+    'bal10': 1200.0,
+    'bal11': 1200.0,
+    'bal12': 1200.0,
+    'bal13': 1200.0,
+    }
+
 
 class TestReportAFR(TransactionCase):
 
@@ -113,6 +129,30 @@ class TestReportAFR(TransactionCase):
             self.assertEqual(lines.get('ytd'), -300)
         else:
             self.assertTrue(False, 'Something went wrong with Test')
+
+    def test_rec_bs_thirteen(self):
+        _logger.info('Testing Receivables at Thirteen Cols')
+        account_id = self.ref('account_financial_report.a_recv')
+        values = dict(
+            self.values,
+            columns='thirteen',
+            inf_type='BS',
+            periods=[],
+            account_list=[(4, account_id, 0)]
+        )
+        lines = self._generate_afr(values)
+        import pdb
+        pdb.set_trace()
+        if lines and lines[0]:
+            res = lines[0]
+            for col in BS_13:
+                self.assertEqual(
+                    res.get(col), BS_13[col],
+                    'Something went wrong for %s' % col
+                )
+        if not lines or lines and not lines[0]:
+            self.assertTrue(False, 'Something went wrong with Test')
+        return True
 
     def test_rec_period_05_is(self):
         _logger.info('Testing Receivables at Period 05')
