@@ -17,6 +17,20 @@ class TestReportAFR(TransactionCase):
         self.company_id = self.ref('base.main_company')
         self.fiscalyear_id = self.ref('account.data_fiscalyear')
         self.currency_id = self.ref('base.EUR')
+        self.values = {
+            'company_id': self.company_id,
+            'inf_type': 'BS',
+            'columns': 'four',
+            'currency_id': self.currency_id,
+            'report_format': 'xls',
+            'display_account': 'bal_mov',
+            'fiscalyear': self.fiscalyear_id,
+            'display_account_level': 0,
+            'target_move': 'posted',
+            'tot_check': False,
+            'periods': [],
+            'account_list': [],
+        }
 
     def test_lines_report_afr_pay_period_01(self):
         _logger.info('Testing Payables at Period 01')
@@ -140,18 +154,14 @@ class TestReportAFR(TransactionCase):
         return True
 
     def _get_data(self, account_id, period_id, inf_type='BS'):
-        wiz_id = self.wiz_rep_obj.create({
-            'company_id': self.company_id,
-            'inf_type': inf_type,
-            'columns': 'four',
-            'currency_id': self.currency_id,
-            'report_format': 'xls',
-            'display_account': 'bal_mov',
-            'fiscalyear': self.fiscalyear_id,
-            'display_account_level': 0,
-            'target_move': 'posted',
-            'periods': period_id,
-            'account_list': [(4, account_id, 0)]})
+        values = dict(
+            self.values,
+            periods=period_id,
+            inf_type=inf_type,
+            account_list=[(4, account_id, 0)]
+        )
+
+        wiz_id = self.wiz_rep_obj.create(values)
 
         context = {
             'xls_report': True,
