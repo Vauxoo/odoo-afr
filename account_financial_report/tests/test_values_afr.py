@@ -23,6 +23,22 @@ BS_13 = {
     'bal13': 1200.0,
     }
 
+IS_13 = {
+    'bal1': 0.0,
+    'bal2': 0.0,
+    'bal3': 0.0,
+    'bal4': 0.0,
+    'bal5': 200.0,
+    'bal6': 0.0,
+    'bal7': 0.0,
+    'bal8': 0.0,
+    'bal9': 0.0,
+    'bal10': 0.0,
+    'bal11': 0.0,
+    'bal12': 0.0,
+    'bal13': 200.0,
+    }
+
 
 class TestReportAFR(TransactionCase):
 
@@ -130,7 +146,7 @@ class TestReportAFR(TransactionCase):
         else:
             self.assertTrue(False, 'Something went wrong with Test')
 
-    def test_rec_bs_thirteen(self):
+    def test_rec_thirteen(self):
         _logger.info('Testing Receivables at Thirteen Cols')
         account_id = self.ref('account_financial_report.a_recv')
         values = dict(
@@ -171,6 +187,21 @@ class TestReportAFR(TransactionCase):
                     'Something went wrong for %s' % col
                 )
         if not lines or lines and (not lines[0] or not lines[1]):
+            self.assertTrue(False, 'Something went wrong with Test')
+        values = dict(
+            values,
+            tot_check=False,
+            inf_type='IS',
+        )
+        lines = self._generate_afr(values)
+        if lines and lines[0]:
+            res = lines[0]
+            for col in IS_13:
+                self.assertEqual(
+                    res.get(col), IS_13[col],
+                    'Something went wrong for %s' % col
+                )
+        if not lines or lines and not lines[0]:
             self.assertTrue(False, 'Something went wrong with Test')
         return True
 
