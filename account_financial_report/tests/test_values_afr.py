@@ -141,8 +141,6 @@ class TestReportAFR(TransactionCase):
             account_list=[(4, account_id, 0)]
         )
         lines = self._generate_afr(values)
-        import pdb
-        pdb.set_trace()
         if lines and lines[0]:
             res = lines[0]
             for col in BS_13:
