@@ -38,16 +38,8 @@ class AccountBalance(report_sxw.rml_parse):
 
     def __init__(self, cr, uid, name, context):
         super(AccountBalance, self).__init__(cr, uid, name, context)
-        self.sum_debit = 0.00
-        self.sum_credit = 0.00
-        self.sum_balance = 0.00
-        self.sum_debit_fy = 0.00
-        self.sum_credit_fy = 0.00
-        self.sum_balance_fy = 0.00
         self.to_currency_id = None
         self.from_currency_id = None
-        self.date_lst = []
-        self.date_lst_string = ''
         self.localcontext.update({
             'getattr': getattr,
             'time': time,
