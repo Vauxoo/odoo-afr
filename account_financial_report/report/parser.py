@@ -74,40 +74,6 @@ class AccountBalance(report_sxw.rml_parse):
         else:
             return [_('VAT OF COMPANY NOT AVAILABLE')]
 
-    def get_fiscalyear_text(self, form):
-        """
-        Returns the fiscal year text used on the report.
-        """
-        fiscalyear_obj = self.pool.get('account.fiscalyear')
-        fiscalyear = None
-        if form.get('fiscalyear'):
-            fiscalyear = fiscalyear_obj.browse(
-                self.cr, self.uid, form['fiscalyear'])
-            return fiscalyear.name or fiscalyear.code
-        else:
-            fiscalyear = fiscalyear_obj.browse(
-                self.cr, self.uid, fiscalyear_obj.find(self.cr, self.uid))
-            return "%s*" % (fiscalyear.name or fiscalyear.code)
-
-    def get_informe_text(self, form):
-        """
-        Returns the header text used on the report.
-        """
-        afr_id = form['afr_id'] and isinstance(form['afr_id'], (list, tuple)) \
-            and form['afr_id'][0] or form['afr_id']
-        if afr_id:
-            name = self.pool.get('afr').browse(self.cr, self.uid, afr_id).name
-        elif form['analytic_ledger'] and form['columns'] == 'four' and \
-                form['inf_type'] == 'BS':
-            name = _('Analytic Ledger')
-        elif form['inf_type'] == 'BS':
-            name = _('Balance Sheet')
-        elif form['inf_type'] == 'IS':
-            name = _('Income Statement')
-        if form['columns'] == 'currency':
-            name = _('End Balance Multicurrency')
-        return name
-
     def get_month(self, form):
         '''
         return day, year and month
@@ -126,29 +92,6 @@ class AccountBalance(report_sxw.rml_parse):
             sorted(aux)
             return _('From ') + self.formatLang(aux[0], date=True) + _(' to ')\
                 + self.formatLang(aux[-1], date=True)
-
-    def get_periods_and_date_text(self, form):
-        """
-        Returns the text with the periods/dates used on the report.
-        """
-        period_obj = self.pool.get('account.period')
-        fiscalyear_obj = self.pool.get('account.fiscalyear')
-        periods_str = None
-        fiscalyear_id = form['fiscalyear'] or fiscalyear_obj.find(self.cr,
-                                                                  self.uid)
-        period_ids = period_obj.search(self.cr, self.uid, [(
-            'fiscalyear_id', '=', fiscalyear_id), ('special', '=', False)])
-        if form['filter'] in ['byperiod', 'all']:
-            period_ids = form['periods']
-        periods_str = ', '.join([period.name or period.code for period in
-                                 period_obj.browse(self.cr, self.uid,
-                                                   period_ids)])
-
-        dates_str = None
-        if form['filter'] in ['bydate', 'all']:
-            dates_str = self.formatLang(form['date_from'], date=True) + \
-                ' - ' + self.formatLang(form['date_to'], date=True) + ' '
-        return {'periods': periods_str, 'date': dates_str}
 
     def special_period(self, periods):
         period_obj = self.pool.get('account.period')
