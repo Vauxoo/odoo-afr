@@ -65,6 +65,15 @@ class TestReportAFR(TransactionCase):
         self.company_id = self.ref('base.main_company')
         self.fiscalyear_id = self.ref('account.data_fiscalyear')
         self.currency_id = self.ref('base.EUR')
+        self.account_list = []
+        self.a_pay = self.ref('account_financial_report.a_pay')
+        self.a_recv = self.ref('account_financial_report.a_recv')
+        self.rev = self.ref('account_financial_report.rev')
+        self.srv = self.ref('account_financial_report.srv')
+        self.account_list += [(4, self.a_pay, 0)]
+        self.account_list += [(4, self.a_recv, 0)]
+        self.account_list += [(4, self.rev, 0)]
+        self.account_list += [(4, self.srv, 0)]
         self.values = {
             'company_id': self.company_id,
             'inf_type': 'BS',
@@ -125,14 +134,7 @@ class TestReportAFR(TransactionCase):
     def test_display_all(self):
         _logger.info('Testing Display All Account at Period 03')
         period_id = self.ref('account.period_3')
-        account_id = self.ref('account_financial_report.a_pay')
-        account_list=[(4, account_id, 0)]
-        account_id = self.ref('account_financial_report.a_recv')
-        account_list+=[(4, account_id, 0)]
-        account_id = self.ref('account_financial_report.rev')
-        account_list+=[(4, account_id, 0)]
-        account_id = self.ref('account_financial_report.srv')
-        account_list+=[(4, account_id, 0)]
+        account_list = self.account_list,
         values = dict(
             self.values,
             display_account='all',
