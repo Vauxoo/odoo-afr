@@ -782,17 +782,17 @@ class AccountBalance(report_sxw.rml_parse):
     #     # only print one subkey lines.
     #     return res
 
-    def get_fields(self):
-        """
-        TODO
-        """
-        update_fields_list = [
-            'debit', 'credit', 'balance', 'amount_currency',
-            'amount_company_currency', 'differential']
-        copy_fields_list = [
-            'id', 'date', 'journal', 'partner', 'title', 'name',
-            'entry', 'ref', 'analytic', 'period', 'currency']
-        return update_fields_list, copy_fields_list
+    # def get_fields(self):
+    #     """
+    #     TODO
+    #     """
+    #     update_fields_list = [
+    #         'debit', 'credit', 'balance', 'amount_currency',
+    #         'amount_company_currency', 'differential']
+    #     copy_fields_list = [
+    #         'id', 'date', 'journal', 'partner', 'title', 'name',
+    #         'entry', 'ref', 'analytic', 'period', 'currency']
+    #     return update_fields_list, copy_fields_list
 
     # def _get_real_totals(self, res, overwrite_fields):
     #     """
