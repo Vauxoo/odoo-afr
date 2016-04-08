@@ -7,6 +7,35 @@ import logging
 
 _logger = logging.getLogger(__name__)
 
+PARTNER_BALANCE = [
+    {'balance': 1200.0,
+     'balanceinit': 1000.0,
+     'credit': 0.0,
+     'debit': 200.0,
+     'partner': [
+         {'balance': 200.0,
+          'balanceinit': 0.0,
+          'credit': 0.0,
+          'partner_name': 'Vauxoo',
+          'debit': 200.0, },
+         {'balance': 1000.0,
+          'balanceinit': 1000.0,
+          'credit': 0.0,
+          'partner_name': 'UNKNOWN',
+          'debit': 0.0, },
+     ]},
+    {'balance': -800.0,
+     'balanceinit': -800.0,
+     'credit': 0.0,
+     'debit': 0.0,
+     'partner': [
+         {'balance': -800.0,
+          'balanceinit': -800.0,
+          'credit': 0.0,
+          'partner_name': 'UNKNOWN',
+          'debit': 0.0, }]},
+]
+
 ANALYTIC_LEDGER = [
     {'balance': 1000.0,
      'balanceinit': 1000.0,
@@ -154,6 +183,42 @@ class TestReportAFR(TransactionCase):
             self.assertEqual(lines.get('ytd'), -300)
         else:
             self.assertTrue(False, 'Something went wrong with Test')
+
+    def test_lines_report_partner_balance_period_05(self):
+        _logger.info('Testing Partner Balance at Period 05')
+        period_id = self.ref('account.period_5')
+        values = dict(
+            self.values,
+            periods=[(4, period_id, 0)],
+            account_list=[(4, self.a_recv, 0), (4, self.a_pay, 0)],
+            partner_balance=True,
+        )
+        lines = self._generate_afr(values)
+
+        if not lines:
+            self.assertTrue(False, 'Something went wrong with Test')
+
+        self.assertEqual(len(lines), 2, 'There should be 2 Lines')
+        zipped = zip(PARTNER_BALANCE, lines)
+        for elem in zipped:
+            std, res = elem
+            for col in std:
+                if col != 'partner':
+                    self.assertEqual(
+                        res.get(col), std[col],
+                        'Something went wrong for %s' % col)
+                    continue
+
+                self.assertEqual(
+                    len(res.get(col)), len(std[col]),
+                    'Something went wrong for %s' % col)
+                zipped2 = zip(std.get(col), res.get(col))
+                for elem2 in zipped2:
+                    std2, res2 = elem2
+                    for col2 in std2:
+                        self.assertEqual(
+                            res2.get(col2), std2[col2],
+                            'Something went wrong for %s' % col2)
 
     def test_lines_report_analytic_ledger_period_03(self):
         _logger.info('Testing Analytic Ledger at Period 03')
