@@ -192,7 +192,7 @@ class TestReportAFR(TransactionCase):
     def test_display_all(self):
         _logger.info('Testing Display All Account at Period 03')
         period_id = self.ref('account.period_3')
-        account_list = self.account_list,
+        account_list = self.account_list
         values = dict(
             self.values,
             display_account='all',
