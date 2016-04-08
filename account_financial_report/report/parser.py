@@ -452,63 +452,63 @@ class AccountBalance(report_sxw.rml_parse):
                             isinstance(aux_val, list) and aux_val or [aux_val]
         return partner_data
 
-    def check_result(self, all_res):
-        """
-        check that the dictionary is ok
-        """
-        for value in all_res.values():
-            for (curr_key, value2) in value.iteritems():
-                for (cval_key, value3) in value2.iteritems():
+    # def check_result(self, all_res):
+    #     """
+    #     check that the dictionary is ok
+    #     """
+    #     for value in all_res.values():
+    #         for (curr_key, value2) in value.iteritems():
+    #             for (cval_key, value3) in value2.iteritems():
 
-                    if cval_key in ['lines', 'xchange_lines', 'filter_lines']:
-                        error = [line for line in value3 if line if
-                                 line['currency'] != curr_key or
-                                 value3.count(line) != 1]
-                        if error:
-                            raise osv.except_osv(
-                                'error',
-                                'lines with other currencys in ' + cval_key)
-                    elif cval_key in ['real_total', 'init_balance', 'total',
-                                      'xchange_total']:
-                        error = (
-                            value3 and (value3['currency'] != curr_key or
-                                        value3['partner']) and value3 or False)
-                        if error:
-                            raise osv.except_osv(
-                                'error',
-                                'lines with other currencys in ' + cval_key)
-                    elif cval_key == 'partner':
-                        for (partner_key, value4) in value3.iteritems():
-                            for (pval_key, val5) in value4.iteritems():
-                                if pval_key in ['lines', 'xchange_lines',
-                                                'filter_lines']:
-                                    error = [
-                                        line for line in val5 if line
-                                        if line['currency'] != curr_key or
-                                        line['partner'] != partner_key or
-                                        val5.count(line) != 1]
-                                    if error:
-                                        raise osv.except_osv(
-                                            'error',
-                                            ('lines with other currencys in ' +
-                                             pval_key))
-                                elif pval_key in ['real_total', 'init_balance',
-                                                  'total', 'xchange_total']:
-                                    error = (
-                                        val5 and (
-                                            val5['currency'] != curr_key or
-                                            val5['partner'] != partner_key) and
-                                        val5 or False)
-                                    if error:
-                                        raise osv.except_osv(
-                                            'error',
-                                            ('lines with other currencys in '
-                                             '%s' % pval_key))
-                    else:
-                        raise osv.except_osv(
-                            'error', 'missing case ' + cval_key)
+    #                 if cval_key in ['lines', 'xchange_lines', 'filter_lines']:
+    #                     error = [line for line in value3 if line if
+    #                              line['currency'] != curr_key or
+    #                              value3.count(line) != 1]
+    #                     if error:
+    #                         raise osv.except_osv(
+    #                             'error',
+    #                             'lines with other currencys in ' + cval_key)
+    #                 elif cval_key in ['real_total', 'init_balance', 'total',
+    #                                   'xchange_total']:
+    #                     error = (
+    #                         value3 and (value3['currency'] != curr_key or
+    #                                     value3['partner']) and value3 or False)
+    #                     if error:
+    #                         raise osv.except_osv(
+    #                             'error',
+    #                             'lines with other currencys in ' + cval_key)
+    #                 elif cval_key == 'partner':
+    #                     for (partner_key, value4) in value3.iteritems():
+    #                         for (pval_key, val5) in value4.iteritems():
+    #                             if pval_key in ['lines', 'xchange_lines',
+    #                                             'filter_lines']:
+    #                                 error = [
+    #                                     line for line in val5 if line
+    #                                     if line['currency'] != curr_key or
+    #                                     line['partner'] != partner_key or
+    #                                     val5.count(line) != 1]
+    #                                 if error:
+    #                                     raise osv.except_osv(
+    #                                         'error',
+    #                                         ('lines with other currencys in ' +
+    #                                          pval_key))
+    #                             elif pval_key in ['real_total', 'init_balance',
+    #                                               'total', 'xchange_total']:
+    #                                 error = (
+    #                                     val5 and (
+    #                                         val5['currency'] != curr_key or
+    #                                         val5['partner'] != partner_key) and
+    #                                     val5 or False)
+    #                                 if error:
+    #                                     raise osv.except_osv(
+    #                                         'error',
+    #                                         ('lines with other currencys in '
+    #                                          '%s' % pval_key))
+    #                 else:
+    #                     raise osv.except_osv(
+    #                         'error', 'missing case ' + cval_key)
 
-        raise osv.except_osv('its', 'ok')
+    #     raise osv.except_osv('its', 'ok')
 
     def aml_group_by_keys(self, aml_list, group_by_keys):
         """
