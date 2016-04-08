@@ -244,6 +244,7 @@ class TestReportAFR(TransactionCase):
             self.values,
             columns='qtr',
             inf_type='BS',
+            display_account='mov',
             periods=[],
             account_list=[(4, account_id, 0)]
         )
@@ -259,6 +260,7 @@ class TestReportAFR(TransactionCase):
             self.assertTrue(False, 'Something went wrong with Test')
         values = dict(
             values,
+            display_account='bal',
             tot_check=True,
         )
         lines = self._generate_afr(values)
@@ -282,6 +284,7 @@ class TestReportAFR(TransactionCase):
         values = dict(
             values,
             tot_check=False,
+            display_account='all',
             inf_type='IS',
         )
         lines = self._generate_afr(values)
