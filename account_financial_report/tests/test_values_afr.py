@@ -7,6 +7,22 @@ import logging
 
 _logger = logging.getLogger(__name__)
 
+BS_QTR = {
+    'bal1': 1000.0,
+    'bal2': 1200.0,
+    'bal3': 1200.0,
+    'bal4': 1200.0,
+    'bal5': 1200.0,
+    }
+
+IS_QTR = {
+    'bal1': 0.0,
+    'bal2': 200.0,
+    'bal3': 0.0,
+    'bal4': 0.0,
+    'bal5': 200.0,
+    }
+
 BS_13 = {
     'bal1': 1000.0,
     'bal2': 1000.0,
@@ -145,6 +161,65 @@ class TestReportAFR(TransactionCase):
             self.assertEqual(lines.get('ytd'), -300)
         else:
             self.assertTrue(False, 'Something went wrong with Test')
+
+    def test_rec_qtr(self):
+        _logger.info('Testing Receivables at Quarter Cols')
+        account_id = self.ref('account_financial_report.a_recv')
+        values = dict(
+            self.values,
+            columns='qtr',
+            inf_type='BS',
+            periods=[],
+            account_list=[(4, account_id, 0)]
+        )
+        lines = self._generate_afr(values)
+        if lines and lines[0]:
+            res = lines[0]
+            for col in BS_QTR:
+                self.assertEqual(
+                    res.get(col), BS_QTR[col],
+                    'Something went wrong for %s' % col
+                )
+        if not lines or lines and not lines[0]:
+            self.assertTrue(False, 'Something went wrong with Test')
+        values = dict(
+            values,
+            tot_check=True,
+        )
+        lines = self._generate_afr(values)
+        if lines and lines[0]:
+            res = lines[0]
+            for col in BS_QTR:
+                self.assertEqual(
+                    res.get(col), BS_QTR[col],
+                    'Something went wrong for %s' % col
+                )
+        if lines and lines[1]:
+            res = lines[1]
+            self.assertEqual(res.get('type'), 'view')
+            for col in BS_QTR:
+                self.assertEqual(
+                    res.get(col), BS_QTR[col],
+                    'Something went wrong for %s' % col
+                )
+        if not lines or lines and (not lines[0] or not lines[1]):
+            self.assertTrue(False, 'Something went wrong with Test')
+        values = dict(
+            values,
+            tot_check=False,
+            inf_type='IS',
+        )
+        lines = self._generate_afr(values)
+        if lines and lines[0]:
+            res = lines[0]
+            for col in IS_QTR:
+                self.assertEqual(
+                    res.get(col), IS_QTR[col],
+                    'Something went wrong for %s' % col
+                )
+        if not lines or lines and not lines[0]:
+            self.assertTrue(False, 'Something went wrong with Test')
+        return True
 
     def test_rec_thirteen(self):
         _logger.info('Testing Receivables at Thirteen Cols')
