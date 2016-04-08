@@ -100,6 +100,7 @@
             <field name="journal_id" ref="account.miscellaneous_journal"/>
             <field name="period_id" ref="account.period_5"/>
             <field name="account_id" ref="account_financial_report.a_recv"/>
+            <field name="partner_id" ref="base.res_partner_23"/>
             <field name="debit">200.0</field>
             <field name="credit">0.0</field>
         </record>
