@@ -122,6 +122,81 @@ class TestReportAFR(TransactionCase):
         else:
             self.assertTrue(False, 'Something went wrong with Test')
 
+    def test_display_all(self):
+        _logger.info('Testing Display All Account at Period 03')
+        period_id = self.ref('account.period_3')
+        account_id = self.ref('account_financial_report.a_pay')
+        account_list=[(4, account_id, 0)]
+        account_id = self.ref('account_financial_report.a_recv')
+        account_list+=[(4, account_id, 0)]
+        account_id = self.ref('account_financial_report.rev')
+        account_list+=[(4, account_id, 0)]
+        account_id = self.ref('account_financial_report.srv')
+        account_list+=[(4, account_id, 0)]
+        values = dict(
+            self.values,
+            display_account='all',
+            periods=[(4, period_id, 0)],
+            account_list=account_list,
+            tot_check=True,
+        )
+        lines = self._generate_afr(values)
+        if lines and lines[-1]:
+            self.assertEqual(len(lines), 5, 'There should be 5 Lines')
+            lines = lines[-1]
+            self.assertEqual(lines.get('balanceinit'), 500)
+            self.assertEqual(lines.get('debit'), 300)
+            self.assertEqual(lines.get('credit'), 300)
+            self.assertEqual(lines.get('balance'), 500)
+            self.assertEqual(lines.get('ytd'), 0)
+        else:
+            self.assertTrue(False, 'Something went wrong with Test')
+        values = dict(
+            values,
+            display_account='bal_mov',
+        )
+        lines = self._generate_afr(values)
+        if lines and lines[-1]:
+            self.assertEqual(len(lines), 4, 'There should be 4 Lines')
+            lines = lines[-1]
+            self.assertEqual(lines.get('balanceinit'), 500)
+            self.assertEqual(lines.get('debit'), 300)
+            self.assertEqual(lines.get('credit'), 300)
+            self.assertEqual(lines.get('balance'), 500)
+            self.assertEqual(lines.get('ytd'), 0)
+        else:
+            self.assertTrue(False, 'Something went wrong with Test')
+        values = dict(
+            values,
+            display_account='mov',
+        )
+        lines = self._generate_afr(values)
+        if lines and lines[-1]:
+            self.assertEqual(len(lines), 3, 'There should be 3 Lines')
+            lines = lines[-1]
+            self.assertEqual(lines.get('balanceinit'), -500)
+            self.assertEqual(lines.get('debit'), 300)
+            self.assertEqual(lines.get('credit'), 300)
+            self.assertEqual(lines.get('balance'), -500)
+            self.assertEqual(lines.get('ytd'), 0)
+        else:
+            self.assertTrue(False, 'Something went wrong with Test')
+        values = dict(
+            values,
+            display_account='bal',
+        )
+        lines = self._generate_afr(values)
+        if lines and lines[-1]:
+            self.assertEqual(len(lines), 4, 'There should be 4 Lines')
+            lines = lines[-1]
+            self.assertEqual(lines.get('balanceinit'), 500)
+            self.assertEqual(lines.get('debit'), 300)
+            self.assertEqual(lines.get('credit'), 300)
+            self.assertEqual(lines.get('balance'), 500)
+            self.assertEqual(lines.get('ytd'), 0)
+        else:
+            self.assertTrue(False, 'Something went wrong with Test')
+
     def test_lines_report_afr_pay_period_05(self):
         _logger.info('Testing Payables at Period 05')
         account_id = self.ref('account_financial_report.a_pay')
