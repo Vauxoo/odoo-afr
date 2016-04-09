@@ -129,6 +129,7 @@ class TestReportAFR(TransactionCase):
         self.account_list = []
         self.a_pay = self.ref('account_financial_report.a_pay')
         self.a_recv = self.ref('account_financial_report.a_recv')
+        self.a_view = self.ref('account_financial_report.a_view')
         self.rev = self.ref('account_financial_report.rev')
         self.srv = self.ref('account_financial_report.srv')
         self.account_list += [(4, self.a_pay, 0)]

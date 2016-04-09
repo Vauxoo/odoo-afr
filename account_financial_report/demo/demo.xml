@@ -1,10 +1,18 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <openerp>
     <data noupdate="1">
+        <record id="a_view" model="account.account">
+            <field name="code">X00001-vx_afr_view</field>
+            <field name="name">View - (vx_afr)</field>
+            <field ref="account.cas" name="parent_id"/>
+            <field name="type">view</field>
+            <field eval="False" name="reconcile"/>
+            <field name="user_type" ref="account.data_account_type_asset"/>
+        </record>
         <record id="a_recv" model="account.account">
             <field name="code">X11002-vx_afr</field>
             <field name="name">Debtors - (vx_afr)</field>
-            <field ref="account.cas" name="parent_id"/>
+            <field ref="account_financial_report.a_view" name="parent_id"/>
             <field name="type">receivable</field>
             <field eval="True" name="reconcile"/>
             <field name="user_type" ref="account.data_account_type_receivable"/>
@@ -13,7 +21,7 @@
         <record id="a_pay" model="account.account">
             <field name="code">X1111-vx_afr</field>
             <field name="name">Creditors - (vx_afr)</field>
-            <field ref="account.cli" name="parent_id"/>
+            <field ref="account_financial_report.a_view" name="parent_id"/>
             <field name="type">payable</field>
             <field eval="True" name="reconcile"/>
             <field name="user_type" ref="account.data_account_type_payable"/>
