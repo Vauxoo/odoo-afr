@@ -162,15 +162,15 @@ class TestReportAFR(TransactionCase):
         if not lines:
             self.assertTrue(False, 'Something went wrong with Test')
 
-        self.assertEqual(len(lines), 4, 'There should be 4 Lines')
+        self.assertEqual(len(lines), 6, 'There should be 6 Lines')
 
         lines = lines[0]
         self.assertEqual(lines.get('id'), self.a_view, 'Wrong Account')
         self.assertEqual(lines.get('balanceinit'), 500)
-        self.assertEqual(lines.get('debit'), 200)
-        self.assertEqual(lines.get('credit'), 300)
-        self.assertEqual(lines.get('balance'), 400)
-        self.assertEqual(lines.get('ytd'), -100)
+        self.assertEqual(lines.get('debit'), 500)
+        self.assertEqual(lines.get('credit'), 500)
+        self.assertEqual(lines.get('balance'), 500)
+        self.assertEqual(lines.get('ytd'), 0)
 
     def test_lines_report_afr_pay_period_01(self):
         _logger.info('Testing Payables at Period 01')

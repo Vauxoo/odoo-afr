@@ -30,7 +30,7 @@
         <record id="rev" model="account.account">
             <field name="code">X200-vx_afr</field>
             <field name="name">Revenue - (vx_afr)</field>
-            <field ref="account.income_view" name="parent_id"/>
+            <field ref="account_financial_report.a_view" name="parent_id"/>
             <field name="type">other</field>
             <field name="user_type" ref="account.data_account_type_income"/>
         </record>
@@ -38,7 +38,7 @@
         <record id="srv" model="account.account">
             <field name="code">X201-vx_afr</field>
             <field name="name">Service - (vx_afr)</field>
-            <field ref="account.income_view" name="parent_id"/>
+            <field ref="account_financial_report.a_view" name="parent_id"/>
             <field name="type">other</field>
             <field name="user_type" ref="account.data_account_type_income"/>
         </record>
