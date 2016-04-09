@@ -9,6 +9,15 @@
             <field eval="False" name="reconcile"/>
             <field name="user_type" ref="account.data_account_type_asset"/>
         </record>
+        <record id="a_cons" model="account.account">
+            <field name="code">X001-vx_afr_cons</field>
+            <field name="name">Consolidated Account - (vx_afr)</field>
+            <field ref="account.chart0" name="parent_id"/>
+            <field name="type">consolidation</field>
+            <field eval="False" name="reconcile"/>
+            <field name="user_type" ref="account.data_account_type_asset"/>
+            <field name="child_consol_ids" eval="[(4,ref('account_financial_report.a_view'))]"/>
+        </record>
         <record id="a_recv" model="account.account">
             <field name="code">X11002-vx_afr</field>
             <field name="name">Debtors - (vx_afr)</field>
