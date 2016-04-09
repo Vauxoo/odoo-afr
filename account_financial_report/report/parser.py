@@ -1508,8 +1508,8 @@ class AccountBalance(report_sxw.rml_parse):
                     else:
                         # Include all accounts
                         to_include = True
-                elif form['columns'] in ('currency',):
-                    to_include = True
+                # elif form['columns'] in ('currency',):
+                #     to_include = True
                 else:
 
                     if form['display_account'] == 'mov' and aa_id[3].parent_id:
