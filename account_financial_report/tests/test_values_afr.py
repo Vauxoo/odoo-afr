@@ -151,6 +151,27 @@ class TestReportAFR(TransactionCase):
             'account_list': [],
         }
 
+    def test_lines_report_afr_view_account_period_all(self):
+        _logger.info('Testing View Account at All Period')
+        values = dict(
+            self.values,
+            display_account_level=6,
+            account_list=[(4, self.a_view, 0)],
+        )
+        lines = self._generate_afr(values)
+        if not lines:
+            self.assertTrue(False, 'Something went wrong with Test')
+
+        self.assertEqual(len(lines), 4, 'There should be 4 Lines')
+
+        lines = lines[0]
+        self.assertEqual(lines.get('id'), self.a_view, 'Wrong Account')
+        self.assertEqual(lines.get('balanceinit'), 500)
+        self.assertEqual(lines.get('debit'), 200)
+        self.assertEqual(lines.get('credit'), 300)
+        self.assertEqual(lines.get('balance'), 400)
+        self.assertEqual(lines.get('ytd'), -100)
+
     def test_lines_report_afr_pay_period_01(self):
         _logger.info('Testing Payables at Period 01')
         account_id = self.ref('account_financial_report.a_pay')
