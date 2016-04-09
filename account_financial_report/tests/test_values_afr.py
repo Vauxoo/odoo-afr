@@ -171,6 +171,26 @@ class TestReportAFR(TransactionCase):
         else:
             self.assertTrue(False, 'Something went wrong with Test')
 
+    def test_lines_report_afr_pay_period_03_is_one_col(self):
+        _logger.info('Testing Payables at Period 03 One Column')
+        account_id = self.ref('account_financial_report.a_pay')
+        period_id = self.ref('account.period_3')
+        values = dict(
+            self.values,
+            columns='one',
+            periods=[(4, period_id, 0)],
+            account_list=[(4, account_id, 0)],
+            inf_type='IS',
+        )
+        lines = self._generate_afr(values)
+        if lines and lines[0]:
+            lines = lines[0]
+            self.assertEqual(lines.get('id'), account_id, 'Wrong Account')
+            self.assertEqual(lines.get('balance'), -300)
+            self.assertEqual(lines.get('ytd'), -300)
+        else:
+            self.assertTrue(False, 'Something went wrong with Test')
+
     def test_lines_report_afr_pay_period_03(self):
         _logger.info('Testing Payables at Period 03')
         account_id = self.ref('account_financial_report.a_pay')
