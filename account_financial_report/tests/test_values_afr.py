@@ -131,6 +131,7 @@ class TestReportAFR(TransactionCase):
         self.a_recv = self.ref('account_financial_report.a_recv')
         self.a_view = self.ref('account_financial_report.a_view')
         self.a_cons = self.ref('account_financial_report.a_cons')
+        self.a_view_cons = self.ref('account_financial_report.a_view_cons')
         self.rev = self.ref('account_financial_report.rev')
         self.srv = self.ref('account_financial_report.srv')
         self.account_list += [(4, self.a_pay, 0)]
@@ -167,6 +168,27 @@ class TestReportAFR(TransactionCase):
 
         lines = lines[0]
         self.assertEqual(lines.get('id'), self.a_view, 'Wrong Account')
+        self.assertEqual(lines.get('balanceinit'), 500)
+        self.assertEqual(lines.get('debit'), 500)
+        self.assertEqual(lines.get('credit'), 500)
+        self.assertEqual(lines.get('balance'), 500)
+        self.assertEqual(lines.get('ytd'), 0)
+
+    def test_lines_report_afr_consview_account_period_all(self):
+        _logger.info('Testing Consolidated & View Account at All Period')
+        values = dict(
+            self.values,
+            display_account_level=6,
+            account_list=[(4, self.a_view_cons, 0)],
+        )
+        lines = self._generate_afr(values)
+        if not lines:
+            self.assertTrue(False, 'Something went wrong with Test')
+
+        self.assertEqual(len(lines), 3, 'There should be 3 Lines')
+
+        lines = lines[0]
+        self.assertEqual(lines.get('id'), self.a_view_cons, 'Wrong Account')
         self.assertEqual(lines.get('balanceinit'), 500)
         self.assertEqual(lines.get('debit'), 500)
         self.assertEqual(lines.get('credit'), 500)

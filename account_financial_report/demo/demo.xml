@@ -9,10 +9,18 @@
             <field eval="False" name="reconcile"/>
             <field name="user_type" ref="account.data_account_type_asset"/>
         </record>
+        <record id="a_view_cons" model="account.account">
+            <field name="code">X1-vx_afr_view_cons</field>
+            <field name="name">Consolidated View - (vx_afr)</field>
+            <field ref="account.chart0" name="parent_id"/>
+            <field name="type">view</field>
+            <field eval="False" name="reconcile"/>
+            <field name="user_type" ref="account.data_account_type_asset"/>
+        </record>
         <record id="a_cons" model="account.account">
             <field name="code">X001-vx_afr_cons</field>
             <field name="name">Consolidated Account - (vx_afr)</field>
-            <field ref="account.chart0" name="parent_id"/>
+            <field ref="account_financial_report.a_view_cons" name="parent_id"/>
             <field name="type">consolidation</field>
             <field eval="False" name="reconcile"/>
             <field name="user_type" ref="account.data_account_type_asset"/>
