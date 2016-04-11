@@ -709,6 +709,41 @@ class TestReportAFR(TransactionCase):
             self.assertEqual(res, 'VAT OF COMPANY NOT AVAILABLE')
         else:
             self.assertTrue(False, 'Something went wrong with Test')
+        company_id = self.ref('base.main_company')
+        company_brw = self.env['res.company'].browse(company_id)
+
+        company_brw.vat = 'VEJ123456789'
+        company_brw.country_id = self.ref('base.ve')
+        res = AccountBalance(
+            self.cr, self.uid, '', {}).get_vat_by_country(
+                data['data']['form'])
+        if res and res[0]:
+            res = res[0]
+            self.assertEqual(res, '- J-12345678-9')
+        else:
+            self.assertTrue(False, 'Something went wrong with Test')
+
+        company_brw.vat = 'MX1234567890'
+        company_brw.country_id = self.ref('base.mx')
+        res = AccountBalance(
+            self.cr, self.uid, '', {}).get_vat_by_country(
+                data['data']['form'])
+        if res and res[0]:
+            res = res[0]
+            self.assertEqual(res, '1234567890')
+        else:
+            self.assertTrue(False, 'Something went wrong with Test')
+
+        company_brw.vat = 'US1234567890'
+        company_brw.country_id = self.ref('base.us')
+        res = AccountBalance(
+            self.cr, self.uid, '', {}).get_vat_by_country(
+                data['data']['form'])
+        if res and res[0]:
+            res = res[0]
+            self.assertEqual(res, 'US1234567890')
+        else:
+            self.assertTrue(False, 'Something went wrong with Test')
         return True
 
     def test_get_informe_text(self):
