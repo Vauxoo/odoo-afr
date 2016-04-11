@@ -127,6 +127,9 @@ class TestReportAFR(TransactionCase):
         self.fiscalyear_id = self.ref('account.data_fiscalyear')
         self.currency_id = self.ref('base.EUR')
         self.account_list = []
+        self.period_1 = self.ref('account.period_1')
+        self.period_3 = self.ref('account.period_3')
+        self.period_5 = self.ref('account.period_5')
         self.a_pay = self.ref('account_financial_report.a_pay')
         self.a_recv = self.ref('account_financial_report.a_recv')
         self.a_view = self.ref('account_financial_report.a_view')
@@ -219,10 +222,9 @@ class TestReportAFR(TransactionCase):
     def test_lines_report_afr_pay_period_01(self):
         _logger.info('Testing Payables at Period 01')
         account_id = self.ref('account_financial_report.a_pay')
-        period_id = self.ref('account.period_1')
         values = dict(
             self.values,
-            periods=[(4, period_id, 0)],
+            periods=[(4, self.period_1, 0)],
             account_list=[(4, account_id, 0)]
         )
         lines = self._generate_afr(values)
@@ -240,11 +242,10 @@ class TestReportAFR(TransactionCase):
     def test_lines_report_afr_pay_period_03_is_one_col(self):
         _logger.info('Testing Payables at Period 03 One Column')
         account_id = self.ref('account_financial_report.a_pay')
-        period_id = self.ref('account.period_3')
         values = dict(
             self.values,
             columns='one',
-            periods=[(4, period_id, 0)],
+            periods=[(4, self.period_3, 0)],
             account_list=[(4, account_id, 0)],
             inf_type='IS',
         )
@@ -260,10 +261,9 @@ class TestReportAFR(TransactionCase):
     def test_lines_report_afr_pay_period_03(self):
         _logger.info('Testing Payables at Period 03')
         account_id = self.ref('account_financial_report.a_pay')
-        period_id = self.ref('account.period_3')
         values = dict(
             self.values,
-            periods=[(4, period_id, 0)],
+            periods=[(4, self.period_3, 0)],
             account_list=[(4, account_id, 0)]
         )
         lines = self._generate_afr(values)
@@ -280,10 +280,9 @@ class TestReportAFR(TransactionCase):
 
     def test_lines_report_partner_balance_period_05(self):
         _logger.info('Testing Partner Balance at Period 05')
-        period_id = self.ref('account.period_5')
         values = dict(
             self.values,
-            periods=[(4, period_id, 0)],
+            periods=[(4, self.period_5, 0)],
             account_list=[(4, self.a_recv, 0), (4, self.a_pay, 0)],
             partner_balance=True,
         )
@@ -316,10 +315,9 @@ class TestReportAFR(TransactionCase):
 
     def test_lines_report_journal_ledger_period_03(self):
         _logger.info('Testing Journal Ledger at Period 03')
-        period_id = self.ref('account.period_3')
         values = dict(
             self.values,
-            periods=[(4, period_id, 0)],
+            periods=[(4, self.period_3, 0)],
             account_list=[(4, self.a_pay, 0)],
             journal_ledger=True,
         )
@@ -352,10 +350,9 @@ class TestReportAFR(TransactionCase):
 
     def test_lines_report_analytic_ledger_period_03(self):
         _logger.info('Testing Analytic Ledger at Period 03')
-        period_id = self.ref('account.period_3')
         values = dict(
             self.values,
-            periods=[(4, period_id, 0)],
+            periods=[(4, self.period_3, 0)],
             account_list=self.account_list,
             analytic_ledger=True,
         )
@@ -386,12 +383,11 @@ class TestReportAFR(TransactionCase):
 
     def test_display_all(self):
         _logger.info('Testing Display All Account at Period 03')
-        period_id = self.ref('account.period_3')
         account_list = self.account_list
         values = dict(
             self.values,
             display_account='all',
-            periods=[(4, period_id, 0)],
+            periods=[(4, self.period_3, 0)],
             account_list=account_list,
             tot_check=True,
         )
@@ -455,10 +451,9 @@ class TestReportAFR(TransactionCase):
     def test_lines_report_afr_pay_period_05(self):
         _logger.info('Testing Payables at Period 05')
         account_id = self.ref('account_financial_report.a_pay')
-        period_id = self.ref('account.period_5')
         values = dict(
             self.values,
-            periods=[(4, period_id, 0)],
+            periods=[(4, self.period_5, 0)],
             account_list=[(4, account_id, 0)]
         )
         lines = self._generate_afr(values)
@@ -616,12 +611,11 @@ class TestReportAFR(TransactionCase):
     def test_rec_period_05_is(self):
         _logger.info('Testing Receivables at Period 05')
         account_id = self.ref('account_financial_report.a_recv')
-        period_id = self.ref('account.period_5')
         values = dict(
             self.values,
             inf_type='IS',
             tot_check=True,
-            periods=[(4, period_id, 0)],
+            periods=[(4, self.period_5, 0)],
             account_list=[(4, account_id, 0)]
         )
         lines = self._generate_afr(values)
@@ -649,11 +643,9 @@ class TestReportAFR(TransactionCase):
     def test_get_vat_by_country(self):
         _logger.info('Testing Country VAT')
         account_id = self.ref('account_financial_report.a_recv')
-        period_id = self.ref('account.period_5')
-        period_id = [(4, period_id, 0)]
         values = dict(
             self.values,
-            periods=period_id,
+            periods=[(4, self.period_5, 0)],
             account_list=[(4, account_id, 0)]
         )
         data = self._get_data(values)
@@ -670,10 +662,9 @@ class TestReportAFR(TransactionCase):
     def test_get_informe_text(self):
         _logger.info('Testing Inform Text')
         account_id = self.ref('account_financial_report.a_recv')
-        period_id = self.ref('account.period_5')
         values = dict(
             self.values,
-            periods=[(4, period_id, 0)],
+            periods=[(4, self.period_5, 0)],
             account_list=[(4, account_id, 0)]
         )
         data = self._get_data(values)
@@ -705,10 +696,9 @@ class TestReportAFR(TransactionCase):
     def get_month(self):
         _logger.info('Testing Month')
         account_id = self.ref('account_financial_report.a_recv')
-        period_id = self.ref('account.period_5')
         values = dict(
             self.values,
-            periods=[(4, period_id, 0)],
+            periods=[(4, self.period_5, 0)],
             account_list=[(4, account_id, 0)]
         )
         data = self._get_data(values)
