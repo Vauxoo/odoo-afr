@@ -95,10 +95,10 @@ class AccountBalance(report_sxw.rml_parse):
         '''
         return day, year and month
         '''
-        if form['filter'] in ['bydate', 'all']:
-            return _('From ') + self.formatLang(form['date_from'], date=True) \
-                + _(' to ') + self.formatLang(form['date_to'], date=True)
-        elif form['filter'] in ['byperiod', 'all']:
+        # if form['filter'] in ['bydate', 'all']:
+        #     return _('From ') + self.formatLang(form['date_from'], date=True) \
+        #         + _(' to ') + self.formatLang(form['date_to'], date=True)
+        if form['filter'] in ['byperiod', 'all']:
             aux = []
             period_obj = self.pool.get('account.period')
 
@@ -110,13 +110,13 @@ class AccountBalance(report_sxw.rml_parse):
             return _('From ') + self.formatLang(aux[0], date=True) + _(' to ')\
                 + self.formatLang(aux[-1], date=True)
 
-    def special_period(self, periods):
-        period_obj = self.pool.get('account.period')
-        period_brw = period_obj.browse(self.cr, self.uid, periods)
-        period_counter = [True for i in period_brw if not i.special]
-        if not period_counter:
-            return True
-        return False
+    # def special_period(self, periods):
+    #     period_obj = self.pool.get('account.period')
+    #     period_brw = period_obj.browse(self.cr, self.uid, periods)
+    #     period_counter = [True for i in period_brw if not i.special]
+    #     if not period_counter:
+    #         return True
+    #     return False
 
     def exchange_name(self, form):
         self.from_currency_id = \
@@ -947,44 +947,44 @@ class AccountBalance(report_sxw.rml_parse):
             ctx_end['filter'] = form.get('filter', 'all')
             ctx_end['fiscalyear'] = fiscalyear.id
 
-            if ctx_end['filter'] not in ['bydate', 'none']:
-                special = self.special_period(form['periods'])
-            else:
-                special = False
+            # if ctx_end['filter'] not in ['bydate', 'none']:
+            #     special = self.special_period(form['periods'])
+            # else:
+            #     special = False
 
             if form['filter'] in ['byperiod', 'all']:
-                if special:
-                    ctx_end['periods'] = period_obj.search(
-                        self.cr, self.uid,
-                        [('id', 'in', form['periods'] or
-                          ctx_end.get('periods', False))])
-                else:
-                    ctx_end['periods'] = period_obj.search(
-                        self.cr, self.uid,
-                        [('id', 'in', form['periods'] or
-                          ctx_end.get('periods', False)),
-                         ('special', '=', False)])
+                # if special:
+                #     ctx_end['periods'] = period_obj.search(
+                #         self.cr, self.uid,
+                #         [('id', 'in', form['periods'] or
+                #           ctx_end.get('periods', False))])
+                # else:
+                ctx_end['periods'] = period_obj.search(
+                    self.cr, self.uid,
+                    [('id', 'in', form['periods'] or
+                      ctx_end.get('periods', False)),
+                      ('special', '=', False)])
 
-            if form['filter'] in ['bydate', 'all', 'none']:
-                ctx_end['date_from'] = form['date_from']
-                ctx_end['date_to'] = form['date_to']
+            # if form['filter'] in ['bydate', 'all', 'none']:
+            #     ctx_end['date_from'] = form['date_from']
+            #     ctx_end['date_to'] = form['date_to']
 
             return ctx_end.copy()
 
-        def missing_period(ctx_init):
+        # def missing_period(ctx_init):
 
-            ctx_init['fiscalyear'] = fiscalyear_obj.search(
-                self.cr, self.uid, [('date_stop', '<', fiscalyear.date_start)],
-                order='date_stop') and \
-                fiscalyear_obj.search(
-                    self.cr, self.uid,
-                    [('date_stop', '<', fiscalyear.date_start)],
-                    order='date_stop')[-1] or []
-            ctx_init['periods'] = period_obj.search(
-                self.cr, self.uid,
-                [('fiscalyear_id', '=', ctx_init['fiscalyear']),
-                 ('date_stop', '<', fiscalyear.date_start)])
-            return ctx_init
+        #     ctx_init['fiscalyear'] = fiscalyear_obj.search(
+        #         self.cr, self.uid, [('date_stop', '<', fiscalyear.date_start)],
+        #         order='date_stop') and \
+        #         fiscalyear_obj.search(
+        #             self.cr, self.uid,
+        #             [('date_stop', '<', fiscalyear.date_start)],
+        #             order='date_stop')[-1] or []
+        #     ctx_init['periods'] = period_obj.search(
+        #         self.cr, self.uid,
+        #         [('fiscalyear_id', '=', ctx_init['fiscalyear']),
+        #          ('date_stop', '<', fiscalyear.date_start)])
+        #     return ctx_init
         #######################################################################
         # CONTEXT FOR INITIAL BALANCE                                         #
         #######################################################################
@@ -996,8 +996,8 @@ class AccountBalance(report_sxw.rml_parse):
 
             if form['filter'] in ['byperiod', 'all']:
                 ctx_init['periods'] = form['periods']
-                if not ctx_init['periods']:
-                    ctx_init = missing_period(ctx_init.copy())
+                # if not ctx_init['periods']:
+                #     ctx_init = missing_period(ctx_init.copy())
                 date_start = min(
                     [period.date_start for period in
                      period_obj.browse(self.cr, self.uid,
@@ -1005,25 +1005,25 @@ class AccountBalance(report_sxw.rml_parse):
                 ctx_init['periods'] = period_obj.search(
                     self.cr, self.uid, [('fiscalyear_id', '=', fiscalyear.id),
                                         ('date_stop', '<=', date_start)])
-            elif form['filter'] in ['bydate']:
-                ctx_init['date_from'] = fiscalyear.date_start
-                ctx_init['date_to'] = form['date_from']
-                ctx_init['periods'] = period_obj.search(
-                    self.cr, self.uid, [('fiscalyear_id', '=', fiscalyear.id),
-                                        ('date_stop', '<=',
-                                         ctx_init['date_to'])])
-            elif form['filter'] == 'none':
-                ctx_init['periods'] = period_obj.search(
-                    self.cr, self.uid, [('fiscalyear_id', '=', fiscalyear.id),
-                                        ('special', '=', True)])
-                date_start = min(
-                    [period.date_start for period in
-                     period_obj.browse(self.cr, self.uid,
-                                       ctx_init['periods'])])
-                ctx_init['periods'] = period_obj.search(
-                    self.cr, self.uid, [('fiscalyear_id', '=', fiscalyear.id),
-                                        ('date_start', '<=', date_start),
-                                        ('special', '=', True)])
+            # elif form['filter'] in ['bydate']:
+            #     ctx_init['date_from'] = fiscalyear.date_start
+            #     ctx_init['date_to'] = form['date_from']
+            #     ctx_init['periods'] = period_obj.search(
+            #         self.cr, self.uid, [('fiscalyear_id', '=', fiscalyear.id),
+            #                             ('date_stop', '<=',
+            #                              ctx_init['date_to'])])
+            # elif form['filter'] == 'none':
+            #     ctx_init['periods'] = period_obj.search(
+            #         self.cr, self.uid, [('fiscalyear_id', '=', fiscalyear.id),
+            #                             ('special', '=', True)])
+            #     date_start = min(
+            #         [period.date_start for period in
+            #          period_obj.browse(self.cr, self.uid,
+            #                            ctx_init['periods'])])
+            #     ctx_init['periods'] = period_obj.search(
+            #         self.cr, self.uid, [('fiscalyear_id', '=', fiscalyear.id),
+            #                             ('date_start', '<=', date_start),
+            #                             ('special', '=', True)])
 
             return ctx_init.copy()
 
