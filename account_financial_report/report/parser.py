@@ -238,8 +238,8 @@ class AccountBalance(report_sxw.rml_parse):
             for det in res_dict:
                 inicial, debit, credit, balance = det['balanceinit'], det[
                     'debit'], det['credit'], det['balance'],
-                if not any([inicial, debit, credit, balance]):
-                    continue
+                # if not any([inicial, debit, credit, balance]):
+                #     continue
                 data = {
                     'partner_name': det['partner_name'],
                     'balanceinit': inicial,
