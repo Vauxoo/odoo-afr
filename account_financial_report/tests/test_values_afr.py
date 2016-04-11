@@ -500,6 +500,7 @@ class TestReportAFR(TransactionCase):
         if lines and lines[0]:
             lines = lines[0]
             self.assertEqual(lines.get('id'), self.a_pay, 'Wrong Account')
+            self.assertEqual(lines.get('change_sign'), -1)
             self.assertEqual(lines.get('balanceinit'), -500)
             self.assertEqual(lines.get('debit'), 0)
             self.assertEqual(lines.get('credit'), 300)
@@ -521,6 +522,8 @@ class TestReportAFR(TransactionCase):
         lines = self._generate_afr(values)
         if lines and lines[0]:
             res = lines[0]
+            self.assertEqual(
+                res.get('change_sign'), 1, 'Sign should be positive')
             for col in BS_QTR:
                 self.assertEqual(
                     res.get(col), BS_QTR[col],
