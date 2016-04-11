@@ -4,6 +4,7 @@ from openerp.tests.common import TransactionCase
 from openerp.addons.account_financial_report.report.parser \
     import AccountBalance
 import logging
+import time
 
 _logger = logging.getLogger(__name__)
 
@@ -718,7 +719,7 @@ class TestReportAFR(TransactionCase):
         self.assertEqual(res, 'AFR REPORT')
         return True
 
-    def get_month(self):
+    def test_get_month(self):
         _logger.info('Testing Month')
         values = dict(
             self.values,
@@ -729,7 +730,8 @@ class TestReportAFR(TransactionCase):
         res = AccountBalance(
             self.cr, self.uid, '', {}).get_month(
                 data['data']['form'])
-        self.assertEqual(res, 'From 05/01/2016 to 05/31/2016')
+        self.assertEqual(res, 'From 05/01/{year} to 05/31/{year}'.format(
+            year=time.strftime('%Y')))
         return True
 
     def _get_data(self, values):
