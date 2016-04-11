@@ -132,6 +132,7 @@ class TestReportAFR(TransactionCase):
         self.period_1 = self.ref('account.period_1')
         self.period_3 = self.ref('account.period_3')
         self.period_5 = self.ref('account.period_5')
+        self.chart0 = self.ref('account.chart0')
         self.a_pay = self.ref('account_financial_report.a_pay')
         self.a_recv = self.ref('account_financial_report.a_recv')
         self.a_view = self.ref('account_financial_report.a_view')
@@ -648,6 +649,18 @@ class TestReportAFR(TransactionCase):
         if not lines or lines and not lines[0]:
             self.assertTrue(False, 'Something went wrong with Test')
         return True
+
+    def test_chart0_account(self):
+        _logger.info('Testing Receivables at Period 05')
+        values = dict(
+            self.values,
+            account_list=[(4, self.chart0, 0)],
+        )
+        lines = self._generate_afr(values)
+
+        if not lines:
+            # /!\ NOTE: Weak Test
+            self.assertTrue(False, 'Something went wrong with Test')
 
     def test_rec_period_05_is(self):
         _logger.info('Testing Receivables at Period 05')
