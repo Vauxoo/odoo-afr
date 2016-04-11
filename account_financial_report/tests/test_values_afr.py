@@ -681,6 +681,25 @@ class TestReportAFR(TransactionCase):
             self.cr, self.uid, '', {}).get_informe_text(
                 data['data']['form'])
         self.assertEqual(res, 'Balance Sheet')
+        values = dict(
+            values,
+            analytic_ledger=True,
+        )
+        data = self._get_data(values)
+        res = AccountBalance(
+            self.cr, self.uid, '', {}).get_informe_text(
+                data['data']['form'])
+        self.assertEqual(res, 'Analytic Ledger')
+        values = dict(
+            values,
+            analytic_ledger=False,
+            inf_type='IS',
+        )
+        data = self._get_data(values)
+        res = AccountBalance(
+            self.cr, self.uid, '', {}).get_informe_text(
+                data['data']['form'])
+        self.assertEqual(res, 'Income Statement')
         return True
 
     def get_month(self):
