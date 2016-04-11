@@ -310,6 +310,18 @@ class TestReportAFR(TransactionCase):
                             res2.get(col2), std2[col2],
                             'Something went wrong for %s' % col2)
 
+        _logger.info('Testing Partner Balance at Period 01 With no Lines')
+        values = dict(
+            values,
+            periods=[(4, self.period_1, 0)],
+            account_list=[(4, self.srv, 0)],
+            partner_balance=True,
+        )
+        lines = self._generate_afr(values)
+
+        if lines:
+            self.assertTrue(False, 'Something went wrong with Test')
+
     def test_lines_report_journal_ledger_period_03(self):
         _logger.info('Testing Journal Ledger at Period 03')
         values = dict(
