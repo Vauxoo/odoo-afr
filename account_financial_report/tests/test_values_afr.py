@@ -221,16 +221,15 @@ class TestReportAFR(TransactionCase):
 
     def test_lines_report_afr_pay_period_01(self):
         _logger.info('Testing Payables at Period 01')
-        account_id = self.ref('account_financial_report.a_pay')
         values = dict(
             self.values,
             periods=[(4, self.period_1, 0)],
-            account_list=[(4, account_id, 0)]
+            account_list=[(4, self.a_pay, 0)]
         )
         lines = self._generate_afr(values)
         if lines and lines[0]:
             lines = lines[0]
-            self.assertEqual(lines.get('id'), account_id, 'Wrong Account')
+            self.assertEqual(lines.get('id'), self.a_pay, 'Wrong Account')
             self.assertEqual(lines.get('balanceinit'), -500)
             self.assertEqual(lines.get('debit'), 0)
             self.assertEqual(lines.get('credit'), 0)
@@ -241,18 +240,17 @@ class TestReportAFR(TransactionCase):
 
     def test_lines_report_afr_pay_period_03_is_one_col(self):
         _logger.info('Testing Payables at Period 03 One Column')
-        account_id = self.ref('account_financial_report.a_pay')
         values = dict(
             self.values,
             columns='one',
             periods=[(4, self.period_3, 0)],
-            account_list=[(4, account_id, 0)],
+            account_list=[(4, self.a_pay, 0)],
             inf_type='IS',
         )
         lines = self._generate_afr(values)
         if lines and lines[0]:
             lines = lines[0]
-            self.assertEqual(lines.get('id'), account_id, 'Wrong Account')
+            self.assertEqual(lines.get('id'), self.a_pay, 'Wrong Account')
             self.assertEqual(lines.get('balance'), -300)
             self.assertEqual(lines.get('ytd'), -300)
         else:
@@ -260,16 +258,15 @@ class TestReportAFR(TransactionCase):
 
     def test_lines_report_afr_pay_period_03(self):
         _logger.info('Testing Payables at Period 03')
-        account_id = self.ref('account_financial_report.a_pay')
         values = dict(
             self.values,
             periods=[(4, self.period_3, 0)],
-            account_list=[(4, account_id, 0)]
+            account_list=[(4, self.a_pay, 0)],
         )
         lines = self._generate_afr(values)
         if lines and lines[0]:
             lines = lines[0]
-            self.assertEqual(lines.get('id'), account_id, 'Wrong Account')
+            self.assertEqual(lines.get('id'), self.a_pay, 'Wrong Account')
             self.assertEqual(lines.get('balanceinit'), -500)
             self.assertEqual(lines.get('debit'), 0)
             self.assertEqual(lines.get('credit'), 300)
@@ -383,12 +380,11 @@ class TestReportAFR(TransactionCase):
 
     def test_display_all(self):
         _logger.info('Testing Display All Account at Period 03')
-        account_list = self.account_list
         values = dict(
             self.values,
             display_account='all',
             periods=[(4, self.period_3, 0)],
-            account_list=account_list,
+            account_list=self.account_list,
             tot_check=True,
         )
         lines = self._generate_afr(values)
@@ -450,16 +446,15 @@ class TestReportAFR(TransactionCase):
 
     def test_lines_report_afr_pay_period_05(self):
         _logger.info('Testing Payables at Period 05')
-        account_id = self.ref('account_financial_report.a_pay')
         values = dict(
             self.values,
             periods=[(4, self.period_5, 0)],
-            account_list=[(4, account_id, 0)]
+            account_list=[(4, self.a_pay, 0)],
         )
         lines = self._generate_afr(values)
         if lines and lines[0]:
             lines = lines[0]
-            self.assertEqual(lines.get('id'), account_id, 'Wrong Account')
+            self.assertEqual(lines.get('id'), self.a_pay, 'Wrong Account')
             self.assertEqual(lines.get('balanceinit'), -800)
             self.assertEqual(lines.get('debit'), 0)
             self.assertEqual(lines.get('credit'), 0)
@@ -470,15 +465,14 @@ class TestReportAFR(TransactionCase):
 
     def test_lines_report_afr_pay_period_all(self):
         _logger.info('Testing Payables All Periods')
-        account_id = self.ref('account_financial_report.a_pay')
         values = dict(
             self.values,
-            account_list=[(4, account_id, 0)]
+            account_list=[(4, self.a_pay, 0)],
         )
         lines = self._generate_afr(values)
         if lines and lines[0]:
             lines = lines[0]
-            self.assertEqual(lines.get('id'), account_id, 'Wrong Account')
+            self.assertEqual(lines.get('id'), self.a_pay, 'Wrong Account')
             self.assertEqual(lines.get('balanceinit'), -500)
             self.assertEqual(lines.get('debit'), 0)
             self.assertEqual(lines.get('credit'), 300)
@@ -489,14 +483,13 @@ class TestReportAFR(TransactionCase):
 
     def test_rec_qtr(self):
         _logger.info('Testing Receivables at Quarter Cols')
-        account_id = self.ref('account_financial_report.a_recv')
         values = dict(
             self.values,
             columns='qtr',
             inf_type='BS',
             display_account='mov',
             periods=[],
-            account_list=[(4, account_id, 0)]
+            account_list=[(4, self.a_recv, 0)],
         )
         lines = self._generate_afr(values)
         if lines and lines[0]:
@@ -551,13 +544,12 @@ class TestReportAFR(TransactionCase):
 
     def test_rec_thirteen(self):
         _logger.info('Testing Receivables at Thirteen Cols')
-        account_id = self.ref('account_financial_report.a_recv')
         values = dict(
             self.values,
             columns='thirteen',
             inf_type='BS',
             periods=[],
-            account_list=[(4, account_id, 0)]
+            account_list=[(4, self.a_recv, 0)],
         )
         lines = self._generate_afr(values)
         if lines and lines[0]:
@@ -610,19 +602,18 @@ class TestReportAFR(TransactionCase):
 
     def test_rec_period_05_is(self):
         _logger.info('Testing Receivables at Period 05')
-        account_id = self.ref('account_financial_report.a_recv')
         values = dict(
             self.values,
             inf_type='IS',
             tot_check=True,
             periods=[(4, self.period_5, 0)],
-            account_list=[(4, account_id, 0)]
+            account_list=[(4, self.a_recv, 0)],
         )
         lines = self._generate_afr(values)
         if lines and lines[0]:
             res = lines[0]
             self.assertEqual(res.get('type'), 'receivable')
-            self.assertEqual(res.get('id'), account_id, 'Wrong Account')
+            self.assertEqual(res.get('id'), self.a_recv, 'Wrong Account')
             self.assertEqual(res.get('balanceinit'), 0)
             self.assertEqual(res.get('debit'), 200)
             self.assertEqual(res.get('credit'), 0)
@@ -642,11 +633,10 @@ class TestReportAFR(TransactionCase):
 
     def test_get_vat_by_country(self):
         _logger.info('Testing Country VAT')
-        account_id = self.ref('account_financial_report.a_recv')
         values = dict(
             self.values,
             periods=[(4, self.period_5, 0)],
-            account_list=[(4, account_id, 0)]
+            account_list=[(4, self.a_recv, 0)],
         )
         data = self._get_data(values)
         res = AccountBalance(
@@ -661,11 +651,10 @@ class TestReportAFR(TransactionCase):
 
     def test_get_informe_text(self):
         _logger.info('Testing Inform Text')
-        account_id = self.ref('account_financial_report.a_recv')
         values = dict(
             self.values,
             periods=[(4, self.period_5, 0)],
-            account_list=[(4, account_id, 0)]
+            account_list=[(4, self.a_recv, 0)],
         )
         data = self._get_data(values)
         res = AccountBalance(
@@ -695,11 +684,10 @@ class TestReportAFR(TransactionCase):
 
     def get_month(self):
         _logger.info('Testing Month')
-        account_id = self.ref('account_financial_report.a_recv')
         values = dict(
             self.values,
             periods=[(4, self.period_5, 0)],
-            account_list=[(4, account_id, 0)]
+            account_list=[(4, self.a_recv, 0)],
         )
         data = self._get_data(values)
         res = AccountBalance(
