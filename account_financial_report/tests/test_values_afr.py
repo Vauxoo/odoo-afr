@@ -122,6 +122,7 @@ class TestReportAFR(TransactionCase):
     def setUp(self):
         super(TestReportAFR, self).setUp()
         self.wiz_rep_obj = self.env['wizard.report']
+        self.afr_obj = self.env['afr']
 
         self.company_id = self.ref('base.main_company')
         self.fiscalyear_id = self.ref('account.data_fiscalyear')
@@ -155,6 +156,19 @@ class TestReportAFR(TransactionCase):
             'periods': [],
             'account_list': [],
         }
+
+    def _get_afr_template(self):
+        values = dict(self.values)
+        values = dict(
+            values,
+            name='AFR REPORT',
+            account_ids=[(4, self.a_recv, 0)],
+            fiscalyear_id=self.fiscalyear_id,
+        )
+        values.pop('periods')
+        values.pop('fiscalyear')
+        values.pop('account_list')
+        return self.afr_obj.create(values)
 
     def test_lines_report_afr_view_account_period_all(self):
         _logger.info('Testing View Account at All Period')
@@ -692,6 +706,16 @@ class TestReportAFR(TransactionCase):
             self.cr, self.uid, '', {}).get_informe_text(
                 data['data']['form'])
         self.assertEqual(res, 'Income Statement')
+
+        values = dict(
+            values,
+            afr_id=self._get_afr_template().id,
+        )
+        data = self._get_data(values)
+        res = AccountBalance(
+            self.cr, self.uid, '', {}).get_informe_text(
+                data['data']['form'])
+        self.assertEqual(res, 'AFR REPORT')
         return True
 
     def get_month(self):
