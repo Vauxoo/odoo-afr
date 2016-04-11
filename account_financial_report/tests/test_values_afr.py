@@ -192,6 +192,25 @@ class TestReportAFR(TransactionCase):
         self.assertEqual(lines.get('balance'), 500)
         self.assertEqual(lines.get('ytd'), 0)
 
+        _logger.info('Testing View Account at All Period (Multicurrency)')
+        values = dict(
+            values,
+            currency_id=self.ref('base.USD'),
+        )
+        lines = self._generate_afr(values)
+        if not lines:
+            self.assertTrue(False, 'Something went wrong with Test')
+
+        self.assertEqual(len(lines), 6, 'There should be 6 Lines')
+
+        lines = lines[0]
+        self.assertEqual(lines.get('id'), self.a_view, 'Wrong Account')
+        self.assertNotEqual(lines.get('balanceinit'), 500)
+        self.assertNotEqual(lines.get('debit'), 500)
+        self.assertNotEqual(lines.get('credit'), 500)
+        self.assertNotEqual(lines.get('balance'), 500)
+        self.assertEqual(lines.get('ytd'), 0)
+
     def test_lines_report_afr_consview_account_period_all(self):
         _logger.info('Testing Consolidated & View Account at All Period')
         values = dict(
