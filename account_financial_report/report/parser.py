@@ -273,10 +273,10 @@ class AccountBalance(report_sxw.rml_parse):
             #     where = where + \
             #         """ and aml.currency_id = {currency_id}""".format(
             #             currency_id=ctx['currency_id'])
-            if ctx.get('partner_id', False):
-                where = where + \
-                    """ and aml.partner_id = {partner_id}""".format(
-                        partner_id=ctx['partner_id'])
+            # if ctx.get('partner_id', False):
+            #     where = where + \
+            #         """ and aml.partner_id = {partner_id}""".format(
+            #             partner_id=ctx['partner_id'])
             if ctx.get('state', 'posted') == 'posted':
                 where += "AND am.state = 'posted'"
             sql_detalle = """select aml.id as id, aj.name as diario,
