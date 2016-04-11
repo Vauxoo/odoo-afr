@@ -269,10 +269,10 @@ class AccountBalance(report_sxw.rml_parse):
             # periods = str(tuple(ctx['periods']))
             where = """where aml.period_id in (%s) and aa.id = %s
             and aml.state <> 'draft'""" % (periods, account['id'])
-            if ctx.get('currency_id', False):
-                where = where + \
-                    """ and aml.currency_id = {currency_id}""".format(
-                        currency_id=ctx['currency_id'])
+            # if ctx.get('currency_id', False):
+            #     where = where + \
+            #         """ and aml.currency_id = {currency_id}""".format(
+            #             currency_id=ctx['currency_id'])
             if ctx.get('partner_id', False):
                 where = where + \
                     """ and aml.partner_id = {partner_id}""".format(
