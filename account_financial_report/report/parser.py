@@ -124,12 +124,12 @@ class AccountBalance(report_sxw.rml_parse):
                 form['company_id'] and
                 isinstance(form['company_id'], (list, tuple)) and
                 form['company_id'][0] or form['company_id'])
-        if not form['currency_id']:
-            self.to_currency_id = self.from_currency_id
-        else:
-            self.to_currency_id = form['currency_id'] and \
-                isinstance(form['currency_id'], (list, tuple)) and \
-                form['currency_id'][0] or form['currency_id']
+        # if not form['currency_id']:
+        #     self.to_currency_id = self.from_currency_id
+        # else:
+        #     self.to_currency_id = form['currency_id'] and \
+        #         isinstance(form['currency_id'], (list, tuple)) and \
+        #         form['currency_id'][0] or form['currency_id']
         return self.pool.get('res.currency').browse(self.cr, self.uid,
                                                     self.to_currency_id).name
 
@@ -1037,12 +1037,12 @@ class AccountBalance(report_sxw.rml_parse):
             form['company_id'] and
             isinstance(form['company_id'], (list, tuple)) and
             form['company_id'][0] or form['company_id'])
-        if not form['currency_id']:
-            self.to_currency_id = self.from_currency_id
-        else:
-            self.to_currency_id = form['currency_id'] and \
-                isinstance(form['currency_id'], (list, tuple)) and \
-                form['currency_id'][0] or form['currency_id']
+        # if not form['currency_id']:
+        #     self.to_currency_id = self.from_currency_id
+        # else:
+        self.to_currency_id = form['currency_id'] and \
+            isinstance(form['currency_id'], (list, tuple)) and \
+            form['currency_id'][0] or form['currency_id']
 
         if 'account_list' in form and form['account_list']:
             account_ids = form['account_list']
