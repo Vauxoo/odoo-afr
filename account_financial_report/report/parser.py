@@ -1093,14 +1093,14 @@ class AccountBalance(report_sxw.rml_parse):
 
         tot_check = False
 
-        if not form['periods']:
-            form['periods'] = period_obj.search(
-                self.cr, self.uid, [('fiscalyear_id', '=', fiscalyear.id),
-                                    ('special', '=', False)],
-                order='date_start asc')
-            if not form['periods']:
-                raise osv.except_osv(_('UserError'), _(
-                    'The Selected Fiscal Year Does not have Regular Periods'))
+        # if not form['periods']:
+        #     form['periods'] = period_obj.search(
+        #         self.cr, self.uid, [('fiscalyear_id', '=', fiscalyear.id),
+        #                             ('special', '=', False)],
+        #         order='date_start asc')
+        #     if not form['periods']:
+        #         raise osv.except_osv(_('UserError'), _(
+        #             'The Selected Fiscal Year Does not have Regular Periods'))
 
         if form['columns'] == 'qtr':
             period_ids = period_obj.search(
