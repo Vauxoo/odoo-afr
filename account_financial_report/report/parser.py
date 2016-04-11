@@ -1062,8 +1062,8 @@ class AccountBalance(report_sxw.rml_parse):
         if form.get('fiscalyear'):
             if isinstance(form.get('fiscalyear'), (list, tuple)):
                 fiscalyear = form['fiscalyear'] and form['fiscalyear'][0]
-            elif isinstance(form.get('fiscalyear'), (int,)):
-                fiscalyear = form['fiscalyear']
+            # elif isinstance(form.get('fiscalyear'), (int,)):
+            #     fiscalyear = form['fiscalyear']
         fiscalyear = fiscalyear_obj.browse(self.cr, self.uid, fiscalyear)
 
         ################################################################
