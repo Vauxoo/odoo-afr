@@ -111,5 +111,5 @@ class TestReportAFR(TransactionCase):
         book = xlrd.open_workbook(file_xls)
         sh = book.sheet_by_index(0)
         self.assertEquals(
-            sh.nrows, 6,
+            sh.nrows, 10,
             'the generated file contains more or less lines than expected')
