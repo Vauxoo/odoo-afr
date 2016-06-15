@@ -36,6 +36,7 @@ install:
   - export PATH=${HOME}/maintainer-quality-tools/travis:${PATH}
   - travis_install_nightly
   - pip install beautifulsoup4
+  - pip install xlrd
 
 script:
   - travis_wait travis_run_tests
