@@ -122,6 +122,9 @@ class TestReportAFR(TransactionCase):
 
     def setUp(self):
         super(TestReportAFR, self).setUp()
+        self.acc_obj = self.registry('account.account')
+        self.acc_obj._parent_store_compute(self.cr)
+
         self.wiz_rep_obj = self.env['wizard.report']
         self.afr_obj = self.env['afr']
 
