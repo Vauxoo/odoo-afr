@@ -700,8 +700,8 @@ class TestReportAFR(TransactionCase):
         _logger.info('Testing Country VAT')
         company_id = self.ref('base.main_company')
         company_brw = self.env['res.company'].browse(company_id)
-        company_brw.vat = ''
         company_brw.country_id = False
+        company_brw.vat = ''
         values = dict(
             self.values,
             periods=[(4, self.period_5, 0)],
@@ -717,8 +717,8 @@ class TestReportAFR(TransactionCase):
         else:
             self.assertTrue(False, 'Something went wrong with Test')
 
-        company_brw.vat = 'VEJ123456789'
         company_brw.country_id = self.ref('base.ve')
+        company_brw.vat = 'VEJ123456789'
         res = AccountBalance(
             self.cr, self.uid, '', {}).get_vat_by_country(
                 data['data']['form'])
@@ -728,19 +728,19 @@ class TestReportAFR(TransactionCase):
         else:
             self.assertTrue(False, 'Something went wrong with Test')
 
-        company_brw.vat = 'MX1234567890'
         company_brw.country_id = self.ref('base.mx')
+        company_brw.vat = 'MXABC123456T1B'
         res = AccountBalance(
             self.cr, self.uid, '', {}).get_vat_by_country(
                 data['data']['form'])
         if res and res[0]:
             res = res[0]
-            self.assertEqual(res, '1234567890')
+            self.assertEqual(res, 'ABC123456T1B')
         else:
             self.assertTrue(False, 'Something went wrong with Test')
 
-        company_brw.vat = 'US1234567890'
         company_brw.country_id = self.ref('base.us')
+        company_brw.vat = 'US1234567890'
         res = AccountBalance(
             self.cr, self.uid, '', {}).get_vat_by_country(
                 data['data']['form'])
