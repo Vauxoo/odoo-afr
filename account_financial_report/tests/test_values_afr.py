@@ -698,6 +698,10 @@ class TestReportAFR(TransactionCase):
 
     def test_get_vat_by_country(self):
         _logger.info('Testing Country VAT')
+        company_id = self.ref('base.main_company')
+        company_brw = self.env['res.company'].browse(company_id)
+        company_brw.vat = ''
+        company_brw.country_id = False
         values = dict(
             self.values,
             periods=[(4, self.period_5, 0)],
@@ -712,8 +716,6 @@ class TestReportAFR(TransactionCase):
             self.assertEqual(res, 'VAT OF COMPANY NOT AVAILABLE')
         else:
             self.assertTrue(False, 'Something went wrong with Test')
-        company_id = self.ref('base.main_company')
-        company_brw = self.env['res.company'].browse(company_id)
 
         company_brw.vat = 'VEJ123456789'
         company_brw.country_id = self.ref('base.ve')
