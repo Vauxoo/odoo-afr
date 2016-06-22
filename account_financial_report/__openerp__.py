@@ -35,6 +35,9 @@
         "controller_report_xls",
     ],
     "category": "Accounting",
+    "demo": [
+        "demo/demo.xml",
+    ],
     "data": [
         "security/security.xml",
         "security/ir.model.access.csv",
