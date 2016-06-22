@@ -394,7 +394,7 @@ class AccountBalance(report_sxw.rml_parse):
                     self.cr, self.uid,
                     [('id', 'in', form['periods'] or
                       ctx_end.get('periods', False)),
-                      ('special', '=', False)])
+                     ('special', '=', False)])
 
             return ctx_end.copy()
 
