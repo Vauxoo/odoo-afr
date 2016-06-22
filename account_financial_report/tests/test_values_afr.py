@@ -729,13 +729,13 @@ class TestReportAFR(TransactionCase):
             self.assertTrue(False, 'Something went wrong with Test')
 
         company_brw.country_id = self.ref('base.mx')
-        company_brw.vat = 'MXABC123456T1B'
+        company_brw.vat = 'MXABC980101T1B'
         res = AccountBalance(
             self.cr, self.uid, '', {}).get_vat_by_country(
                 data['data']['form'])
         if res and res[0]:
             res = res[0]
-            self.assertEqual(res, 'ABC123456T1B')
+            self.assertEqual(res, 'ABC980101T1B')
         else:
             self.assertTrue(False, 'Something went wrong with Test')
 
