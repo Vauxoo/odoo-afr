@@ -26,132 +26,23 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ##############################################################################
 
-from openerp.osv import osv, fields
-import time
 from openerp.tools.translate import _
-from openerp import api
+from openerp import models, fields, api
 
 
-class AccountFinancialReport(osv.osv):
+class AccountFinancialReport(models.Model):
     _name = "afr"
+    _inherit = "afr.abstract"
 
-    _columns = {
-        'name': fields.char('Name', size=128, required=True),
-        'company_id': fields.many2one('res.company', 'Company', required=True),
-        'currency_id': fields.many2one(
-            'res.currency', 'Currency',
-            help="Currency at which this report will be expressed. If not "
-            "selected will be used the one set in the company"),
-        'inf_type': fields.selection(
-            [('BS', 'Ending Balance'),
-             ('IS', 'Variation on Periods')], 'Type', required=True),
-        'columns': fields.selection(
-            [('one', 'End. Balance'),
-             ('two', 'Debit | Credit'),
-             ('four', 'Initial | Debit | Credit | YTD'),
-             ('five', 'Initial | Debit | Credit | Period | YTD'),
-             ('qtr', "4 QTR's | YTD"),
-             ('thirteen', '12 Months | YTD')],
-            'Columns', required=True),
-        'display_account': fields.selection(
-            [('all', 'All Accounts'),
-             ('bal', 'With Balance'),
-             ('mov', 'With movements'),
-             ('bal_mov', 'With Balance / Movements')], 'Display accounts'),
-        'display_account_level': fields.integer(
-            'Up to level',
-            help='Display accounts up to this level (0 to show all)'),
-        'account_ids': fields.many2many(
-            'account.account', 'afr_account_rel', 'afr_id', 'account_id',
-            'Root accounts', required=True),
-        'fiscalyear_id': fields.many2one(
-            'account.fiscalyear', 'Fiscal year',
-            help='Fiscal Year for this report', required=True),
-        'period_ids': fields.many2many(
-            'account.period', 'afr_period_rel', 'afr_id', 'period_id',
-            'Periods', help='All periods in the fiscal year if empty'),
-        'analytic_ledger': fields.boolean(
-            'Analytic Ledger',
-            help="Allows to Generate an Analytic Ledger for accounts with "
-            "moves. Available when Balance Sheet and 'Initial | Debit | "
-            "Credit | YTD' are selected"),
-        'journal_ledger': fields.boolean(
-            'journal Ledger',
-            help="Allows to Generate an journal Ledger for accounts with "
-            "moves. Available when Balance Sheet and 'Initial | Debit | "
-            "Credit | YTD' are selected"),
-        'partner_balance': fields.boolean(
-            'Partner Balance', help="Allows to Generate a Partner Balance for "
-            "accounts with moves. Available when Balance Sheet and 'Initial | "
-            "Debit | Credit | YTD' are selected"),
-        'tot_check': fields.boolean(
-            'Summarize?',
-            help='Checking will add a new line at the end of the Report which '
-            'will Summarize Columns in Report'),
-        'lab_str': fields.char(
-            'Description',
-            help='Description for the Summary',
-            size=128),
-        'target_move': fields.selection(
-            [('posted', 'All Posted Entries'), ('all', 'All Entries')],
-            'Entries to Include', required=True,
-            help='Print All Accounting Entries or just Posted Accounting '
-            'Entries'),
-        'group_by': fields.selection(
-            [('currency', 'Currency'), ('partner', 'Partner')],
-            'Group by',
-            help='Only applies in the way of the end'
-            ' balance multicurrency report is show.'),
-        'lines_detail': fields.selection(
-            [
-                ('detail', 'Detail'),
-                ('full', 'Full Detail'),
-                ('total', 'Totals')],
-            'Line Details',
-            help='Only applies in the way of the end balance multicurrency'
-            ' report is show.'),
-        'print_analytic_lines': fields.boolean(
-            'With Analytic Lines',
-            help="If this checkbox is active will print the analytic lines in"
-            " the analytic ledger four columns report. This option only"
-            " applies when the analytic ledger is selected."),
-        'report_format': fields.selection([
-            ('pdf', 'PDF'),
-            # TODO: enable print on controller to HTML
-            # ('html', 'HTML'),
-            ('xls', 'Spreadsheet')], 'Report Format'),
+    name = fields.Char('Name', size=128, required=True)
+    account_ids = fields.Many2many(
+        'account.account', 'afr_account_rel', 'afr_id', 'account_id',
+        'Root accounts', required=True)
+    period_ids = fields.Many2many(
+        'account.period', 'afr_period_rel', 'afr_id', 'period_id',
+        'Periods', help='All periods in the fiscal year if empty')
 
-        # Deprecated fields
-        'filter': fields.selection(
-            [('bydate', 'By Date'), ('byperiod', 'By Period'),
-             ('all', 'By Date and Period'), ('none', 'No Filter')],
-            'Date/Period Filter'),
-        'date_to': fields.date('End date'),
-        'date_from': fields.date('Start date'),
-    }
-
-    _defaults = {
-        'display_account_level': lambda *a: 0,
-        'inf_type': lambda *a: 'BS',
-        'company_id': lambda self, cr, uid, c:
-        self.pool.get(
-            'res.company')._company_default_get(
-            cr,
-            uid,
-            'account.invoice',
-            context=c),
-        'fiscalyear_id': lambda self, cr, uid, c:
-        self.pool.get('account.fiscalyear').find(cr, uid),
-        'display_account': lambda *a: 'bal_mov',
-        'columns': lambda *a: 'four',
-
-        'date_from': lambda *a: time.strftime('%Y-%m-%d'),
-        'date_to': lambda *a: time.strftime('%Y-%m-%d'),
-        'filter': lambda *a: 'byperiod',
-        'target_move': 'posted',
-    }
-
-    @api.one
+    @api.multi
     def copy(self, cr, uid, ids, default=None, context=None):
         context = context and dict(context) or {}
         previous_name = self.browse(cr, uid, ids, context=context).name
