@@ -22,18 +22,14 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ##########################################################################
 
-from openerp.osv import osv, fields
+from openerp import models, fields
 
 
-class ResCompany(osv.osv):
+class ResCompany(models.Model):
     _inherit = 'res.company'
-    _columns = {
-        'credit_account_ids': fields.many2many('account.account',
-                                               'credit_account_company_rel',
-                                               'company_id', 'account_id',
-                                               'Creditable Accounts'),
-        'debit_account_ids': fields.many2many('account.account',
-                                              'debit_account_company_rel',
-                                              'company_id', 'account_id',
-                                              'Debitable Accounts'),
-    }
+    credit_account_ids = fields.Many2many(
+        'account.account', 'credit_account_company_rel', 'company_id',
+        'account_id', 'Creditable Accounts')
+    debit_account_ids = fields.Many2many(
+        'account.account', 'debit_account_company_rel', 'company_id',
+        'account_id', 'Debitable Accounts')
