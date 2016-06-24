@@ -51,9 +51,7 @@ class AccountBalance(report_sxw.rml_parse):
         self.context = context
 
     def get_vat_by_country(self, form):
-        """
-        Return the vat of the partner by country
-        """
+        """ Return the vat of the partner by country."""
         rc_obj = self.pool.get('res.company')
         country_code = rc_obj.browse(
             self.cr, self.uid,
@@ -72,9 +70,7 @@ class AccountBalance(report_sxw.rml_parse):
             return [_('VAT OF COMPANY NOT AVAILABLE')]
 
     def get_informe_text(self, form):
-        """
-        Returns the header text used on the report.
-        """
+        """Returns the header text used on the report."""
         afr_id = form['afr_id'] and isinstance(form['afr_id'], (list, tuple)) \
             and form['afr_id'][0] or form['afr_id']
         if afr_id:
@@ -89,9 +85,7 @@ class AccountBalance(report_sxw.rml_parse):
         return name
 
     def get_month(self, form):
-        '''
-        return day, year and month
-        '''
+        """Return day, year and month."""
         if form['filter'] in ['byperiod', 'all']:
             aux = []
             period_obj = self.pool.get('account.period')
@@ -234,9 +228,7 @@ class AccountBalance(report_sxw.rml_parse):
         return res
 
     def _get_analytic_ledger(self, account, ctx=None):
-        """
-        TODO
-        """
+        """Return a dictionary with all ledger of an account."""
         ctx = ctx or {}
         res = []
         aml_obj = self.pool.get('account.move.line')
@@ -349,223 +341,135 @@ class AccountBalance(report_sxw.rml_parse):
                 })
         return res
 
-    def lines(self, form, level=0):
-        """
-        Returns all the data needed for the report lines (account info plus
-        debit/credit/balance in the selected period and the full year)
-        """
-        account_obj = self.pool.get('account.account')
-        period_obj = self.pool.get('account.period')
-        fiscalyear_obj = self.pool.get('account.fiscalyear')
+    def _get_children_and_consol(
+            self, cr, uid, ids, level, context=None, change_sign=False):
+        """Consolidating Accounts to display them later properly in report."""
 
-        def _get_children_and_consol(cr, uid, ids, level, context=None,
-                                     change_sign=False):
-            aa_obj = self.pool.get('account.account')
-            ids2 = []
-            for aa_brw in aa_obj.browse(cr, uid, ids, context):
-                if aa_brw.child_id and aa_brw.level < \
-                        level and aa_brw.type != 'consolidation':
-                    if not change_sign:
-                        ids2.append([aa_brw.id, True, False, aa_brw])
-                    ids2 += _get_children_and_consol(
-                        cr, uid, [x.id for x in aa_brw.child_id], level,
-                        context, change_sign=change_sign)
-                    if change_sign:
-                        ids2.append(aa_brw.id)
-                    else:
-                        ids2.append([aa_brw.id, False, True, aa_brw])
+        aa_obj = self.pool.get('account.account')
+        ids2 = []
+        for aa_brw in aa_obj.browse(cr, uid, ids, context):
+            if aa_brw.child_id and aa_brw.level < \
+                    level and aa_brw.type != 'consolidation':
+                if not change_sign:
+                    ids2.append([aa_brw.id, True, False, aa_brw])
+                ids2.extend(self._get_children_and_consol(
+                    cr, uid, [x.id for x in aa_brw.child_id], level,
+                    context, change_sign=change_sign))
+                if change_sign:
+                    ids2.append(aa_brw.id)
                 else:
-                    if change_sign:
-                        ids2.append(aa_brw.id)
-                    else:
-                        ids2.append([aa_brw.id, True, True, aa_brw])
-            return ids2
+                    ids2.append([aa_brw.id, False, True, aa_brw])
+            else:
+                if change_sign:
+                    ids2.append(aa_brw.id)
+                else:
+                    ids2.append([aa_brw.id, True, True, aa_brw])
+        return ids2
 
-        #######################################################################
-        # CONTEXT FOR ENDIND BALANCE                                          #
-        #######################################################################
-        def _ctx_end(ctx):
-            ctx_end = ctx
-            ctx_end['filter'] = form.get('filter', 'all')
-            ctx_end['fiscalyear'] = fiscalyear.id
+    def _ctx_end(self, ctx, fiscalyear, form):
+        """Context for ending balance"""
+        ctx_end = ctx
+        ctx_end['filter'] = form.get('filter', 'all')
+        ctx_end['fiscalyear'] = fiscalyear.id
 
-            if form['filter'] in ['byperiod', 'all']:
-                ctx_end['periods'] = period_obj.search(
-                    self.cr, self.uid,
-                    [('id', 'in', form['periods'] or
-                      ctx_end.get('periods', False)),
-                     ('special', '=', False)])
+        if form['filter'] in ['byperiod', 'all']:
+            ctx_end['periods'] = self.pool.get('account.period').search(
+                self.cr, self.uid,
+                [('id', 'in', form['periods'] or
+                  ctx_end.get('periods', False)),
+                 ('special', '=', False)])
 
-            return ctx_end.copy()
+        return ctx_end.copy()
 
         #######################################################################
         # CONTEXT FOR INITIAL BALANCE                                         #
         #######################################################################
 
-        def _ctx_init(ctx):
-            ctx_init = self.context.copy()
-            ctx_init['filter'] = form.get('filter', 'all')
-            ctx_init['fiscalyear'] = fiscalyear.id
+    def _ctx_init(self, ctx_init, fiscalyear, form):
+        """Context for initial balance"""
+        period_obj = self.pool.get('account.period')
+        ctx_init['filter'] = form.get('filter', 'all')
+        ctx_init['fiscalyear'] = fiscalyear.id
 
-            if form['filter'] in ['byperiod', 'all']:
-                ctx_init['periods'] = form['periods']
-                date_start = min(
-                    [period.date_start for period in
-                     period_obj.browse(self.cr, self.uid,
-                                       ctx_init['periods'])])
-                ctx_init['periods'] = period_obj.search(
-                    self.cr, self.uid, [('fiscalyear_id', '=', fiscalyear.id),
-                                        ('date_stop', '<=', date_start)])
+        if form['filter'] in ['byperiod', 'all']:
+            ctx_init['periods'] = form['periods']
+            date_start = min(
+                [period.date_start
+                 for period in period_obj.browse(
+                     self.cr, self.uid, ctx_init['periods'])])
+            ctx_init['periods'] = period_obj.search(
+                self.cr, self.uid, [
+                    ('fiscalyear_id', '=', fiscalyear.id),
+                    ('date_stop', '<=', date_start)])
+        return ctx_init.copy()
 
-            return ctx_init.copy()
+    def zfunc(self, nval):
+        """Method to return a meaningful value"""
+        # TODO: To replace with openerp is_zero method
+        return abs(nval) < 0.005 and 0.0 or nval
 
-        def zfunction(nval):
-            return abs(nval) < 0.005 and 0.0 or nval
-        self.context = dict(self.context)
-        account_ids = []
-        self.context['state'] = form['target_move'] or 'posted'
-
-        self.from_currency_id = self.get_company_currency(
-            form['company_id'] and
-            isinstance(form['company_id'], (list, tuple)) and
-            form['company_id'][0] or form['company_id'])
-        self.to_currency_id = form['currency_id'] and \
-            isinstance(form['currency_id'], (list, tuple)) and \
-            form['currency_id'][0] or form['currency_id']
-
-        if 'account_list' in form and form['account_list']:
-            account_ids = form['account_list']
-            account_list = form['account_list']
-            del form['account_list']
+    def _getting_accounts(self, form):
+        """Crunching accounts to easy later computation on accounts"""
+        account_obj = self.pool.get('account.account')
+        account_ids = form.get('account_list', [])
 
         credit_account_ids = self.get_company_accounts(
-            form['company_id'] and
-            isinstance(form['company_id'], (list, tuple)) and
-            form['company_id'][0] or form['company_id'], 'credit')
+            form.get('company_id') and form['company_id'][0], 'credit')
 
         debit_account_ids = self.get_company_accounts(
-            form['company_id'] and
-            isinstance(form['company_id'], (list, tuple)) and
-            form['company_id'][0] or form['company_id'], 'debit')
-
-        if form.get('fiscalyear'):
-            if isinstance(form.get('fiscalyear'), (list, tuple)):
-                fiscalyear = form['fiscalyear'] and form['fiscalyear'][0]
-        fiscalyear = fiscalyear_obj.browse(self.cr, self.uid, fiscalyear)
+            form.get('company_id') and form['company_id'][0], 'debit')
 
         ################################################################
         # Get the accounts                                             #
         ################################################################
-        all_account_ids = _get_children_and_consol(
+        all_account_ids = self._get_children_and_consol(
             self.cr, self.uid, account_ids, 100, self.context)
 
-        account_ids = _get_children_and_consol(
+        account_ids = self._get_children_and_consol(
             self.cr, self.uid, account_ids,
             form['display_account_level'] and
             form['display_account_level'] or 100, self.context)
 
-        credit_account_ids = _get_children_and_consol(
+        credit_account_ids = self._get_children_and_consol(
             self.cr, self.uid, credit_account_ids, 100, self.context,
             change_sign=True)
 
-        debit_account_ids = _get_children_and_consol(
+        debit_account_ids = self._get_children_and_consol(
             self.cr, self.uid, debit_account_ids, 100, self.context,
             change_sign=True)
 
         credit_account_ids = list(set(
             credit_account_ids) - set(debit_account_ids))
-        #
-        # Generate the report lines (checking each account)
-        #
-
-        tot_check = False
-
-        if form['columns'] == 'qtr':
-            period_ids = period_obj.search(
-                self.cr, self.uid, [('fiscalyear_id', '=', fiscalyear.id),
-                                    ('special', '=', False)],
-                order='date_start asc')
-            aval = 0
-            lval = []
-            pval = []
-            for xval in period_ids:
-                aval += 1
-                if aval < 3:
-                    lval.append(xval)
-                else:
-                    lval.append(xval)
-                    pval.append(lval)
-                    lval = []
-                    aval = 0
-            tot_bal1 = 0.0
-            tot_bal2 = 0.0
-            tot_bal3 = 0.0
-            tot_bal4 = 0.0
-            tot_bal5 = 0.0
-        elif form['columns'] == 'thirteen':
-            period_ids = period_obj.search(
-                self.cr, self.uid, [('fiscalyear_id', '=', fiscalyear.id),
-                                    ('special', '=', False)],
-                order='date_start asc')
-            tot_bal1 = 0.0
-            tot_bal1 = 0.0
-            tot_bal2 = 0.0
-            tot_bal3 = 0.0
-            tot_bal4 = 0.0
-            tot_bal5 = 0.0
-            tot_bal6 = 0.0
-            tot_bal7 = 0.0
-            tot_bal8 = 0.0
-            tot_bal9 = 0.0
-            tot_bal10 = 0.0
-            tot_bal11 = 0.0
-            tot_bal12 = 0.0
-            tot_bal13 = 0.0
-        else:
-            ctx_end = _ctx_end(self.context.copy())
-            tot_bin = 0.0
-            tot_deb = 0.0
-            tot_crd = 0.0
-            tot_ytd = 0.0
-            tot_eje = 0.0
-
-        res = {}
-        result_acc = []
-        tot = {}
-
-        ###############################################################
-        # Calculations of credit, debit and balance,
-        # without repeating operations.
-        ###############################################################
 
         account_black_ids = account_obj.search(
-            self.cr, self.uid, ([('id', 'in', [i[0] for i in all_account_ids]),
-                                 ('type', 'not in', ('view',
-                                                     'consolidation'))]))
+            self.cr, self.uid,
+            ([('id', 'in', [i[0] for i in all_account_ids]),
+              ('type', 'not in', ('view', 'consolidation'))]))
 
         account_not_black_ids = account_obj.search(
-            self.cr, self.uid, ([('id', 'in', [i[0] for i in all_account_ids]),
-                                 ('type', '=', 'view')]))
+            self.cr, self.uid,
+            ([('id', 'in', [i[0] for i in all_account_ids]),
+              ('type', '=', 'view')]))
 
         acc_cons_ids = account_obj.search(
-            self.cr, self.uid, ([('id', 'in', [i[0] for i in all_account_ids]),
-                                 ('type', 'in', ('consolidation',))]))
+            self.cr, self.uid,
+            ([('id', 'in', [i[0] for i in all_account_ids]),
+              ('type', 'in', ('consolidation',))]))
 
         account_consol_ids = acc_cons_ids and \
-            account_obj._get_children_and_consol(self.cr, self.uid,
-                                                 acc_cons_ids) or []
+            account_obj._get_children_and_consol(
+                self.cr, self.uid, acc_cons_ids) or []
 
-        account_black_ids += account_obj.search(self.cr, self.uid, (
-            [('id', 'in', account_consol_ids),
-             ('type', 'not in',
-              ('view', 'consolidation'))]))
+        account_black_ids += account_obj.search(
+            self.cr, self.uid,
+            ([('id', 'in', account_consol_ids),
+              ('type', 'not in', ('view', 'consolidation'))]))
 
         account_black_ids = list(set(account_black_ids))
 
-        c_account_not_black_ids = account_obj.search(self.cr, self.uid, ([
-            ('id', 'in',
-             account_consol_ids),
-            ('type', '=', 'view')]))
+        c_account_not_black_ids = account_obj.search(
+            self.cr, self.uid,
+            ([('id', 'in', account_consol_ids), ('type', '=', 'view')]))
         delete_cons = False
         if c_account_not_black_ids:
             delete_cons = set(account_not_black_ids) & set(
@@ -599,16 +503,338 @@ class AccountBalance(report_sxw.rml_parse):
             account_not_black = c_account_not_black + \
                 acc_cons_brw + account_not_black
 
-        # All accounts per period
-        all_ap = {}
+        return (delete_cons, account_black_ids, account_not_black_ids,
+                account_not_black, credit_account_ids, account_ids)
 
-        # Iteration limit depending on the number of columns
+    def _process_period(self, form, fiscalyear):
+        period_obj = self.pool.get('account.period')
+        ctx_end = {}
+        period_ids = []
+        pval = []
+
+        if form['columns'] == 'qtr':
+            period_ids = period_obj.search(
+                self.cr, self.uid,
+                [('fiscalyear_id', '=', fiscalyear.id),
+                 ('special', '=', False)],
+                order='date_start asc')
+            aval = 0
+            lval = []
+            for xval in period_ids:
+                aval += 1
+                if aval < 3:
+                    lval.append(xval)
+                else:
+                    lval.append(xval)
+                    pval.append(lval)
+                    lval = []
+                    aval = 0
+        elif form['columns'] == 'thirteen':
+            period_ids = period_obj.search(
+                self.cr, self.uid, [('fiscalyear_id', '=', fiscalyear.id),
+                                    ('special', '=', False)],
+                order='date_start asc')
+        else:
+            ctx_end = self._ctx_end(self.context.copy(), fiscalyear, form)
+
+        return (ctx_end, period_ids, pval)
+
+    def test_include(self, cols, res, period=None):
+        """Check whether lines for certain columns are filled with values."""
+        to_test = [False]
+        for col in cols:
+            if period is None:
+                to_test.append(
+                    abs(res.get(col, 0.0)) >= 0.005 and True or False)
+                continue
+            for xval in range(period):
+                to_test.append(
+                    abs(res.get(col % (xval + 1), 0.0)) >= 0.005 and
+                    True or False)
+        return any(to_test)
+
+    def check_accounts_to_display(self, form, aa_id, res, period):
+        """Check whether we must include this line in the report or not."""
+        # Include all accounts unless stated otherwise
+        to_include = True
+        cols = []
+
+        if form['columns'] in ('thirteen', 'qtr'):
+            if form['display_account'] == 'mov' and aa_id[3].parent_id:
+                # Include accounts with movements
+                cols = ['dbr%s', 'cdr%s']
+            elif form['display_account'] == 'bal' and aa_id[3].parent_id:
+                # Include accounts with balance
+                cols = ['bal%s']
+            elif form['display_account'] == 'bal_mov' and aa_id[3].parent_id:
+                # Include accounts with balance or movements
+                cols = ['dbr%s', 'cdr%s', 'bal%s']
+        else:
+            if form['display_account'] == 'mov' and aa_id[3].parent_id:
+                # Include accounts with movements
+                cols = ['debit', 'credit']
+            elif form['display_account'] == 'bal' and aa_id[3].parent_id:
+                # Include accounts with balance
+                cols = ['balance']
+            elif form['display_account'] == 'bal_mov' and aa_id[3].parent_id:
+                # Include accounts with balance or movements
+                cols = ['debit', 'credit', 'balance']
+        if cols:
+            to_include = self.test_include(cols, res, period)
+        return to_include
+
+    def include_ledger(self, res, form, to_include, ctx_i, ctx_end):
+        """Includes a Ledger to an account."""
+        # ANALYTIC LEDGER
+        if (to_include and form['analytic_ledger'] and
+                form['columns'] == 'four' and
+                form['inf_type'] == 'BS' and
+                res['type'] in ('other', 'liquidity', 'receivable',
+                                'payable')):
+            ctx_end.update(
+                company_id=form['company_id'][0],
+                report=form['columns'])
+            res['mayor'] = self._get_analytic_ledger(res, ctx=ctx_end)
+        # JOURNAL LEDGER
+        elif to_include and form['journal_ledger'] and \
+                form['columns'] == 'four' and form['inf_type'] == 'BS'\
+                and res['type'] in ('other', 'liquidity', 'receivable',
+                                    'payable'):
+            res['journal'] = self._get_journal_ledger(res, ctx=ctx_end)
+        # PARTNER LEDGER
+        elif to_include and form['partner_balance'] and \
+                form['columns'] == 'four' and form['inf_type'] == 'BS'\
+                and res['type'] in ('other', 'liquidity', 'receivable',
+                                    'payable'):
+            res['partner'] = self._get_partner_balance(
+                res, ctx_i['periods'], ctx=ctx_end)
+        # /!\ NOTE: Is it needed?
+        else:
+            res['mayor'] = []
+        return res
+
+    def get_line_values(self, idx, res, form, all_ap):
+        """Fill line with proper values according to report type
+        by modifying previously existing dictionary with values."""
+        if form['columns'] == 'qtr':
+            for pn in range(1, 5):
+
+                if form['inf_type'] == 'IS':
+                    debit, credit, balance = [self.zfunc(x) for x in (
+                        all_ap[pn - 1][idx].get('debit', 0.0),
+                        all_ap[pn - 1][idx].get('credit', 0.0),
+                        all_ap[pn - 1][idx].get('balance', 0.0))]
+                    res.update({
+                        'dbr%s' % pn: self.exchange(debit),
+                        'cdr%s' % pn: self.exchange(credit),
+                        'bal%s' % pn: self.exchange(balance),
+                    })
+                else:
+                    i, debit, credit = [self.zfunc(x) for x in (
+                        all_ap[pn - 1][idx].get('balanceinit', 0.0),
+                        all_ap[pn - 1][idx].get('debit', 0.0),
+                        all_ap[pn - 1][idx].get('credit', 0.0))]
+                    balance = self.zfunc(i + debit - credit)
+                    res.update({
+                        'dbr%s' % pn: self.exchange(debit),
+                        'cdr%s' % pn: self.exchange(credit),
+                        'bal%s' % pn: self.exchange(balance),
+                    })
+
+            if form['inf_type'] == 'IS':
+                debit, credit, balance = [self.zfunc(x) for x in (
+                    all_ap['all'][idx].get('debit', 0.0),
+                    all_ap['all'][idx].get('credit', 0.0),
+                    all_ap['all'][idx].get('balance', 0.0))]
+                res.update({
+                    'dbr5': self.exchange(debit),
+                    'cdr5': self.exchange(credit),
+                    'bal5': self.exchange(balance),
+                })
+            else:
+                i, debit, credit = [self.zfunc(x) for x in (
+                    all_ap['all'][idx].get('balanceinit', 0.0),
+                    all_ap['all'][idx].get('debit', 0.0),
+                    all_ap['all'][idx].get('credit', 0.0))]
+                balance = self.zfunc(i + debit - credit)
+                res.update({
+                    'dbr5': self.exchange(debit),
+                    'cdr5': self.exchange(credit),
+                    'bal5': self.exchange(balance),
+                })
+
+        elif form['columns'] == 'thirteen':
+            pn = 1
+            for p_num in range(12):
+
+                if form['inf_type'] == 'IS':
+                    debit, credit, balance = [self.zfunc(x) for x in (
+                        all_ap[p_num][idx].get('debit', 0.0),
+                        all_ap[p_num][idx].get('credit', 0.0),
+                        all_ap[p_num][idx].get('balance', 0.0))]
+                    res.update({
+                        'dbr%s' % pn: self.exchange(debit),
+                        'cdr%s' % pn: self.exchange(credit),
+                        'bal%s' % pn: self.exchange(balance),
+                    })
+                else:
+                    i, debit, credit = [self.zfunc(x) for x in (
+                        all_ap[p_num][idx].get('balanceinit', 0.0),
+                        all_ap[p_num][idx].get('debit', 0.0),
+                        all_ap[p_num][idx].get('credit', 0.0))]
+                    balance = self.zfunc(i + debit - credit)
+                    res.update({
+                        'dbr%s' % pn: self.exchange(debit),
+                        'cdr%s' % pn: self.exchange(credit),
+                        'bal%s' % pn: self.exchange(balance),
+                    })
+
+                pn += 1
+
+            if form['inf_type'] == 'IS':
+                debit, credit, balance = [self.zfunc(x) for x in (
+                    all_ap['all'][idx].get('debit', 0.0),
+                    all_ap['all'][idx].get('credit', 0.0),
+                    all_ap['all'][idx].get('balance', 0.0))]
+                res.update({
+                    'dbr13': self.exchange(debit),
+                    'cdr13': self.exchange(credit),
+                    'bal13': self.exchange(balance),
+                })
+            else:
+                i, debit, credit = [self.zfunc(x) for x in (
+                    all_ap['all'][idx].get('balanceinit', 0.0),
+                    all_ap['all'][idx].get('debit', 0.0),
+                    all_ap['all'][idx].get('credit', 0.0))]
+                balance = self.zfunc(i + debit - credit)
+                res.update({
+                    'dbr13': self.exchange(debit),
+                    'cdr13': self.exchange(credit),
+                    'bal13': self.exchange(balance),
+                })
+
+        else:
+            i, debit, credit = [self.zfunc(x) for x in (
+                all_ap['all'][idx].get('balanceinit', 0.0),
+                all_ap['all'][idx].get('debit', 0.0),
+                all_ap['all'][idx].get('credit', 0.0))]
+            balance = self.zfunc(i + debit - credit)
+            res.update({
+                'balanceinit': self.exchange(i),
+                'debit': self.exchange(debit),
+                'credit': self.exchange(credit),
+                'ytd': self.exchange(debit - credit),
+            })
+
+            if form['inf_type'] == 'IS' and form['columns'] == 'one':
+                res.update({
+                    'balance': self.exchange(debit - credit),
+                })
+            else:
+                res.update({
+                    'balance': self.exchange(balance),
+                })
+        return None
+
+    def get_limit(self, form):
+        """Iteration limit depending on the number of columns."""
+        limit = 1
         if form['columns'] == 'thirteen':
             limit = 13
         elif form['columns'] == 'qtr':
             limit = 5
+        return limit
+
+    def get_all_accounts_per_period(
+            self, delete_cons, form, p_act, limit, all_account, all_ap,
+            account_not_black_ids, dict_not_black):
+        """Get values for all accounts in asked periods."""
+
+        for acc_id in account_not_black_ids:
+            acc_childs = dict_not_black[acc_id]['obj'].type == 'view' \
+                and dict_not_black[acc_id]['obj'].child_id \
+                or dict_not_black[acc_id]['obj'].child_consol_ids
+            for child_id in acc_childs:
+                if child_id.type == 'consolidation' and delete_cons:
+                    continue
+                if not all_account.get(child_id.id):
+                    continue
+                dict_not_black[acc_id]['debit'] += \
+                    all_account[child_id.id].get('debit')
+                dict_not_black[acc_id]['credit'] += \
+                    all_account[child_id.id].get('credit')
+                dict_not_black[acc_id]['balance'] += \
+                    all_account[child_id.id].get('balance')
+                if form['inf_type'] == 'BS':
+                    dict_not_black[acc_id]['balanceinit'] += \
+                        all_account[child_id.id].get('balanceinit')
+            all_account[acc_id] = dict_not_black[acc_id]
+
+        if p_act == limit - 1:
+            all_ap['all'] = all_account
         else:
-            limit = 1
+            if form['columns'] == 'thirteen':
+                all_ap[p_act] = all_account
+            elif form['columns'] == 'qtr':
+                all_ap[p_act] = all_account
+        return None
+
+    def lines(self, form, level=0):
+        """Returns all the data needed for the report lines (account info plus
+        debit/credit/balance in the selected period and the full year)."""
+
+        account_obj = self.pool.get('account.account')
+        fiscalyear_obj = self.pool.get('account.fiscalyear')
+
+        self.context = dict(self.context)
+        self.context['state'] = form['target_move'] or 'posted'
+
+        self.from_currency_id = self.get_company_currency(
+            form['company_id'] and
+            isinstance(form['company_id'], (list, tuple)) and
+            form['company_id'][0] or form['company_id'])
+        self.to_currency_id = form['currency_id'] and \
+            isinstance(form['currency_id'], (list, tuple)) and \
+            form['currency_id'][0] or form['currency_id']
+
+        fiscalyear = form.get('fiscalyear') and form['fiscalyear'][0]
+        fiscalyear = fiscalyear_obj.browse(self.cr, self.uid, fiscalyear)
+
+        #
+        # Generate the report lines (checking each account)
+        #
+        tot_bal1 = tot_bal2 = tot_bal3 = tot_bal4 = tot_bal5 = tot_bal6 = 0.0
+        tot_bal7 = tot_bal8 = tot_bal9 = tot_bal10 = tot_bal11 = 0.0
+        tot_bal12 = tot_bal13 = tot_bin = tot_deb = tot_crd = 0.0
+        tot_ytd = tot_eje = 0.0
+
+        res = {}
+        tot = {}
+
+        res_process_period = self._process_period(form, fiscalyear)
+        ctx_end = res_process_period[0]
+        period_ids = res_process_period[1]
+        pval = res_process_period[2]
+
+        ###############################################################
+        # Calculations of credit, debit and balance,
+        # without repeating operations.
+        ###############################################################
+
+        res_getting_accounts = self._getting_accounts(form)
+        delete_cons = res_getting_accounts[0]
+        account_black_ids = res_getting_accounts[1]
+        account_not_black_ids = res_getting_accounts[2]
+        account_not_black = res_getting_accounts[3]
+        credit_account_ids = res_getting_accounts[4]
+        account_ids = res_getting_accounts[5]
+
+        # All accounts per period
+        all_ap = {}
+        ctx_i = {}
+
+        # Iteration limit depending on the number of columns
+        limit = self.get_limit(form)
 
         for p_act in range(limit):
             if limit != 1:
@@ -620,16 +846,14 @@ class AccountBalance(report_sxw.rml_parse):
                     elif form['columns'] == 'qtr':
                         form['periods'] = pval[p_act]
 
-            if form['inf_type'] == 'IS':
-                ctx_to_use = _ctx_end(self.context.copy())
-            else:
-                ctx_i = _ctx_init(self.context.copy())
-                ctx_to_use = _ctx_end(self.context.copy())
+            ctx_to_use = self._ctx_end(
+                self.context.copy(), fiscalyear, form)
 
             account_black = account_obj.browse(
                 self.cr, self.uid, account_black_ids, ctx_to_use)
 
             if form['inf_type'] == 'BS':
+                ctx_i = self._ctx_init(self.context.copy(), fiscalyear, form)
                 account_black_init = account_obj.browse(
                     self.cr, self.uid, account_black_ids, ctx_i)
 
@@ -663,318 +887,121 @@ class AccountBalance(report_sxw.rml_parse):
 
             # It makes a copy because they modify
             all_account = dict_black.copy()
-
-            for acc_id in account_not_black_ids:
-                acc_childs = dict_not_black[acc_id]['obj'].type == 'view' \
-                    and dict_not_black[acc_id]['obj'].child_id \
-                    or dict_not_black[acc_id]['obj'].child_consol_ids
-                for child_id in acc_childs:
-                    if child_id.type == 'consolidation' and delete_cons:
-                        continue
-                    if not all_account.get(child_id.id):
-                        continue
-                    dict_not_black[acc_id]['debit'] += \
-                        all_account[child_id.id].get('debit')
-                    dict_not_black[acc_id]['credit'] += \
-                        all_account[child_id.id].get('credit')
-                    dict_not_black[acc_id]['balance'] += \
-                        all_account[child_id.id].get('balance')
-                    if form['inf_type'] == 'BS':
-                        dict_not_black[acc_id]['balanceinit'] += \
-                            all_account[child_id.id].get('balanceinit')
-                all_account[acc_id] = dict_not_black[acc_id]
-
-            if p_act == limit - 1:
-                all_ap['all'] = all_account
-            else:
-                if form['columns'] == 'thirteen':
-                    all_ap[p_act] = all_account
-                elif form['columns'] == 'qtr':
-                    all_ap[p_act] = all_account
+            self.get_all_accounts_per_period(
+                delete_cons, form, p_act, limit, all_account, all_ap,
+                account_not_black_ids, dict_not_black)
 
         ###############################################################
         # End of the calculations of credit, debit and balance
         #
         ###############################################################
 
+        return self._compute_line(
+            account_ids, delete_cons, form, tot_bal1, tot_bal2, tot_bal3,
+            tot_bal4, tot_bal5, tot_bal6, tot_bal7, tot_bal8, tot_bal9,
+            tot_bal10, tot_bal11, tot_bal12, tot_bal13, tot_bin, tot_deb,
+            tot_crd, tot_ytd, tot_eje, ctx_i, ctx_end, res, tot, all_ap,
+            credit_account_ids)
+
+    def _compute_line(
+            self, account_ids, delete_cons, form, tot_bal1, tot_bal2, tot_bal3,
+            tot_bal4, tot_bal5, tot_bal6, tot_bal7, tot_bal8, tot_bal9,
+            tot_bal10, tot_bal11, tot_bal12, tot_bal13, tot_bin, tot_deb,
+            tot_crd, tot_ytd, tot_eje, ctx_i, ctx_end, res, tot, all_ap,
+            credit_account_ids):
+        """End of the calculations of credit, debit and balance."""
+
+        account_list = form.get('account_list', [])
+        tot_check = False
+        result_acc = []
+
         for aa_id in account_ids:
             idx = aa_id[0]
-            if aa_id[3].type == 'consolidation' and delete_cons:
-                continue
+            to_consolidate = aa_id[3].type == 'consolidation' and delete_cons
             #
             # Check if we need to include this level
             #
-            if not form['display_account_level'] or \
-                    aa_id[3].level <= form['display_account_level']:
-                res = {
-                    'id': idx,
-                    'type': aa_id[3].type,
-                    'code': aa_id[3].code,
-                    'name': (aa_id[2] and not aa_id[1]) and 'TOTAL %s' %
-                    (aa_id[3].name.upper()) or aa_id[3].name,
-                    'parent_id': aa_id[3].parent_id and aa_id[3].parent_id.id,
-                    'level': aa_id[3].level,
-                    'label': aa_id[1],
-                    'total': aa_id[2],
-                    'change_sign': credit_account_ids and
-                    (idx in credit_account_ids and -1 or 1) or 1
-                }
 
-                if form['columns'] == 'qtr':
-                    for pn in range(1, 5):
+            to_display = not (not form['display_account_level'] or
+                              aa_id[3].level <= form['display_account_level'])
+            if any([to_display, to_consolidate]):
+                continue
 
-                        if form['inf_type'] == 'IS':
-                            debit, credit, balance = [zfunction(x) for x in (
-                                all_ap[pn - 1][idx].get('debit', 0.0),
-                                all_ap[pn - 1][idx].get('credit', 0.0),
-                                all_ap[pn - 1][idx].get('balance', 0.0))]
-                            res.update({
-                                'dbr%s' % pn: self.exchange(debit),
-                                'cdr%s' % pn: self.exchange(credit),
-                                'bal%s' % pn: self.exchange(balance),
-                            })
-                        else:
-                            i, debit, credit = [zfunction(x) for x in (
-                                all_ap[pn - 1][idx].get('balanceinit', 0.0),
-                                all_ap[pn - 1][idx].get('debit', 0.0),
-                                all_ap[pn - 1][idx].get('credit', 0.0))]
-                            balance = zfunction(i + debit - credit)
-                            res.update({
-                                'dbr%s' % pn: self.exchange(debit),
-                                'cdr%s' % pn: self.exchange(credit),
-                                'bal%s' % pn: self.exchange(balance),
-                            })
+            res = {
+                'id': idx,
+                'type': aa_id[3].type,
+                'code': aa_id[3].code,
+                'name': (aa_id[2] and not aa_id[1]) and 'TOTAL %s' %
+                (aa_id[3].name.upper()) or aa_id[3].name,
+                'parent_id': aa_id[3].parent_id and aa_id[3].parent_id.id,
+                'level': aa_id[3].level,
+                'label': aa_id[1],
+                'total': aa_id[2],
+                'change_sign': credit_account_ids and
+                (idx in credit_account_ids and -1 or 1) or 1
+            }
 
-                    if form['inf_type'] == 'IS':
-                        debit, credit, balance = [zfunction(x) for x in (
-                            all_ap['all'][idx].get('debit', 0.0),
-                            all_ap['all'][idx].get('credit', 0.0),
-                            all_ap['all'][idx].get('balance', 0.0))]
-                        res.update({
-                            'dbr5': self.exchange(debit),
-                            'cdr5': self.exchange(credit),
-                            'bal5': self.exchange(balance),
-                        })
-                    else:
-                        i, debit, credit = [zfunction(x) for x in (
-                            all_ap['all'][idx].get('balanceinit', 0.0),
-                            all_ap['all'][idx].get('debit', 0.0),
-                            all_ap['all'][idx].get('credit', 0.0))]
-                        balance = zfunction(i + debit - credit)
-                        res.update({
-                            'dbr5': self.exchange(debit),
-                            'cdr5': self.exchange(credit),
-                            'bal5': self.exchange(balance),
-                        })
+            self.get_line_values(idx, res, form, all_ap)
 
-                elif form['columns'] == 'thirteen':
-                    pn = 1
-                    for p_num in range(12):
+            if form['columns'] == 'qtr':
+                pn = 5
+            elif form['columns'] == 'thirteen':
+                pn = 13
+            else:
+                pn = None
 
-                        if form['inf_type'] == 'IS':
-                            debit, credit, balance = [zfunction(x) for x in (
-                                all_ap[p_num][idx].get('debit', 0.0),
-                                all_ap[p_num][idx].get('credit', 0.0),
-                                all_ap[p_num][idx].get('balance', 0.0))]
-                            res.update({
-                                'dbr%s' % pn: self.exchange(debit),
-                                'cdr%s' % pn: self.exchange(credit),
-                                'bal%s' % pn: self.exchange(balance),
-                            })
-                        else:
-                            i, debit, credit = [zfunction(x) for x in (
-                                all_ap[p_num][idx].get('balanceinit', 0.0),
-                                all_ap[p_num][idx].get('debit', 0.0),
-                                all_ap[p_num][idx].get('credit', 0.0))]
-                            balance = zfunction(i + debit - credit)
-                            res.update({
-                                'dbr%s' % pn: self.exchange(debit),
-                                'cdr%s' % pn: self.exchange(credit),
-                                'bal%s' % pn: self.exchange(balance),
-                            })
+            #
+            # Check whether we must include this line in the report or not
+            #
+            to_include = self.check_accounts_to_display(form, aa_id, res, pn)
 
-                        pn += 1
+            #
+            # Include a ledger to the account
+            #
+            res = self.include_ledger(
+                res.copy(), form, to_include, ctx_i, ctx_end)
 
-                    if form['inf_type'] == 'IS':
-                        debit, credit, balance = [zfunction(x) for x in (
-                            all_ap['all'][idx].get('debit', 0.0),
-                            all_ap['all'][idx].get('credit', 0.0),
-                            all_ap['all'][idx].get('balance', 0.0))]
-                        res.update({
-                            'dbr13': self.exchange(debit),
-                            'cdr13': self.exchange(credit),
-                            'bal13': self.exchange(balance),
-                        })
-                    else:
-                        i, debit, credit = [zfunction(x) for x in (
-                            all_ap['all'][idx].get('balanceinit', 0.0),
-                            all_ap['all'][idx].get('debit', 0.0),
-                            all_ap['all'][idx].get('credit', 0.0))]
-                        balance = zfunction(i + debit - credit)
-                        res.update({
-                            'dbr13': self.exchange(debit),
-                            'cdr13': self.exchange(credit),
-                            'bal13': self.exchange(balance),
-                        })
-
-                else:
-                    i, debit, credit = [zfunction(x) for x in (
-                        all_ap['all'][idx].get('balanceinit', 0.0),
-                        all_ap['all'][idx].get('debit', 0.0),
-                        all_ap['all'][idx].get('credit', 0.0))]
-                    balance = zfunction(i + debit - credit)
-                    res.update({
-                        'balanceinit': self.exchange(i),
-                        'debit': self.exchange(debit),
-                        'credit': self.exchange(credit),
-                        'ytd': self.exchange(debit - credit),
-                    })
-
-                    if form['inf_type'] == 'IS' and form['columns'] == 'one':
-                        res.update({
-                            'balance': self.exchange(debit - credit),
-                        })
-                    else:
-                        res.update({
-                            'balance': self.exchange(balance),
-                        })
-
+            if to_include:
+                result_acc.append(res)
                 #
-                # Check whether we must include this line in the report or not
+                # Check whether we must sumarize this line in the report or
+                # not
                 #
-                to_include = False
+                if form['tot_check'] and (res['id'] in account_list) and \
+                        (res['id'] not in tot):
+                    if form['columns'] == 'qtr':
+                        tot_check = True
+                        tot[res['id']] = True
+                        tot_bal1 += res.get('bal1', 0.0)
+                        tot_bal2 += res.get('bal2', 0.0)
+                        tot_bal3 += res.get('bal3', 0.0)
+                        tot_bal4 += res.get('bal4', 0.0)
+                        tot_bal5 += res.get('bal5', 0.0)
 
-                if form['columns'] in ('thirteen', 'qtr'):
-                    to_test = [False]
-                    if form['display_account'] == 'mov' and aa_id[3].parent_id:
-                        # Include accounts with movements
-                        for xval in range(pn - 1):
-                            to_test.append(res.get(
-                                'dbr%s' % xval, 0.0) >= 0.005 and
-                                True or False)
-                            to_test.append(res.get(
-                                'cdr%s' % xval, 0.0) >= 0.005 and
-                                True or False)
-                        if any(to_test):
-                            to_include = True
-
-                    elif form['display_account'] == 'bal' and \
-                            aa_id[3].parent_id:
-                        # Include accounts with balance
-                        for xval in range(pn - 1):
-                            to_test.append(res.get(
-                                'bal%s' % xval, 0.0) >= 0.005 and
-                                True or False)
-                        if any(to_test):
-                            to_include = True
-
-                    elif form['display_account'] == 'bal_mov' and \
-                            aa_id[3].parent_id:
-                        # Include accounts with balance or movements
-                        for xval in range(pn - 1):
-                            to_test.append(res.get(
-                                'bal%s' % xval, 0.0) >= 0.005 and
-                                True or False)
-                            to_test.append(res.get(
-                                'dbr%s' % xval, 0.0) >= 0.005 and
-                                True or False)
-                            to_test.append(res.get(
-                                'cdr%s' % xval, 0.0) >= 0.005 and
-                                True or False)
-                        if any(to_test):
-                            to_include = True
+                    elif form['columns'] == 'thirteen':
+                        tot_check = True
+                        tot[res['id']] = True
+                        tot_bal1 += res.get('bal1', 0.0)
+                        tot_bal2 += res.get('bal2', 0.0)
+                        tot_bal3 += res.get('bal3', 0.0)
+                        tot_bal4 += res.get('bal4', 0.0)
+                        tot_bal5 += res.get('bal5', 0.0)
+                        tot_bal6 += res.get('bal6', 0.0)
+                        tot_bal7 += res.get('bal7', 0.0)
+                        tot_bal8 += res.get('bal8', 0.0)
+                        tot_bal9 += res.get('bal9', 0.0)
+                        tot_bal10 += res.get('bal10', 0.0)
+                        tot_bal11 += res.get('bal11', 0.0)
+                        tot_bal12 += res.get('bal12', 0.0)
+                        tot_bal13 += res.get('bal13', 0.0)
                     else:
-                        # Include all accounts
-                        to_include = True
-                else:
-
-                    if form['display_account'] == 'mov' and aa_id[3].parent_id:
-                        # Include accounts with movements
-                        if abs(debit) >= 0.005 or abs(credit) >= 0.005:
-                            to_include = True
-                    elif form['display_account'] == 'bal' and \
-                            aa_id[3].parent_id:
-                        # Include accounts with balance
-                        if abs(balance) >= 0.005:
-                            to_include = True
-                    elif form['display_account'] == 'bal_mov' and \
-                            aa_id[3].parent_id:
-                        # Include accounts with balance or movements
-                        if abs(balance) >= 0.005 or abs(debit) >= 0.005 or \
-                                abs(credit) >= 0.005:
-                            to_include = True
-                    else:
-                        # Include all accounts
-                        to_include = True
-
-                # ANALYTIC LEDGER
-                if (to_include and form['analytic_ledger'] and
-                        form['columns'] == 'four' and
-                        form['inf_type'] == 'BS' and
-                        res['type'] in ('other', 'liquidity', 'receivable',
-                                        'payable')):
-                    ctx_end.update(company_id=(form['company_id'] and
-                                               isinstance(form['company_id'],
-                                               (list, tuple)) and
-                                               form['company_id'][0] or
-                                               form['company_id']),
-                                   report=form['columns'])
-                    res['mayor'] = self._get_analytic_ledger(res, ctx=ctx_end)
-                elif to_include and form['journal_ledger'] and \
-                        form['columns'] == 'four' and form['inf_type'] == 'BS'\
-                        and res['type'] in ('other', 'liquidity', 'receivable',
-                                            'payable'):
-                    res['journal'] = self._get_journal_ledger(res, ctx=ctx_end)
-                elif to_include and form['partner_balance'] and \
-                        form['columns'] == 'four' and form['inf_type'] == 'BS'\
-                        and res['type'] in ('other', 'liquidity', 'receivable',
-                                            'payable'):
-                    res['partner'] = self._get_partner_balance(
-                        res, ctx_i['periods'], ctx=ctx_end)
-                else:
-                    res['mayor'] = []
-
-                if to_include:
-                    result_acc.append(res)
-                    #
-                    # Check whether we must sumarize this line in the report or
-                    # not
-                    #
-                    if form['tot_check'] and (res['id'] in account_list) and \
-                            (res['id'] not in tot):
-                        if form['columns'] == 'qtr':
-                            tot_check = True
-                            tot[res['id']] = True
-                            tot_bal1 += res.get('bal1', 0.0)
-                            tot_bal2 += res.get('bal2', 0.0)
-                            tot_bal3 += res.get('bal3', 0.0)
-                            tot_bal4 += res.get('bal4', 0.0)
-                            tot_bal5 += res.get('bal5', 0.0)
-
-                        elif form['columns'] == 'thirteen':
-                            tot_check = True
-                            tot[res['id']] = True
-                            tot_bal1 += res.get('bal1', 0.0)
-                            tot_bal2 += res.get('bal2', 0.0)
-                            tot_bal3 += res.get('bal3', 0.0)
-                            tot_bal4 += res.get('bal4', 0.0)
-                            tot_bal5 += res.get('bal5', 0.0)
-                            tot_bal6 += res.get('bal6', 0.0)
-                            tot_bal7 += res.get('bal7', 0.0)
-                            tot_bal8 += res.get('bal8', 0.0)
-                            tot_bal9 += res.get('bal9', 0.0)
-                            tot_bal10 += res.get('bal10', 0.0)
-                            tot_bal11 += res.get('bal11', 0.0)
-                            tot_bal12 += res.get('bal12', 0.0)
-                            tot_bal13 += res.get('bal13', 0.0)
-                        else:
-                            tot_check = True
-                            tot[res['id']] = True
-                            tot_bin += res['balanceinit']
-                            tot_deb += res['debit']
-                            tot_crd += res['credit']
-                            tot_ytd += res['ytd']
-                            tot_eje += res['balance']
+                        tot_check = True
+                        tot[res['id']] = True
+                        tot_bin += res['balanceinit']
+                        tot_deb += res['debit']
+                        tot_crd += res['credit']
+                        tot_ytd += res['ytd']
+                        tot_eje += res['balance']
 
         if tot_check:
             str_label = form['lab_str']
@@ -987,27 +1014,27 @@ class AccountBalance(report_sxw.rml_parse):
             if form['columns'] == 'qtr':
                 res2.update(
                     dict(
-                        bal1=zfunction(tot_bal1),
-                        bal2=zfunction(tot_bal2),
-                        bal3=zfunction(tot_bal3),
-                        bal4=zfunction(tot_bal4),
-                        bal5=zfunction(tot_bal5),))
+                        bal1=self.zfunc(tot_bal1),
+                        bal2=self.zfunc(tot_bal2),
+                        bal3=self.zfunc(tot_bal3),
+                        bal4=self.zfunc(tot_bal4),
+                        bal5=self.zfunc(tot_bal5),))
             elif form['columns'] == 'thirteen':
                 res2.update(
                     dict(
-                        bal1=zfunction(tot_bal1),
-                        bal2=zfunction(tot_bal2),
-                        bal3=zfunction(tot_bal3),
-                        bal4=zfunction(tot_bal4),
-                        bal5=zfunction(tot_bal5),
-                        bal6=zfunction(tot_bal6),
-                        bal7=zfunction(tot_bal7),
-                        bal8=zfunction(tot_bal8),
-                        bal9=zfunction(tot_bal9),
-                        bal10=zfunction(tot_bal10),
-                        bal11=zfunction(tot_bal11),
-                        bal12=zfunction(tot_bal12),
-                        bal13=zfunction(tot_bal13),))
+                        bal1=self.zfunc(tot_bal1),
+                        bal2=self.zfunc(tot_bal2),
+                        bal3=self.zfunc(tot_bal3),
+                        bal4=self.zfunc(tot_bal4),
+                        bal5=self.zfunc(tot_bal5),
+                        bal6=self.zfunc(tot_bal6),
+                        bal7=self.zfunc(tot_bal7),
+                        bal8=self.zfunc(tot_bal8),
+                        bal9=self.zfunc(tot_bal9),
+                        bal10=self.zfunc(tot_bal10),
+                        bal11=self.zfunc(tot_bal11),
+                        bal12=self.zfunc(tot_bal12),
+                        bal13=self.zfunc(tot_bal13),))
 
             else:
                 res2.update({
