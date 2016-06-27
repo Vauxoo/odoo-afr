@@ -22,5 +22,6 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ##########################################################################
 
+from . import afr_abstract
 from . import account_financial_report
 from . import res_company
