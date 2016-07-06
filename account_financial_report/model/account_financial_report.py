@@ -61,25 +61,16 @@ class AccountFinancialReport(models.Model):
             if brw.inf_type != 'BS':
                 brw.update({'analytic_ledger': False})
 
-    def onchange_columns(self, cr, uid, ids, columns,
-                         fiscalyear_id, period_ids, context=None):
-        context = context and dict(context) or {}
-        res = {'value': {}}
+    @api.onchange('columns', 'fiscalyear_id')
+    def onchange_columns(self):
+        for brw in self:
+            values = {}
+            if brw.columns != 'four':
+                values.update({'analytic_ledger': False})
 
-        if columns != 'four':
-            res['value'].update({'analytic_ledger': False})
-        if columns != 'currency':
-            res['value'].update({'analytic_ledger': True})
-        if columns in ('qtr', 'thirteen'):
-            p_obj = self.pool.get("account.period")
-            period_ids = p_obj.search(cr, uid,
-                                      [('fiscalyear_id', '=', fiscalyear_id),
-                                       ('special', '=', False)],
-                                      context=context)
-            res['value'].update({'period_ids': period_ids})
-        else:
-            res['value'].update({'period_ids': []})
-        return res
+            values.update({'period_ids': [(6, False, {})]})
+
+            brw.update(values)
 
     def onchange_analytic_ledger(
             self, cr, uid, ids, company_id, analytic_ledger, context=None):
