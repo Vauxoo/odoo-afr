@@ -78,20 +78,13 @@ class AccountFinancialReport(models.Model):
             if brw.analytic_ledger:
                 brw.update({'currency_id': self.company_id.currency_id.id})
 
-    def onchange_company_id(self, cr, uid, ids, company_id, context=None):
-        context = context and dict(context) or {}
-        context['company_id'] = company_id
-        res = {'value': {}}
-
-        if not company_id:
-            return res
-
-        cur_id = self.pool.get('res.company').browse(
-            cr, uid, company_id, context=context).currency_id.id
-        fy_id = self.pool.get('account.fiscalyear').find(
-            cr, uid, context=context)
-        res['value'].update({'fiscalyear_id': fy_id})
-        res['value'].update({'currency_id': cur_id})
-        res['value'].update({'account_ids': []})
-        res['value'].update({'period_ids': []})
-        return res
+    @api.onchange('company_id')
+    def onchange_company_id(self):
+        for brw in self:
+            values = {}
+            values.update({'currency_id': self.company_id.currency_id.id})
+            values.update(
+                {'fiscalyear_id': self.env['account.fiscalyear'].find()})
+            values.update({'account_ids': [(6, False, {})]})
+            values.update({'period_ids': [(6, False, {})]})
+            brw.update(values)

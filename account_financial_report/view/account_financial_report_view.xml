@@ -10,7 +10,7 @@
                     <field name="name" nolabel="1"/>
                 <group>
                     <group string="Company Info" >
-                        <field name="company_id" on_change='onchange_company_id(company_id)' />
+                        <field name="company_id"/>
                         <field name="currency_id"
                         domain="[('company_id','=',company_id)]"
                         attrs="{'readonly':[('analytic_ledger','=',True)]}" />
