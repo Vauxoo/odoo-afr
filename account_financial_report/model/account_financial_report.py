@@ -43,18 +43,14 @@ class AccountFinancialReport(models.Model):
         'Periods', help='All periods in the fiscal year if empty')
 
     @api.multi
-    def copy(self, cr, uid, ids, default=None, context=None):
-        context = context and dict(context) or {}
-        previous_name = self.browse(cr, uid, ids, context=context).name
-        new_name = _('Copy of %s') % previous_name
-        lst = self.search(cr, uid, [('name', 'like', new_name)],
-                          context=context)
+    def copy(self, default=None):
+        default = dict(default or {})
+        new_name = _('Copy of %s') % self.name
+        lst = self.search([('name', 'like', new_name)])
         if lst:
-            new_name = '%s (%s)' % (new_name, len(lst) + 1)
+            new_name = u'%s (%s)' % (new_name, len(lst) + 1)
         default['name'] = new_name
-        return super(AccountFinancialReport, self).copy(cr, uid, ids,
-                                                        default=default,
-                                                        context=context)
+        return super(AccountFinancialReport, self).copy(default=default)
 
     def onchange_inf_type(self, cr, uid, ids, inf_type, context=None):
         context = context and dict(context) or {}
