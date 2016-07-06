@@ -19,9 +19,7 @@
                         </group>
                     </group>
                     <group string="Report Info" >
-                        <field
-                            name="inf_type"
-                            on_change='onchange_inf_type(inf_type)' />
+                        <field name="inf_type"/>
                         <field name="columns" on_change='onchange_columns(columns,fiscalyear_id,period_ids)' />
                         <field name="analytic_ledger"
                         attrs="{'readonly':['|',('columns','!=','four'),('inf_type','!=','BS')],}"

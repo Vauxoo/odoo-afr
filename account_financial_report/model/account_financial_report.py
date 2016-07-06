@@ -53,14 +53,13 @@ class AccountFinancialReport(models.Model):
         default['name'] = new_name
         return super(AccountFinancialReport, self).copy(default=default)
 
-    def onchange_inf_type(self, cr, uid, ids, inf_type, context=None):
-        context = context and dict(context) or {}
-        res = {'value': {}}
-
-        if inf_type != 'BS':
-            res['value'].update({'analytic_ledger': False})
-
-        return res
+    @api.onchange('inf_type')
+    def onchange_inf_type(self):
+        '''When report type changes boolean field analytic ledger changes
+        if applies'''
+        for brw in self:
+            if brw.inf_type != 'BS':
+                brw.update({'analytic_ledger': False})
 
     def onchange_columns(self, cr, uid, ids, columns,
                          fiscalyear_id, period_ids, context=None):
