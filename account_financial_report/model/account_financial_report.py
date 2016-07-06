@@ -44,6 +44,7 @@ class AccountFinancialReport(models.Model):
 
     @api.multi
     def copy(self, default=None):
+        '''Duplicate a record and changes its name to make it unique'''
         default = dict(default or {})
         new_name = _('Copy of %s') % self.name
         lst = self.search([('name', 'like', new_name)])
