@@ -72,15 +72,11 @@ class AccountFinancialReport(models.Model):
 
             brw.update(values)
 
-    def onchange_analytic_ledger(
-            self, cr, uid, ids, company_id, analytic_ledger, context=None):
-        context = context and dict(context) or {}
-        context['company_id'] = company_id
-        res = {'value': {}}
-        cur_id = self.pool.get('res.company').browse(
-            cr, uid, company_id, context=context).currency_id.id
-        res['value'].update({'currency_id': cur_id})
-        return res
+    @api.onchange('analytic_ledger')
+    def onchange_analytic_ledger(self):
+        for brw in self:
+            if brw.analytic_ledger:
+                brw.update({'currency_id': self.company_id.currency_id.id})
 
     def onchange_company_id(self, cr, uid, ids, company_id, context=None):
         context = context and dict(context) or {}
