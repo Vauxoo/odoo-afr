@@ -31,6 +31,8 @@ from openerp import models, fields, api
 
 
 class AccountFinancialReport(models.Model):
+    """Provides a Prototyping class to be reused to hold templates & wizards"""
+
     _name = "afr"
     _inherit = "afr.abstract"
 
