@@ -819,7 +819,7 @@ class TestReportAFR(TransactionCase):
             'active_ids': [wiz_id.id],
             'active_id': wiz_id.id,
         }
-        return wiz_id.with_context(context).print_report({})
+        return wiz_id.with_context(context).print_report()
 
     def _generate_afr(self, values):
         data = self._get_data(values)
