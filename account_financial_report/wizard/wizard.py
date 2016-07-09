@@ -86,21 +86,6 @@ class WizardReport(models.TransientModel):
                 {'periods': values['period_ids'][:]})
             brw.update(values)
 
-    def _get_defaults(self, cr, uid, data, context=None):
-        context = context and dict(context) or {}
-        user = pooler.get_pool(cr.dbname).get(
-            'res.users').browse(cr, uid, uid, context=context)
-        if user.company_id:
-            company_id = user.company_id.id
-        else:
-            company_id = pooler.get_pool(cr.dbname).get(
-                'res.company').search(cr, uid, [('parent_id', '=', False)])[0]
-        data['form']['company_id'] = company_id
-        fiscalyear_obj = pooler.get_pool(cr.dbname).get('account.fiscalyear')
-        data['form']['fiscalyear'] = fiscalyear_obj.find(cr, uid)
-        data['form']['context'] = context
-        return data['form']
-
     def _check_state(self, cr, uid, data, context=None):
         context = context and dict(context) or {}
         if data['form']['filter'] == 'bydate':
