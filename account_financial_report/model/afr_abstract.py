@@ -35,11 +35,17 @@ class AfrAbstract(models.AbstractModel):
     display_account_level = fields.Integer(
         'Up to level', default=0,
         help='Display accounts up to this level (0 to show all)')
+    account_ids = fields.Many2many(
+        'account.account', 'afr_account_rel', 'afr_id', 'account_id',
+        'Root accounts', required=True)
     fiscalyear_id = fields.Many2one(
         'account.fiscalyear', 'Fiscal year',
         default=lambda self: self.env['account.fiscalyear'].find(
             exception=False),
         help='Fiscal Year for this report', required=True)
+    period_ids = fields.Many2many(
+        'account.period', 'afr_period_rel', 'afr_id', 'period_id',
+        'Periods', help='All periods in the fiscal year if empty')
     analytic_ledger = fields.Boolean(
         'Analytic Ledger',
         help="Allows to Generate an Analytic Ledger for accounts with "
