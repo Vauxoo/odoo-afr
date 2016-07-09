@@ -91,12 +91,6 @@ class TestReportAFR(TransactionCase):
             'target_move': 'posted',
             'account_list': [(4, account_id, 0)]})
 
-        context = {
-            'xls_report': False,
-            # 'active_model': 'wizard.report',
-            # 'active_ids': [wiz_id.id],
-            # 'active_id': wiz_id.id,
-        }
         wiz_rep_obj.print_report(cr, uid, wiz_id)
 
     def _generate_afr(self, account_id):
