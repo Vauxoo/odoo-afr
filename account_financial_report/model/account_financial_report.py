@@ -44,7 +44,7 @@ class AccountFinancialReport(models.Model):
 
     @api.multi
     def copy(self, default=None):
-        '''Duplicate a record and changes its name to make it unique'''
+        """Duplicate a record and changes its name to make it unique"""
         default = dict(default or {})
         new_name = _('Copy of %s') % self.name
         lst = self.search([('name', 'like', new_name)])
@@ -55,14 +55,16 @@ class AccountFinancialReport(models.Model):
 
     @api.onchange('inf_type')
     def onchange_inf_type(self):
-        '''When report type changes boolean field analytic ledger changes
-        if applies'''
+        """When report type changes boolean field analytic ledger changes
+        if applies"""
         for brw in self:
             if brw.inf_type != 'BS':
                 brw.update({'analytic_ledger': False})
 
     @api.onchange('columns', 'fiscalyear_id')
     def onchange_columns(self):
+        """When `columns` or `fiscalyear_id` changes `period_ids` field changes
+        if applies"""
         for brw in self:
             values = {}
             if brw.columns != 'four':
@@ -74,12 +76,17 @@ class AccountFinancialReport(models.Model):
 
     @api.onchange('analytic_ledger')
     def onchange_analytic_ledger(self):
+        """When `analytic_ledger` changes `currency_id` field changes to
+        Company's Currency"""
         for brw in self:
             if brw.analytic_ledger:
                 brw.update({'currency_id': self.company_id.currency_id.id})
 
     @api.onchange('company_id')
     def onchange_company_id(self):
+        """When `company_id` changes `currency_id`, `fiscalyear_id`,
+        `account_id` & `period_ids` fields are filled with Company's Currency,
+        Current Fiscal Year, Accounts & Periods are set to blank"""
         for brw in self:
             values = {}
             values.update({'currency_id': self.company_id.currency_id.id})
