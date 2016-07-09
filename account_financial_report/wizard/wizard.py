@@ -28,7 +28,6 @@
 
 from openerp import models, fields, api
 from openerp.exceptions import except_orm
-from openerp import pooler
 from openerp.tools.translate import _
 
 
