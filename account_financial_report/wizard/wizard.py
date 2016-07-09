@@ -55,50 +55,6 @@ class WizardReport(models.TransientModel):
         help='Only applies in the way of the end'
         ' balance multicurrency report is show.')
 
-    def onchange_inf_type(self, cr, uid, ids, inf_type, context=None):
-        context = context and dict(context) or {}
-        res = {'value': {}}
-
-        if inf_type != 'BS':
-            res['value'].update({'analytic_ledger': False})
-
-        return res
-
-    def onchange_columns(self, cr, uid, ids, columns, fiscalyear, periods,
-                         context=None):
-        context = context and dict(context) or {}
-        res = {'value': {}}
-
-        p_obj = self.pool.get("account.period")
-        all_periods = p_obj.search(cr, uid, [
-            ('fiscalyear_id', '=', fiscalyear), ('special', '=', False)],
-            context=context)
-        sval = set(periods[0][2])
-        tval = set(all_periods)
-        go = periods[0][2] and sval.issubset(tval) or False
-
-        if columns != 'four':
-            res['value'].update({'analytic_ledger': False})
-
-        if columns in ('qtr', 'thirteen'):
-            res['value'].update({'periods': all_periods})
-        else:
-            if go:
-                res['value'].update({'periods': periods})
-            else:
-                res['value'].update({'periods': []})
-        return res
-
-    def onchange_analytic_ledger(self, cr, uid, ids, company_id,
-                                 analytic_ledger, context=None):
-        context = context and dict(context) or {}
-        context['company_id'] = company_id
-        res = {}
-        res['value'] = {
-            'currency_id': self.pool.get('res.company').browse(
-                cr, uid, company_id, context=context).currency_id.id}
-        return res
-
     def onchange_company_id(self, cr, uid, ids, company_id, context=None):
         context = context and dict(context) or {}
         context['company_id'] = company_id
