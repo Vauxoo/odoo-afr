@@ -37,12 +37,6 @@ class AccountFinancialReport(models.Model):
     _inherit = "afr.abstract"
 
     name = fields.Char('Name', size=128, required=True)
-    account_ids = fields.Many2many(
-        'account.account', 'afr_account_rel', 'afr_id', 'account_id',
-        'Root accounts', required=True)
-    period_ids = fields.Many2many(
-        'account.period', 'afr_period_rel', 'afr_id', 'period_id',
-        'Periods', help='All periods in the fiscal year if empty')
 
     @api.multi
     def copy(self, default=None):
