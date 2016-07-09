@@ -219,6 +219,3 @@ class WizardReport(models.TransientModel):
             'report_name': name,
             'datas': data,
         }
-
-
-WizardReport()
