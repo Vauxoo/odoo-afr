@@ -16,21 +16,21 @@ class AfrAbstract(models.AbstractModel):
         "selected will be used the one set in the company")
     inf_type = fields.Selection(
         [('BS', 'Ending Balance'),
-            ('IS', 'Variation on Periods')],
+         ('IS', 'Variation on Periods')],
         'Type', required=True, default='BS')
     columns = fields.Selection(
         [('one', 'End. Balance'),
-            ('two', 'Debit | Credit'),
-            ('four', 'Initial | Debit | Credit | YTD'),
-            ('five', 'Initial | Debit | Credit | Period | YTD'),
-            ('qtr', "4 QTR's | YTD"),
-            ('thirteen', '12 Months | YTD')],
+         ('two', 'Debit | Credit'),
+         ('four', 'Initial | Debit | Credit | YTD'),
+         ('five', 'Initial | Debit | Credit | Period | YTD'),
+         ('qtr', "4 QTR's | YTD"),
+         ('thirteen', '12 Months | YTD')],
         'Columns', required=True, default='four')
     display_account = fields.Selection(
         [('all', 'All Accounts'),
-            ('bal', 'With Balance'),
-            ('mov', 'With movements'),
-            ('bal_mov', 'With Balance / Movements')],
+         ('bal', 'With Balance'),
+         ('mov', 'With movements'),
+         ('bal_mov', 'With Balance / Movements')],
         'Display accounts', default='bal_mov')
     display_account_level = fields.Integer(
         'Up to level', default=0,
