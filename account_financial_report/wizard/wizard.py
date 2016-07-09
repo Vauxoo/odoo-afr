@@ -27,8 +27,6 @@
 ##############################################################################
 
 from openerp import models, fields, api
-from openerp.exceptions import except_orm
-from openerp.tools.translate import _
 
 
 class WizardReport(models.TransientModel):
@@ -84,36 +82,6 @@ class WizardReport(models.TransientModel):
             values.update(
                 {'periods': values['period_ids'][:]})
             brw.update(values)
-
-    def _check_state(self, cr, uid, data, context=None):
-        context = context and dict(context) or {}
-        if data['form']['filter'] == 'bydate':
-            self._check_date(cr, uid, data, context)
-        return data['form']
-
-    def _check_date(self, cr, uid, data, context=None):
-        context = context and dict(context) or {}
-
-        if data['form']['date_from'] > data['form']['date_to']:
-            raise except_orm(_('Error !'), _(
-                'La fecha final debe ser mayor a la inicial'))
-
-        sql = """SELECT f.id, f.date_start, f.date_stop
-            FROM account_fiscalyear f
-            WHERE '%s' = f.id """ % (data['form']['fiscalyear'])
-        cr.execute(sql)
-        res = cr.dictfetchall()
-
-        if res:
-            if (data['form']['date_to'] > res[0]['date_stop'] or
-                    data['form']['date_from'] < res[0]['date_start']):
-                raise except_orm(_('UserError'),
-                                 _('Dates shall be between %s and %s') % (
-                    res[0]['date_start'], res[0]['date_stop']))
-            else:
-                return 'report'
-        else:
-            raise except_orm(_('UserError'), _('No existe periodo fiscal'))
 
     def period_span(self, cr, uid, ids, fy_id, context=None):
         context = context and dict(context) or {}
