@@ -26,7 +26,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ##############################################################################
 
-from openerp import models, fields
+from openerp import models, fields, api
 from openerp.exceptions import except_orm
 from openerp import pooler
 from openerp.tools.translate import _
@@ -55,24 +55,18 @@ class WizardReport(models.TransientModel):
         help='Only applies in the way of the end'
         ' balance multicurrency report is show.')
 
-    def onchange_company_id(self, cr, uid, ids, company_id, context=None):
-        context = context and dict(context) or {}
-        context['company_id'] = company_id
-        res = {'value': {}}
-
-        if not company_id:
-            return res
-
-        cur_id = self.pool.get('res.company').browse(
-            cr, uid, company_id, context=context).currency_id.id
-        fy_id = self.pool.get('account.fiscalyear').find(
-            cr, uid, context=context)
-        res['value'].update({'fiscalyear': fy_id})
-        res['value'].update({'currency_id': cur_id})
-        res['value'].update({'account_list': []})
-        res['value'].update({'periods': []})
-        res['value'].update({'afr_id': None})
-        return res
+    @api.onchange('company_id')
+    def onchange_company_id(self):
+        """When `company_id` changes `currency_id`, `fiscalyear_id`,
+        `account_list` & `period` fields are filled with Company's Currency,
+        Current Fiscal Year, Accounts & Periods are set to blank"""
+        for brw in self:
+            values = {}
+            values.update({'afr_id': None})
+            values.update({'account_list': [(6, False, {})]})
+            values.update({'periods': [(6, False, {})]})
+            brw.update(values)
+        return super(WizardReport, self).onchange_company_id()
 
     def onchange_afr_id(self, cr, uid, ids, afr_id, context=None):
         context = context and dict(context) or {}
