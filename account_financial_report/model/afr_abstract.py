@@ -92,7 +92,7 @@ class AfrAbstract(models.AbstractModel):
     # Deprecated fields
     filter = fields.Selection(
         [('bydate', 'By Date'), ('byperiod', 'By Period'),
-            ('all', 'By Date and Period'), ('none', 'No Filter')],
+         ('all', 'By Date and Period'), ('none', 'No Filter')],
         'Date/Period Filter', default='byperiod')
     date_to = fields.Date('End date')
     date_from = fields.Date('Start date')
