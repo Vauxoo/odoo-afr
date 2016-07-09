@@ -68,37 +68,23 @@ class WizardReport(models.TransientModel):
             brw.update(values)
         return super(WizardReport, self).onchange_company_id()
 
-    def onchange_afr_id(self, cr, uid, ids, afr_id, context=None):
-        context = context and dict(context) or {}
-        res = {'value': {}}
-        if not afr_id:
-            return res
-        afr_brw = self.pool.get('afr').browse(cr, uid, afr_id, context=context)
-        res['value'].update({'currency_id': afr_brw.currency_id and
-                             afr_brw.currency_id.id or
-                             afr_brw.company_id.currency_id.id})
-        res['value'].update({'inf_type': afr_brw.inf_type or 'BS'})
-        res['value'].update({'columns': afr_brw.columns or 'five'})
-        res['value'].update({'display_account': afr_brw.display_account or
-                             'bal_mov'})
-        res['value'].update({'display_account_level':
-                             afr_brw.display_account_level or 0})
-        res['value'].update({'fiscalyear': afr_brw.fiscalyear_id and
-                             afr_brw.fiscalyear_id.id})
-        res['value'].update({'account_list': [
-                            acc.id for acc in afr_brw.account_ids]})
-        res['value'].update({'periods': [p.id for p in afr_brw.period_ids]})
-        res['value'].update({'analytic_ledger': (afr_brw.analytic_ledger or
-                                                 False)})
-        res['value'].update({'tot_check': afr_brw.tot_check or False})
-        res['value'].update({'lab_str': afr_brw.lab_str or _(
-            'Write a Description for your Summary Total')})
-        res['value'].update({'report_format': afr_brw.report_format or False})
-        res['value'].update(
-            {'partner_balance': afr_brw.partner_balance or False})
-        res['value'].update(
-            {'print_analytic_lines': afr_brw.print_analytic_lines or False})
-        return res
+    @api.onchange('afr_id')
+    def onchange_afr_id(self):
+        """Takes the fields in the template and fields those on the wizard"""
+        for brw in self:
+            if not brw.afr_id:
+                continue
+            values = brw.afr_id.copy_data()[0]
+            values.pop('name')
+            # TODO: Change fields `fiscalyear`to `fiscalyear_id`,
+            # `account_list` to `account_ids` and `periods`to `period_ids`
+            values.update(
+                {'fiscalyear': values['fiscalyear_id']})
+            values.update(
+                {'account_list': values['account_ids'][:]})
+            values.update(
+                {'periods': values['period_ids'][:]})
+            brw.update(values)
 
     def _get_defaults(self, cr, uid, data, context=None):
         context = context and dict(context) or {}
