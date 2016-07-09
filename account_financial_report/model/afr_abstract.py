@@ -4,6 +4,8 @@ from openerp import models, fields, api
 
 
 class AfrAbstract(models.AbstractModel):
+    """Holder class for common fields and methods in AFR template and wizard
+    classes"""
     _name = "afr.abstract"
 
     company_id = fields.Many2one(
