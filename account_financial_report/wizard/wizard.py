@@ -83,38 +83,36 @@ class WizardReport(models.TransientModel):
                 {'periods': values['period_ids'][:]})
             brw.update(values)
 
-    def period_span(self, cr, uid, ids, fy_id, context=None):
-        context = context and dict(context) or {}
-        ap_obj = self.pool.get('account.period')
-        fy_id = fy_id and isinstance(fy_id, (list, tuple)) and fy_id[0] or fy_id  # noqa
-        if not ids:
-            return ap_obj.search(cr, uid, [('fiscalyear_id', '=', fy_id),
-                                           ('special', '=', False)],
-                                 order='date_start asc')
+    @api.multi
+    def period_span(self):
+        """Method to provide period list into report"""
+        args = [('fiscalyear_id', '=', self.fiscalyear.id),
+                ('special', '=', False)]
+        if self.periods:
+            date_start = min([period.date_start for period in self.periods])
+            date_stop = max([period.date_stop for period in self.periods])
+            args.extend([
+                ('date_start', '>=', date_start),
+                ('date_stop', '<=', date_stop)])
 
-        ap_brws = ap_obj.browse(cr, uid, ids, context=context)
-        date_start = min([period.date_start for period in ap_brws])
-        date_stop = max([period.date_stop for period in ap_brws])
+        res = self.periods.with_context(self._context).search(
+            args, order='date_start asc')
+        return [brw.id for brw in res]
 
-        return ap_obj.search(cr, uid, [('fiscalyear_id', '=', fy_id),
-                                       ('special', '=', False),
-                                       ('date_start', '>=', date_start),
-                                       ('date_stop', '<=', date_stop)],
-                             order='date_start asc')
-
-    def print_report(self, cr, uid, ids, data, context=None):
-        context = context and dict(context) or {}
+    @api.multi
+    def print_report(self):
+        """Method to preprocess data and print a report"""
+        context = dict(self._context)
 
         data = {}
         data['ids'] = context.get('active_ids', [])
         data['model'] = context.get('active_model', 'ir.ui.menu')
-        data['form'] = self.read(cr, uid, ids[0])
+        data['form'] = self.read()[0]
 
         del data['form']['date_from']
         del data['form']['date_to']
 
-        data['form']['periods'] = self.period_span(
-            cr, uid, data['form']['periods'], data['form']['fiscalyear'])
+        data['form']['periods'] = self.period_span()
 
         xls = data['form'].get('report_format') == 'xls'
 
@@ -148,9 +146,8 @@ class WizardReport(models.TransientModel):
         if xls:
             context['xls_report'] = xls
 
-            return self.pool['report'].get_action(
-                cr, uid, [], name, data=data,
-                context=context)
+            return self.env['report'].with_context(context).get_action(
+                self, name, data=data)
 
         return {
             'type': 'ir.actions.report.xml',
