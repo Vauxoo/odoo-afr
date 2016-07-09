@@ -52,11 +52,17 @@ class TestReportAFR(TransactionCase):
         self.fiscalyear_id = self.ref('account.data_fiscalyear')
         self.currency_id = self.ref('base.EUR')
 
-    def test_lines_report_afr(self):
+    def test_lines_report_afr_xls(self):
         _logger.info('I duplicate invoice demo to this test')
         account_id = self._duplicate_invoice()
         _logger.info('I generate the account financial report')
         self._generate_afr(account_id.id)
+
+    def test_lines_report_afr_pdf(self):
+        _logger.info('I duplicate invoice demo to this test')
+        account_id = self._duplicate_invoice()
+        _logger.info('I generate the account financial report')
+        self._generate_afr_pdf(account_id.id)
 
     def _duplicate_invoice(self):
         account_id = self.account_cred.copy({
@@ -69,6 +75,29 @@ class TestReportAFR(TransactionCase):
             self.uid, 'account.invoice', invoice_id.id, 'invoice_open',
             self.cr)
         return account_id
+
+    def _generate_afr_pdf(self, account_id):
+        cr, uid = self.cr, self.uid
+        wiz_rep_obj = self.registry('wizard.report')
+        wiz_id = wiz_rep_obj.create(cr, uid, {
+            'company_id': self.company_id,
+            'inf_type': 'BS',
+            'columns': 'four',
+            'currency_id': self.currency_id,
+            'report_format': 'pdf',
+            'display_account': 'bal_mov',
+            'fiscalyear': self.fiscalyear_id,
+            'display_account_level': 0,
+            'target_move': 'posted',
+            'account_list': [(4, account_id, 0)]})
+
+        context = {
+            'xls_report': False,
+            # 'active_model': 'wizard.report',
+            # 'active_ids': [wiz_id.id],
+            # 'active_id': wiz_id.id,
+        }
+        wiz_rep_obj.print_report(cr, uid, wiz_id)
 
     def _generate_afr(self, account_id):
         wiz_id = self.wiz_rep_obj.create({
@@ -89,7 +118,7 @@ class TestReportAFR(TransactionCase):
             'active_ids': [wiz_id.id],
             'active_id': wiz_id.id,
         }
-        data = wiz_id.with_context(context).print_report({})
+        data = wiz_id.with_context(context).print_report()
         result = openerp.report.render_report(
             self.cr, self.uid, [wiz_id.id],
             'afr.1cols', data.get('data', {}), context=context)[0]
