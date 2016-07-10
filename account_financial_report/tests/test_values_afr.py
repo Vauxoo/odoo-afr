@@ -132,6 +132,7 @@ class TestReportAFR(TransactionCase):
         self.fiscalyear_id = self.ref('account.data_fiscalyear')
         self.currency_id = self.ref('base.EUR')
         self.account_list = []
+        self.afr_id = self.ref('account_financial_report.afr_01')
         self.period_1 = self.ref('account.period_1')
         self.period_3 = self.ref('account.period_3')
         self.period_5 = self.ref('account.period_5')
@@ -876,3 +877,19 @@ class TestReportAFR(TransactionCase):
         wiz_brw.onchange_company_id()
 
         self.assertEqual(wiz_brw.company_id.id, self.company_id)
+
+    def test_onchange_afr_id(self):
+        values = dict(
+            self.values,
+            account_list=[(4, self.a_recv, 0)],
+        )
+        wiz_brw = self.wiz_rep_obj.create(values)
+        wiz_brw.onchange_afr_id()
+
+        self.assertEqual(wiz_brw.afr_id.id, False)
+        self.assertEqual(len(wiz_brw.periods), 0)
+
+        wiz_brw.write({'afr_id': self.afr_id})
+        wiz_brw.onchange_afr_id()
+        self.assertEqual(wiz_brw.afr_id.id, self.afr_id)
+        self.assertEqual(len(wiz_brw.periods), 2)
