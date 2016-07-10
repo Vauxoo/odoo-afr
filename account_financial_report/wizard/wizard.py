@@ -116,9 +116,7 @@ class WizardReport(models.TransientModel):
 
         xls = data['form'].get('report_format') == 'xls'
 
-        if data['form']['columns'] == 'currency':
-            name = xls and 'afr.multicurrency' or 'afr.rml.multicurrency'
-        elif data['form']['columns'] == 'one':
+        if data['form']['columns'] == 'one':
             name = xls and 'afr.1cols' or 'afr.rml.1cols'
         elif data['form']['columns'] == 'two':
             name = xls and 'afr.1cols' or 'afr.rml.2cols'
