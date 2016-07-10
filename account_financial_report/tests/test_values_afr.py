@@ -878,6 +878,20 @@ class TestReportAFR(TransactionCase):
 
         self.assertEqual(wiz_brw.company_id.id, self.company_id)
 
+    def test_onchange_inf_type(self):
+        values = dict(
+            self.values,
+            periods=[(4, self.period_5, 0)],
+            account_list=[(4, self.a_recv, 0)],
+            inf_type='IS',
+            analytic_ledger=True,
+        )
+        wiz_brw = self.wiz_rep_obj.create(values)
+        wiz_brw.onchange_inf_type()
+
+        self.assertEqual(wiz_brw.inf_type, 'IS')
+        self.assertEqual(wiz_brw.analytic_ledger, False)
+
     def test_onchange_afr_id(self):
         values = dict(
             self.values,
