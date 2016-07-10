@@ -865,3 +865,14 @@ class TestReportAFR(TransactionCase):
         data = self._get_data(values)
         return AccountBalance(
             self.cr, self.uid, '', {}).lines(data['data']['form'])
+
+    def test_onchange_company_id(self):
+        values = dict(
+            self.values,
+            periods=[(4, self.period_5, 0)],
+            account_list=[(4, self.a_recv, 0)],
+        )
+        wiz_brw = self.wiz_rep_obj.create(values)
+        wiz_brw.onchange_company_id()
+
+        self.assertEqual(wiz_brw.company_id.id, self.company_id)
