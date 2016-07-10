@@ -26,10 +26,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ##############################################################################
 
-from openerp import models, fields
-from openerp.exceptions import except_orm
-from openerp import pooler
-from openerp.tools.translate import _
+from openerp import models, fields, api
 
 
 class WizardReport(models.TransientModel):
@@ -55,184 +52,75 @@ class WizardReport(models.TransientModel):
         help='Only applies in the way of the end'
         ' balance multicurrency report is show.')
 
-    def onchange_inf_type(self, cr, uid, ids, inf_type, context=None):
-        context = context and dict(context) or {}
-        res = {'value': {}}
+    @api.onchange('company_id')
+    def onchange_company_id(self):
+        """When `company_id` changes `currency_id`, `fiscalyear_id`,
+        `account_list` & `period` fields are filled with Company's Currency,
+        Current Fiscal Year, Accounts & Periods are set to blank"""
+        for brw in self:
+            values = {}
+            values.update({'afr_id': None})
+            values.update({'account_list': [(6, False, {})]})
+            values.update({'periods': [(6, False, {})]})
+            brw.update(values)
+        return super(WizardReport, self).onchange_company_id()
 
-        if inf_type != 'BS':
-            res['value'].update({'analytic_ledger': False})
+    @api.onchange('afr_id')
+    def onchange_afr_id(self):
+        """Takes the fields in the template and fields those on the wizard"""
+        for brw in self:
+            brw.update({'account_list': [(6, False, {})]})
+            brw.update({'periods': [(6, False, {})]})
+            if not brw.afr_id:
+                continue
+            values = brw.afr_id.copy_data()[0]
+            values.pop('name')
+            # TODO: Change fields `fiscalyear`to `fiscalyear_id`,
+            # `account_list` to `account_ids` and `periods`to `period_ids`
+            values.update(
+                {'fiscalyear': values['fiscalyear_id']})
+            values.update(
+                {'account_list': values['account_ids'][:]})
+            values.update(
+                {'periods': values['period_ids'][:]})
+            values.pop('account_ids')
+            values.pop('period_ids')
+            brw.update(values)
 
-        return res
+    @api.multi
+    def period_span(self):
+        """Method to provide period list into report"""
+        args = [('fiscalyear_id', '=', self.fiscalyear.id),
+                ('special', '=', False)]
+        if self.periods:
+            date_start = min([period.date_start for period in self.periods])
+            date_stop = max([period.date_stop for period in self.periods])
+            args.extend([
+                ('date_start', '>=', date_start),
+                ('date_stop', '<=', date_stop)])
 
-    def onchange_columns(self, cr, uid, ids, columns, fiscalyear, periods,
-                         context=None):
-        context = context and dict(context) or {}
-        res = {'value': {}}
+        res = self.periods.with_context(self._context).search(
+            args, order='date_start asc')
+        return [brw.id for brw in res]
 
-        p_obj = self.pool.get("account.period")
-        all_periods = p_obj.search(cr, uid, [
-            ('fiscalyear_id', '=', fiscalyear), ('special', '=', False)],
-            context=context)
-        sval = set(periods[0][2])
-        tval = set(all_periods)
-        go = periods[0][2] and sval.issubset(tval) or False
-
-        if columns != 'four':
-            res['value'].update({'analytic_ledger': False})
-
-        if columns in ('qtr', 'thirteen'):
-            res['value'].update({'periods': all_periods})
-        else:
-            if go:
-                res['value'].update({'periods': periods})
-            else:
-                res['value'].update({'periods': []})
-        return res
-
-    def onchange_analytic_ledger(self, cr, uid, ids, company_id,
-                                 analytic_ledger, context=None):
-        context = context and dict(context) or {}
-        context['company_id'] = company_id
-        res = {}
-        res['value'] = {
-            'currency_id': self.pool.get('res.company').browse(
-                cr, uid, company_id, context=context).currency_id.id}
-        return res
-
-    def onchange_company_id(self, cr, uid, ids, company_id, context=None):
-        context = context and dict(context) or {}
-        context['company_id'] = company_id
-        res = {'value': {}}
-
-        if not company_id:
-            return res
-
-        cur_id = self.pool.get('res.company').browse(
-            cr, uid, company_id, context=context).currency_id.id
-        fy_id = self.pool.get('account.fiscalyear').find(
-            cr, uid, context=context)
-        res['value'].update({'fiscalyear': fy_id})
-        res['value'].update({'currency_id': cur_id})
-        res['value'].update({'account_list': []})
-        res['value'].update({'periods': []})
-        res['value'].update({'afr_id': None})
-        return res
-
-    def onchange_afr_id(self, cr, uid, ids, afr_id, context=None):
-        context = context and dict(context) or {}
-        res = {'value': {}}
-        if not afr_id:
-            return res
-        afr_brw = self.pool.get('afr').browse(cr, uid, afr_id, context=context)
-        res['value'].update({'currency_id': afr_brw.currency_id and
-                             afr_brw.currency_id.id or
-                             afr_brw.company_id.currency_id.id})
-        res['value'].update({'inf_type': afr_brw.inf_type or 'BS'})
-        res['value'].update({'columns': afr_brw.columns or 'five'})
-        res['value'].update({'display_account': afr_brw.display_account or
-                             'bal_mov'})
-        res['value'].update({'display_account_level':
-                             afr_brw.display_account_level or 0})
-        res['value'].update({'fiscalyear': afr_brw.fiscalyear_id and
-                             afr_brw.fiscalyear_id.id})
-        res['value'].update({'account_list': [
-                            acc.id for acc in afr_brw.account_ids]})
-        res['value'].update({'periods': [p.id for p in afr_brw.period_ids]})
-        res['value'].update({'analytic_ledger': (afr_brw.analytic_ledger or
-                                                 False)})
-        res['value'].update({'tot_check': afr_brw.tot_check or False})
-        res['value'].update({'lab_str': afr_brw.lab_str or _(
-            'Write a Description for your Summary Total')})
-        res['value'].update({'report_format': afr_brw.report_format or False})
-        res['value'].update(
-            {'partner_balance': afr_brw.partner_balance or False})
-        res['value'].update(
-            {'print_analytic_lines': afr_brw.print_analytic_lines or False})
-        return res
-
-    def _get_defaults(self, cr, uid, data, context=None):
-        context = context and dict(context) or {}
-        user = pooler.get_pool(cr.dbname).get(
-            'res.users').browse(cr, uid, uid, context=context)
-        if user.company_id:
-            company_id = user.company_id.id
-        else:
-            company_id = pooler.get_pool(cr.dbname).get(
-                'res.company').search(cr, uid, [('parent_id', '=', False)])[0]
-        data['form']['company_id'] = company_id
-        fiscalyear_obj = pooler.get_pool(cr.dbname).get('account.fiscalyear')
-        data['form']['fiscalyear'] = fiscalyear_obj.find(cr, uid)
-        data['form']['context'] = context
-        return data['form']
-
-    def _check_state(self, cr, uid, data, context=None):
-        context = context and dict(context) or {}
-        if data['form']['filter'] == 'bydate':
-            self._check_date(cr, uid, data, context)
-        return data['form']
-
-    def _check_date(self, cr, uid, data, context=None):
-        context = context and dict(context) or {}
-
-        if data['form']['date_from'] > data['form']['date_to']:
-            raise except_orm(_('Error !'), _(
-                'La fecha final debe ser mayor a la inicial'))
-
-        sql = """SELECT f.id, f.date_start, f.date_stop
-            FROM account_fiscalyear f
-            WHERE '%s' = f.id """ % (data['form']['fiscalyear'])
-        cr.execute(sql)
-        res = cr.dictfetchall()
-
-        if res:
-            if (data['form']['date_to'] > res[0]['date_stop'] or
-                    data['form']['date_from'] < res[0]['date_start']):
-                raise except_orm(_('UserError'),
-                                 _('Dates shall be between %s and %s') % (
-                    res[0]['date_start'], res[0]['date_stop']))
-            else:
-                return 'report'
-        else:
-            raise except_orm(_('UserError'), _('No existe periodo fiscal'))
-
-    def period_span(self, cr, uid, ids, fy_id, context=None):
-        context = context and dict(context) or {}
-        ap_obj = self.pool.get('account.period')
-        fy_id = fy_id and isinstance(fy_id, (list, tuple)) and fy_id[0] or fy_id  # noqa
-        if not ids:
-            return ap_obj.search(cr, uid, [('fiscalyear_id', '=', fy_id),
-                                           ('special', '=', False)],
-                                 order='date_start asc')
-
-        ap_brws = ap_obj.browse(cr, uid, ids, context=context)
-        date_start = min([period.date_start for period in ap_brws])
-        date_stop = max([period.date_stop for period in ap_brws])
-
-        return ap_obj.search(cr, uid, [('fiscalyear_id', '=', fy_id),
-                                       ('special', '=', False),
-                                       ('date_start', '>=', date_start),
-                                       ('date_stop', '<=', date_stop)],
-                             order='date_start asc')
-
-    def print_report(self, cr, uid, ids, data, context=None):
-        context = context and dict(context) or {}
+    @api.multi
+    def print_report(self):
+        """Method to preprocess data and print a report"""
+        context = dict(self._context)
 
         data = {}
         data['ids'] = context.get('active_ids', [])
         data['model'] = context.get('active_model', 'ir.ui.menu')
-        data['form'] = self.read(cr, uid, ids[0])
+        data['form'] = self.read()[0]
 
         del data['form']['date_from']
         del data['form']['date_to']
 
-        data['form']['periods'] = self.period_span(
-            cr, uid, data['form']['periods'], data['form']['fiscalyear'])
+        data['form']['periods'] = self.period_span()
 
         xls = data['form'].get('report_format') == 'xls'
 
-        if data['form']['columns'] == 'currency':
-            name = xls and 'afr.multicurrency' or 'afr.rml.multicurrency'
-        elif data['form']['columns'] == 'one':
+        if data['form']['columns'] == 'one':
             name = xls and 'afr.1cols' or 'afr.rml.1cols'
         elif data['form']['columns'] == 'two':
             name = xls and 'afr.1cols' or 'afr.rml.2cols'
@@ -260,15 +148,11 @@ class WizardReport(models.TransientModel):
         if xls:
             context['xls_report'] = xls
 
-            return self.pool['report'].get_action(
-                cr, uid, [], name, data=data,
-                context=context)
+            return self.env['report'].with_context(context).get_action(
+                self, name, data=data)
 
         return {
             'type': 'ir.actions.report.xml',
             'report_name': name,
             'datas': data,
         }
-
-
-WizardReport()

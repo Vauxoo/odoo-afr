@@ -132,6 +132,7 @@ class TestReportAFR(TransactionCase):
         self.fiscalyear_id = self.ref('account.data_fiscalyear')
         self.currency_id = self.ref('base.EUR')
         self.account_list = []
+        self.afr_id = self.ref('account_financial_report.afr_01')
         self.period_1 = self.ref('account.period_1')
         self.period_3 = self.ref('account.period_3')
         self.period_5 = self.ref('account.period_5')
@@ -494,6 +495,46 @@ class TestReportAFR(TransactionCase):
         else:
             self.assertTrue(False, 'Something went wrong with Test')
 
+    def test_lines_report_afr_pay_period_05_two_cols(self):
+        _logger.info('Testing Payables at Period 05')
+        values = dict(
+            self.values,
+            periods=[(4, self.period_5, 0)],
+            columns='two',
+            account_list=[(4, self.a_pay, 0)],
+        )
+        lines = self._generate_afr(values)
+        if lines and lines[0]:
+            lines = lines[0]
+            self.assertEqual(lines.get('id'), self.a_pay, 'Wrong Account')
+            self.assertEqual(lines.get('balanceinit'), -800)
+            self.assertEqual(lines.get('debit'), 0)
+            self.assertEqual(lines.get('credit'), 0)
+            self.assertEqual(lines.get('balance'), -800)
+            self.assertEqual(lines.get('ytd'), 0)
+        else:
+            self.assertTrue(False, 'Something went wrong with Test')
+
+    def test_lines_report_afr_pay_period_05_five_cols(self):
+        _logger.info('Testing Payables at Period 05')
+        values = dict(
+            self.values,
+            periods=[(4, self.period_5, 0)],
+            columns='five',
+            account_list=[(4, self.a_pay, 0)],
+        )
+        lines = self._generate_afr(values)
+        if lines and lines[0]:
+            lines = lines[0]
+            self.assertEqual(lines.get('id'), self.a_pay, 'Wrong Account')
+            self.assertEqual(lines.get('balanceinit'), -800)
+            self.assertEqual(lines.get('debit'), 0)
+            self.assertEqual(lines.get('credit'), 0)
+            self.assertEqual(lines.get('balance'), -800)
+            self.assertEqual(lines.get('ytd'), 0)
+        else:
+            self.assertTrue(False, 'Something went wrong with Test')
+
     def test_lines_report_afr_pay_period_05(self):
         _logger.info('Testing Payables at Period 05')
         values = dict(
@@ -819,9 +860,90 @@ class TestReportAFR(TransactionCase):
             'active_ids': [wiz_id.id],
             'active_id': wiz_id.id,
         }
-        return wiz_id.with_context(context).print_report({})
+        return wiz_id.with_context(context).print_report()
 
     def _generate_afr(self, values):
         data = self._get_data(values)
         return AccountBalance(
             self.cr, self.uid, '', {}).lines(data['data']['form'])
+
+    def test_onchange_company_id(self):
+        values = dict(
+            self.values,
+            periods=[(4, self.period_5, 0)],
+            account_list=[(4, self.a_recv, 0)],
+        )
+        wiz_brw = self.wiz_rep_obj.create(values)
+        wiz_brw.onchange_company_id()
+
+        self.assertEqual(wiz_brw.company_id.id, self.company_id)
+
+    def test_onchange_columns(self):
+        values = dict(
+            self.values,
+            periods=[(4, self.period_5, 0)],
+            account_list=[(4, self.a_recv, 0)],
+            analytic_ledger=True,
+            currency_id=self.ref('base.USD'),
+            columns='five',
+        )
+        wiz_brw = self.wiz_rep_obj.create(values)
+        wiz_brw.onchange_columns()
+
+        self.assertEqual(wiz_brw.columns, 'five')
+        self.assertEqual(wiz_brw.analytic_ledger, False)
+        self.assertEqual(wiz_brw.currency_id.id, self.ref('base.USD'))
+        self.assertEqual(len(wiz_brw.periods), 1)
+
+    def test_onchange_analytic_ledger(self):
+        values = dict(
+            self.values,
+            periods=[(4, self.period_5, 0)],
+            account_list=[(4, self.a_recv, 0)],
+            analytic_ledger=True,
+            currency_id=self.ref('base.USD'),
+        )
+        wiz_brw = self.wiz_rep_obj.create(values)
+        wiz_brw.onchange_analytic_ledger()
+
+        self.assertEqual(wiz_brw.analytic_ledger, True)
+        self.assertEqual(wiz_brw.currency_id.id, self.currency_id)
+
+    def test_onchange_inf_type(self):
+        values = dict(
+            self.values,
+            periods=[(4, self.period_5, 0)],
+            account_list=[(4, self.a_recv, 0)],
+            inf_type='IS',
+            analytic_ledger=True,
+        )
+        wiz_brw = self.wiz_rep_obj.create(values)
+        wiz_brw.onchange_inf_type()
+
+        self.assertEqual(wiz_brw.inf_type, 'IS')
+        self.assertEqual(wiz_brw.analytic_ledger, False)
+
+    def test_onchange_afr_id(self):
+        values = dict(
+            self.values,
+            account_list=[(4, self.a_recv, 0)],
+        )
+        wiz_brw = self.wiz_rep_obj.create(values)
+        wiz_brw.onchange_afr_id()
+
+        self.assertEqual(wiz_brw.afr_id.id, False)
+        self.assertEqual(len(wiz_brw.periods), 0)
+
+        wiz_brw.write({'afr_id': self.afr_id})
+        wiz_brw.onchange_afr_id()
+        self.assertEqual(wiz_brw.afr_id.id, self.afr_id)
+        self.assertEqual(len(wiz_brw.periods), 2)
+
+    def test_afr_copy(self):
+        afr_brw = self.afr_obj.browse(self.afr_id)
+        new_afr_brw = afr_brw.copy()
+        self.assertEqual(new_afr_brw.name, 'Copy of Trial Balance')
+        self.assertEqual(len(new_afr_brw.period_ids), 2)
+
+        new_afr_brw = afr_brw.copy()
+        self.assertEqual(new_afr_brw.name, 'Copy of Trial Balance (2)')

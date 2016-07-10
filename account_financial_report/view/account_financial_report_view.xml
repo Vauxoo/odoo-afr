@@ -10,7 +10,7 @@
                     <field name="name" nolabel="1"/>
                 <group>
                     <group string="Company Info" >
-                        <field name="company_id" on_change='onchange_company_id(company_id)' />
+                        <field name="company_id"/>
                         <field name="currency_id"
                         domain="[('company_id','=',company_id)]"
                         attrs="{'readonly':[('analytic_ledger','=',True)]}" />
@@ -19,13 +19,11 @@
                         </group>
                     </group>
                     <group string="Report Info" >
-                        <field
-                            name="inf_type"
-                            on_change='onchange_inf_type(inf_type)' />
-                        <field name="columns" on_change='onchange_columns(columns,fiscalyear_id,period_ids)' />
+                        <field name="inf_type"/>
+                        <field name="columns"/>
                         <field name="analytic_ledger"
                         attrs="{'readonly':['|',('columns','!=','four'),('inf_type','!=','BS')],}"
-                        on_change='onchange_analytic_ledger(company_id,analytic_ledger)' />
+                        />
                         <field name="journal_ledger"
                         attrs="{'readonly':['|',('columns','!=','four'),('inf_type','!=','BS')],}" />
                         <field
@@ -44,8 +42,9 @@
                         <field name="target_move"/>
                     </group>
                     <group string="FiscalYear Info" >
-                        <field name="fiscalyear_id" on_change='onchange_columns(columns,fiscalyear_id,period_ids)'
-                               domain="[('company_id','=',company_id)]"/>
+                        <field
+                            name="fiscalyear_id"
+                            domain="[('company_id','=',company_id)]"/>
                     </group>
                 </group>
                 <group>

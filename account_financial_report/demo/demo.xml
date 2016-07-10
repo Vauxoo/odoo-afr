@@ -146,5 +146,21 @@
         <function model="account.move" name="button_validate">
             <value eval="[ref('account_financial_report.account_move_05')]"/>
         </function>
+
+        <record id="afr_01" model="afr">
+            <field name="name">Trial Balance</field>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="inf_type">BS</field>
+            <field name="columns">four</field>
+            <field name="currency_id" ref="base.EUR"/>
+            <field name="report_format">xls</field>
+            <field name="display_account">bal_mov</field>
+            <field name="fiscalyear_id" ref="account.data_fiscalyear"/>
+            <field name="display_account_level">0</field>
+            <field name="target_move">posted</field>
+            <field name="tot_check">0</field>
+            <field name="period_ids" eval="[(6,0,[ref('account.period_1'),ref('account.period_5')])]"/>
+            <field name="account_ids" eval="[(6,0,[ref('account.chart0')])]"/>
+        </record>
     </data>
 </openerp>

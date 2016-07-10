@@ -21,11 +21,11 @@
                             class="oe_link" />
                     </header>
                 <h2><label for="afr_id"/></h2>
-                <field name="afr_id"  on_change='onchange_afr_id(afr_id)' nolabel="1"/>
+                <field name="afr_id"  nolabel="1"/>
                 <group>
                     <group string="Company Info">
                         <label for="company_id"/>
-                        <field name="company_id" on_change='onchange_company_id(company_id)' nolabel="1"/>
+                        <field name="company_id" nolabel="1"/>
                         <field name="currency_id"
                         domain="[('company_id','=',company_id)]"
                         attrs="{'readonly':[('analytic_ledger','=',True)]}"/>
@@ -36,14 +36,12 @@
                     <group string="Report Info">
                         <field
                             name="inf_type"
-                            on_change='onchange_inf_type(inf_type)'
                             />
-                        <field name="columns" on_change='onchange_columns(columns,fiscalyear,periods)'/>
+                        <field name="columns"/>
                         <field name="group_by" attrs="{'invisible':[('columns', '!=', 'currency')], 'required': [('columns','=','currency')]}"/>
                         <field name="lines_detail" attrs="{'invisible':[('columns', '!=', 'currency')], 'required': [('columns','=','currency')]}"/>
                         <field name="analytic_ledger"
                         attrs="{'readonly':['|',('columns','!=','four'),('inf_type','!=','BS')],}"
-                        on_change='onchange_analytic_ledger(company_id,analytic_ledger)'
                         />
                         <field name="journal_ledger"
                         attrs="{'readonly':['|',('columns','!=','four'),('inf_type','!=','BS')],}"
@@ -61,7 +59,7 @@
                         <field name="target_move"/>
                     </group>
                     <group string="FiscalYear Info">
-                        <field name="fiscalyear" on_change='onchange_columns(columns,fiscalyear,periods)'  domain="[('company_id','=',company_id)]"/>
+                        <field name="fiscalyear" domain="[('company_id','=',company_id)]"/>
                         <newline/>
                     </group>
                 </group>
