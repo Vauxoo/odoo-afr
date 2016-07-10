@@ -893,3 +893,12 @@ class TestReportAFR(TransactionCase):
         wiz_brw.onchange_afr_id()
         self.assertEqual(wiz_brw.afr_id.id, self.afr_id)
         self.assertEqual(len(wiz_brw.periods), 2)
+
+    def test_afr_copy(self):
+        afr_brw = self.afr_obj.browse(self.afr_id)
+        new_afr_brw = afr_brw.copy()
+        self.assertEqual(new_afr_brw.name, 'Copy of Trial Balance')
+        self.assertEqual(len(new_afr_brw.period_ids), 2)
+
+        new_afr_brw = afr_brw.copy()
+        self.assertEqual(new_afr_brw.name, 'Copy of Trial Balance (2)')
