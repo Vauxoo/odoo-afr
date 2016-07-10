@@ -494,6 +494,46 @@ class TestReportAFR(TransactionCase):
         else:
             self.assertTrue(False, 'Something went wrong with Test')
 
+    def test_lines_report_afr_pay_period_05_two_cols(self):
+        _logger.info('Testing Payables at Period 05')
+        values = dict(
+            self.values,
+            periods=[(4, self.period_5, 0)],
+            columns='two',
+            account_list=[(4, self.a_pay, 0)],
+        )
+        lines = self._generate_afr(values)
+        if lines and lines[0]:
+            lines = lines[0]
+            self.assertEqual(lines.get('id'), self.a_pay, 'Wrong Account')
+            self.assertEqual(lines.get('balanceinit'), -800)
+            self.assertEqual(lines.get('debit'), 0)
+            self.assertEqual(lines.get('credit'), 0)
+            self.assertEqual(lines.get('balance'), -800)
+            self.assertEqual(lines.get('ytd'), 0)
+        else:
+            self.assertTrue(False, 'Something went wrong with Test')
+
+    def test_lines_report_afr_pay_period_05_five_cols(self):
+        _logger.info('Testing Payables at Period 05')
+        values = dict(
+            self.values,
+            periods=[(4, self.period_5, 0)],
+            columns='five',
+            account_list=[(4, self.a_pay, 0)],
+        )
+        lines = self._generate_afr(values)
+        if lines and lines[0]:
+            lines = lines[0]
+            self.assertEqual(lines.get('id'), self.a_pay, 'Wrong Account')
+            self.assertEqual(lines.get('balanceinit'), -800)
+            self.assertEqual(lines.get('debit'), 0)
+            self.assertEqual(lines.get('credit'), 0)
+            self.assertEqual(lines.get('balance'), -800)
+            self.assertEqual(lines.get('ytd'), 0)
+        else:
+            self.assertTrue(False, 'Something went wrong with Test')
+
     def test_lines_report_afr_pay_period_05(self):
         _logger.info('Testing Payables at Period 05')
         values = dict(
