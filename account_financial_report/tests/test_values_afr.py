@@ -878,6 +878,23 @@ class TestReportAFR(TransactionCase):
 
         self.assertEqual(wiz_brw.company_id.id, self.company_id)
 
+    def test_onchange_columns(self):
+        values = dict(
+            self.values,
+            periods=[(4, self.period_5, 0)],
+            account_list=[(4, self.a_recv, 0)],
+            analytic_ledger=True,
+            currency_id=self.ref('base.USD'),
+            columns='five',
+        )
+        wiz_brw = self.wiz_rep_obj.create(values)
+        wiz_brw.onchange_columns()
+
+        self.assertEqual(wiz_brw.columns, 'five')
+        self.assertEqual(wiz_brw.analytic_ledger, False)
+        self.assertEqual(wiz_brw.currency_id.id, self.ref('base.USD'))
+        self.assertEqual(len(wiz_brw.periods), 1)
+
     def test_onchange_analytic_ledger(self):
         values = dict(
             self.values,
