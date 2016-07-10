@@ -69,6 +69,8 @@ class WizardReport(models.TransientModel):
     def onchange_afr_id(self):
         """Takes the fields in the template and fields those on the wizard"""
         for brw in self:
+            brw.update({'account_list': [(6, False, {})]})
+            brw.update({'periods': [(6, False, {})]})
             if not brw.afr_id:
                 continue
             values = brw.afr_id.copy_data()[0]
@@ -81,6 +83,8 @@ class WizardReport(models.TransientModel):
                 {'account_list': values['account_ids'][:]})
             values.update(
                 {'periods': values['period_ids'][:]})
+            values.pop('account_ids')
+            values.pop('period_ids')
             brw.update(values)
 
     @api.multi
