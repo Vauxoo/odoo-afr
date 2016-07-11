@@ -155,7 +155,7 @@ class TestReportAFR(TransactionCase):
             'currency_id': self.currency_id,
             'report_format': 'xls',
             'display_account': 'bal_mov',
-            'fiscalyear': self.fiscalyear_id,
+            'fiscalyear_id': self.fiscalyear_id,
             'display_account_level': 0,
             'target_move': 'posted',
             'tot_check': False,
@@ -172,7 +172,7 @@ class TestReportAFR(TransactionCase):
             fiscalyear_id=self.fiscalyear_id,
         )
         values.pop('periods')
-        values.pop('fiscalyear')
+        values.pop('fiscalyear_id')
         values.pop('account_list')
         return self.afr_obj.create(values)
 
