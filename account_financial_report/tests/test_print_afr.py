@@ -86,7 +86,7 @@ class TestReportAFR(TransactionCase):
             'currency_id': self.currency_id,
             'report_format': 'pdf',
             'display_account': 'bal_mov',
-            'fiscalyear': self.fiscalyear_id,
+            'fiscalyear_id': self.fiscalyear_id,
             'display_account_level': 0,
             'target_move': 'posted',
             'account_list': [(4, account_id, 0)]})
@@ -101,7 +101,7 @@ class TestReportAFR(TransactionCase):
             'currency_id': self.currency_id,
             'report_format': 'xls',
             'display_account': 'bal_mov',
-            'fiscalyear': self.fiscalyear_id,
+            'fiscalyear_id': self.fiscalyear_id,
             'display_account_level': 0,
             'target_move': 'posted',
             'account_list': [(4, account_id, 0)]})

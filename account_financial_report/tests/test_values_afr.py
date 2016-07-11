@@ -155,7 +155,7 @@ class TestReportAFR(TransactionCase):
             'currency_id': self.currency_id,
             'report_format': 'xls',
             'display_account': 'bal_mov',
-            'fiscalyear': self.fiscalyear_id,
+            'fiscalyear_id': self.fiscalyear_id,
             'display_account_level': 0,
             'target_move': 'posted',
             'tot_check': False,
@@ -172,7 +172,7 @@ class TestReportAFR(TransactionCase):
             fiscalyear_id=self.fiscalyear_id,
         )
         values.pop('periods')
-        values.pop('fiscalyear')
+        values.pop('fiscalyear_id')
         values.pop('account_list')
         return self.afr_obj.create(values)
 
@@ -328,8 +328,7 @@ class TestReportAFR(TransactionCase):
             self.assertTrue(False, 'Something went wrong with Test')
 
         self.assertEqual(len(lines), 2, 'There should be 2 Lines')
-        zipped = zip(PARTNER_BALANCE, lines)
-        for elem in zipped:
+        for elem in zip(PARTNER_BALANCE, lines):
             std, res = elem
             for col in std:
                 if col != 'partner':
@@ -341,8 +340,7 @@ class TestReportAFR(TransactionCase):
                 self.assertEqual(
                     len(res.get(col)), len(std[col]),
                     'Something went wrong for %s' % col)
-                zipped2 = zip(std.get(col), res.get(col))
-                for elem2 in zipped2:
+                for elem2 in zip(std.get(col), res.get(col)):
                     std2, res2 = elem2
                     for col2 in std2:
                         self.assertEqual(
@@ -375,8 +373,7 @@ class TestReportAFR(TransactionCase):
             self.assertTrue(False, 'Something went wrong with Test')
 
         self.assertEqual(len(lines), 1, 'There should be 1 Lines')
-        zipped = zip(JOURNAL_LEDGER, lines)
-        for elem in zipped:
+        for elem in zip(JOURNAL_LEDGER, lines):
             std, res = elem
             for col in std:
                 if col != 'journal':
@@ -388,8 +385,7 @@ class TestReportAFR(TransactionCase):
                 self.assertEqual(
                     len(res.get(col)), len(std[col]),
                     'Something went wrong for %s' % col)
-                zipped2 = zip(std.get(col), res.get(col))
-                for elem2 in zipped2:
+                for elem2 in zip(std.get(col), res.get(col)):
                     std2, res2 = elem2
                     for col2 in std2:
                         self.assertEqual(
@@ -409,16 +405,14 @@ class TestReportAFR(TransactionCase):
             self.assertTrue(False, 'Something went wrong with Test')
 
         self.assertEqual(len(lines), 3, 'There should be 3 Lines')
-        zipped = zip(ANALYTIC_LEDGER, lines)
-        for elem in zipped:
+        for elem in zip(ANALYTIC_LEDGER, lines):
             std, res = elem
             for col in std:
                 if col == 'mayor':
                     self.assertEqual(
                         len(res.get(col)), len(std[col]),
                         'Something went wrong for %s' % col)
-                    zipped2 = zip(std.get(col), res.get(col))
-                    for elem2 in zipped2:
+                    for elem2 in zip(std.get(col), res.get(col)):
                         std2, res2 = elem2
                         for col2 in std2:
                             self.assertEqual(

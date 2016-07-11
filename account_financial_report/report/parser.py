@@ -366,11 +366,11 @@ class AccountBalance(report_sxw.rml_parse):
                     ids2.append([aa_brw.id, True, True, aa_brw])
         return ids2
 
-    def _ctx_end(self, ctx, fiscalyear, form):
+    def _ctx_end(self, ctx, fy_id, form):
         """Context for ending balance"""
         ctx_end = ctx
         ctx_end['filter'] = form.get('filter', 'all')
-        ctx_end['fiscalyear'] = fiscalyear.id
+        ctx_end['fiscalyear_id'] = fy_id.id
 
         if form['filter'] in ['byperiod', 'all']:
             ctx_end['periods'] = self.pool.get('account.period').search(
@@ -385,11 +385,11 @@ class AccountBalance(report_sxw.rml_parse):
         # CONTEXT FOR INITIAL BALANCE                                         #
         #######################################################################
 
-    def _ctx_init(self, ctx_init, fiscalyear, form):
+    def _ctx_init(self, ctx_init, fy_id, form):
         """Context for initial balance"""
         period_obj = self.pool.get('account.period')
         ctx_init['filter'] = form.get('filter', 'all')
-        ctx_init['fiscalyear'] = fiscalyear.id
+        ctx_init['fiscalyear_id'] = fy_id.id
 
         if form['filter'] in ['byperiod', 'all']:
             ctx_init['periods'] = form['periods']
@@ -399,7 +399,7 @@ class AccountBalance(report_sxw.rml_parse):
                      self.cr, self.uid, ctx_init['periods'])])
             ctx_init['periods'] = period_obj.search(
                 self.cr, self.uid, [
-                    ('fiscalyear_id', '=', fiscalyear.id),
+                    ('fiscalyear_id', '=', fy_id.id),
                     ('date_stop', '<=', date_start)])
         return ctx_init.copy()
 
@@ -506,7 +506,7 @@ class AccountBalance(report_sxw.rml_parse):
         return (delete_cons, account_black_ids, account_not_black_ids,
                 account_not_black, credit_account_ids, account_ids)
 
-    def _process_period(self, form, fiscalyear):
+    def _process_period(self, form, fy_id):
         period_obj = self.pool.get('account.period')
         ctx_end = {}
         period_ids = []
@@ -515,7 +515,7 @@ class AccountBalance(report_sxw.rml_parse):
         if form['columns'] == 'qtr':
             period_ids = period_obj.search(
                 self.cr, self.uid,
-                [('fiscalyear_id', '=', fiscalyear.id),
+                [('fiscalyear_id', '=', fy_id.id),
                  ('special', '=', False)],
                 order='date_start asc')
             aval = 0
@@ -531,11 +531,11 @@ class AccountBalance(report_sxw.rml_parse):
                     aval = 0
         elif form['columns'] == 'thirteen':
             period_ids = period_obj.search(
-                self.cr, self.uid, [('fiscalyear_id', '=', fiscalyear.id),
+                self.cr, self.uid, [('fiscalyear_id', '=', fy_id.id),
                                     ('special', '=', False)],
                 order='date_start asc')
         else:
-            ctx_end = self._ctx_end(self.context.copy(), fiscalyear, form)
+            ctx_end = self._ctx_end(self.context.copy(), fy_id, form)
 
         return (ctx_end, period_ids, pval)
 
@@ -797,8 +797,8 @@ class AccountBalance(report_sxw.rml_parse):
             isinstance(form['currency_id'], (list, tuple)) and \
             form['currency_id'][0] or form['currency_id']
 
-        fiscalyear = form.get('fiscalyear') and form['fiscalyear'][0]
-        fiscalyear = fiscalyear_obj.browse(self.cr, self.uid, fiscalyear)
+        fy_id = form.get('fiscalyear_id') and form['fiscalyear_id'][0]
+        fy_id = fiscalyear_obj.browse(self.cr, self.uid, fy_id)
 
         #
         # Generate the report lines (checking each account)
@@ -811,7 +811,7 @@ class AccountBalance(report_sxw.rml_parse):
         res = {}
         tot = {}
 
-        res_process_period = self._process_period(form, fiscalyear)
+        res_process_period = self._process_period(form, fy_id)
         ctx_end = res_process_period[0]
         period_ids = res_process_period[1]
         pval = res_process_period[2]
@@ -847,13 +847,13 @@ class AccountBalance(report_sxw.rml_parse):
                         form['periods'] = pval[p_act]
 
             ctx_to_use = self._ctx_end(
-                self.context.copy(), fiscalyear, form)
+                self.context.copy(), fy_id, form)
 
             account_black = account_obj.browse(
                 self.cr, self.uid, account_black_ids, ctx_to_use)
 
             if form['inf_type'] == 'BS':
-                ctx_i = self._ctx_init(self.context.copy(), fiscalyear, form)
+                ctx_i = self._ctx_init(self.context.copy(), fy_id, form)
                 account_black_init = account_obj.browse(
                     self.cr, self.uid, account_black_ids, ctx_i)
 
