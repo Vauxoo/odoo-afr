@@ -40,9 +40,6 @@ class WizardReport(models.TransientModel):
     account_list = fields.Many2many(
         'account.account', 'rel_wizard_account', 'account_list',
         'account_id', 'Root accounts', required=True)
-    fiscalyear = fields.Many2one(
-        'account.fiscalyear', 'Fiscal year',
-        help='Fiscal Year for this report', required=True)
     periods = fields.Many2many(
         'account.period', 'rel_wizard_period', 'wizard_id', 'period_id',
         'Periods', help='All periods in the fiscal year if empty')
@@ -75,10 +72,8 @@ class WizardReport(models.TransientModel):
                 continue
             values = brw.afr_id.copy_data()[0]
             values.pop('name')
-            # TODO: Change fields `fiscalyear`to `fiscalyear_id`,
+            # TODO: Change fields
             # `account_list` to `account_ids` and `periods`to `period_ids`
-            values.update(
-                {'fiscalyear': values['fiscalyear_id']})
             values.update(
                 {'account_list': values['account_ids'][:]})
             values.update(
@@ -90,7 +85,7 @@ class WizardReport(models.TransientModel):
     @api.multi
     def period_span(self):
         """Method to provide period list into report"""
-        args = [('fiscalyear_id', '=', self.fiscalyear.id),
+        args = [('fiscalyear_id', '=', self.fiscalyear_id.id),
                 ('special', '=', False)]
         if self.periods:
             date_start = min([period.date_start for period in self.periods])
