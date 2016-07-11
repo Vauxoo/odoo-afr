@@ -59,7 +59,7 @@
                         <field name="target_move"/>
                     </group>
                     <group string="FiscalYear Info">
-                        <field name="fiscalyear" domain="[('company_id','=',company_id)]"/>
+                        <field name="fiscalyear_id" domain="[('company_id','=',company_id)]"/>
                         <newline/>
                     </group>
                 </group>
@@ -78,7 +78,7 @@
                         <field
                             name="periods"
                             nolabel="1"
-                            domain="[('fiscalyear_id','=',fiscalyear),('special','=',False),('company_id','=',company_id)]"
+                            domain="[('fiscalyear_id','=',fiscalyear_id),('special','=',False),('company_id','=',company_id)]"
                              attrs="{'readonly':[('columns','in',('qtr','thirteen'))],}">
                             <tree>
                                 <field name='code'/>
