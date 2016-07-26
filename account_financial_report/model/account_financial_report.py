@@ -34,7 +34,7 @@ class AccountFinancialReport(models.Model):
     """Provides a Prototyping class to be reused to hold templates & wizards"""
 
     _name = "afr"
-    _inherit = "afr.abstract"
+    _inherit = "afr.abstract"  # pylint: disable=R7980
 
     name = fields.Char('Name', size=128, required=True)
 

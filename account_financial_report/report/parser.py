@@ -1056,7 +1056,7 @@ class ReportAfr1Cols(osv.AbstractModel):
     _name = 'report.afr.1cols'
 
     # this inheritance will allow to render this particular report
-    _inherit = 'report.abstract_report'
+    _inherit = 'report.abstract_report'  # pylint: disable=R7980
     _template = 'account_financial_report.afr_template'
     _wrapped_report_class = AccountBalance
 
@@ -1068,7 +1068,7 @@ class ReportAfrAnalyticLedger(osv.AbstractModel):
     _name = 'report.afr.analytic.ledger'
 
     # this inheritance will allow to render this particular report
-    _inherit = 'report.abstract_report'
+    _inherit = 'report.abstract_report'  # pylint: disable=R7980
     _template = 'account_financial_report.afr_template_analytic_ledger'
     _wrapped_report_class = AccountBalance
 
@@ -1150,7 +1150,7 @@ class ReportAfrPartnerBalance(osv.AbstractModel):
     _name = 'report.afr.partner.balance'
 
     # this inheritance will allow to render this particular report
-    _inherit = 'report.abstract_report'
+    _inherit = 'report.abstract_report'  # pylint: disable=R7980
     _template = 'account_financial_report.afr_template_partner_balance'
     _wrapped_report_class = AccountBalance
 
@@ -1162,7 +1162,7 @@ class ReportAfrJournalLedger(osv.AbstractModel):
     _name = 'report.afr.journal.ledger'
 
     # this inheritance will allow to render this particular report
-    _inherit = 'report.abstract_report'
+    _inherit = 'report.abstract_report'  # pylint: disable=R7980
     _template = 'account_financial_report.afr_template_journal_ledger'
     _wrapped_report_class = AccountBalance
 
@@ -1174,6 +1174,6 @@ class ReportAfr13Cols(osv.AbstractModel):
     _name = 'report.afr.13cols'
 
     # this inheritance will allow to render this particular report
-    _inherit = 'report.abstract_report'
+    _inherit = 'report.abstract_report'  # pylint: disable=R7980
     _template = 'account_financial_report.afr_template'
     _wrapped_report_class = AccountBalance

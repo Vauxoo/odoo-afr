@@ -1,6 +1,21 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <openerp>
     <data noupdate="1">
+        <record id="res_partner_23" model="res.partner">
+            <field name="name">VX</field>
+            <field eval="[(6,0,[ref('base.res_partner_category_4')])]" name="category_id"/>
+            <field name="supplier">1</field>
+            <field eval="1" name="customer"/>
+            <field name="is_company">1</field>
+             <field name="type">default</field>
+            <field name="street">3rd Floor, Room 3-C,</field>
+            <field name="street2">Carretera Panamericana, Km 1, Urb. Delgado Chalbaud</field>
+            <field name="city">Caracas</field>
+            <field name="zip">1090</field>
+            <field name="email">vx@yourcompany.example.com</field>
+            <field name="phone">+58 212 681 0538</field>
+            <field name="country_id" ref="base.ve"/>
+        </record>
         <record id="a_view" model="account.account">
             <field name="code">X00001-vx_afr_view</field>
             <field name="name">View - (vx_afr)</field>
@@ -130,7 +145,7 @@
             <field name="journal_id" ref="account.miscellaneous_journal"/>
             <field name="period_id" ref="account.period_5"/>
             <field name="account_id" ref="account_financial_report.a_recv"/>
-            <field name="partner_id" ref="base.res_partner_23"/>
+            <field name="partner_id" ref="res_partner_23"/>
             <field name="debit">200.0</field>
             <field name="credit">0.0</field>
         </record>

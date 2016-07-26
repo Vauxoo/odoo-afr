@@ -1,10 +1,9 @@
 # coding: utf-8
 
-from openerp.tests.common import TransactionCase
-from openerp.addons.account_financial_report.report.parser \
-    import AccountBalance
 import logging
 import time
+from openerp.tests.common import TransactionCase
+from ..report.parser import AccountBalance
 
 _logger = logging.getLogger(__name__)
 
@@ -25,7 +24,7 @@ PARTNER_BALANCE = [
          {'balance': 200.0,
           'balanceinit': 0.0,
           'credit': 0.0,
-          'partner_name': 'Vauxoo',
+          'partner_name': 'VX',
           'debit': 200.0, },
          {'balance': 1000.0,
           'balanceinit': 1000.0,
