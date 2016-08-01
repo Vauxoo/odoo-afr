@@ -370,7 +370,7 @@ class AccountBalance(report_sxw.rml_parse):
         """Context for ending balance"""
         ctx_end = ctx
         ctx_end['filter'] = form.get('filter', 'all')
-        ctx_end['fiscalyear_id'] = fy_id.id
+        ctx_end['fiscalyear'] = fy_id.id
 
         if form['filter'] in ['byperiod', 'all']:
             ctx_end['periods'] = self.pool.get('account.period').search(
@@ -389,7 +389,7 @@ class AccountBalance(report_sxw.rml_parse):
         """Context for initial balance"""
         period_obj = self.pool.get('account.period')
         ctx_init['filter'] = form.get('filter', 'all')
-        ctx_init['fiscalyear_id'] = fy_id.id
+        ctx_init['fiscalyear'] = fy_id.id
 
         if form['filter'] in ['byperiod', 'all']:
             ctx_init['periods'] = form['periods']
