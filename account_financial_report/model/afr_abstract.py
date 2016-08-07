@@ -11,7 +11,7 @@ class AfrAbstract(models.AbstractModel):
     company_id = fields.Many2one(
         'res.company', 'Company', required=True,
         default=lambda self: self.env['res.company']._company_default_get(
-            'ifrs.ifrs'))
+            'afr'))
     currency_id = fields.Many2one(
         'res.currency', 'Currency',
         help="Currency at which this report will be expressed. If not "
