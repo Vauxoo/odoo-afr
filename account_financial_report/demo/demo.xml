@@ -173,7 +173,7 @@
             <field name="fiscalyear_id" ref="account.data_fiscalyear"/>
             <field name="display_account_level">0</field>
             <field name="target_move">posted</field>
-            <field name="tot_check">0</field>
+            <field name="tot_check" eval="0"/>
             <field name="period_ids" eval="[(6,0,[ref('account.period_1'),ref('account.period_5')])]"/>
             <field name="account_ids" eval="[(6,0,[ref('account.chart0')])]"/>
         </record>
