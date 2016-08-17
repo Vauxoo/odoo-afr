@@ -12,7 +12,6 @@
             string="AFR Common Report"
             report_type="qweb-pdf"
             multi="True"
-            attachment_use="False"
             attachment=""
         />
 
@@ -30,7 +29,6 @@
             string="Analytic Ledger"
             report_type="qweb-pdf"
             multi="True"
-            attachment_use="False"
             attachment=""
         />
 
@@ -48,7 +46,6 @@
             string="Partner Balance"
             report_type="qweb-pdf"
             multi="True"
-            attachment_use="False"
             attachment=""
         />
 
@@ -62,7 +59,6 @@
             string="Journal Ledger"
             report_type="qweb-pdf"
             multi="True"
-            attachment_use="False"
             attachment=""
         />
 
@@ -80,7 +76,6 @@
             string="AFR 13 Columns"
             report_type="qweb-pdf"
             multi="True"
-            attachment_use="False"
             attachment=""
         />
 
